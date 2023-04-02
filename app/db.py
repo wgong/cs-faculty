@@ -2,7 +2,7 @@ import sqlite3
 import duckdb
 
 from cfg import *
-from gwg_helper import *
+
 
 class DBConn(object):
     def __init__(self):

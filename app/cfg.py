@@ -54,3 +54,16 @@ EDITABLE_COLUMNS =  {
         'research_group', 'url'
     ],
 }
+
+CLICKABLE_COLUMNS = {
+    "t_faculty": [
+        'url',
+        'img_url',
+    ],
+    't_note': [
+        'url',
+    ],
+    't_research_group': [
+        'url',
+    ],    
+}

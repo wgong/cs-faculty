@@ -3,7 +3,7 @@ Streamlit app to manage CS Faculty data backed by DuckDB
 
 """
 __author__ = "wgong"
-SRC_URL = "https://github.com/wgong/cs_faculty"
+SRC_URL = "https://github.com/wgong/cs-faculty"
 
 #####################################################
 # Imports
@@ -23,11 +23,12 @@ import yaml
 import warnings
 warnings.filterwarnings("ignore")
 
+import streamlit as st
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
+
 from db import *
 from cfg import *
-
-import streamlit as st
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
+from helper import (escape_single_quote, unescape_single_quote)
 
 ##====================================================
 _STR_APP_NAME               = "CS Faculty"
@@ -64,17 +65,11 @@ _GRID_OPTIONS = {
     "paginationPageSize": 10,
 }
 
+GROUP_DATA_COLS = ['research_group', 'url']
 NOTE_DATA_COLS = [col for col in TABLE_COLUMNS["t_note"] if col not in ["id", "ts"]]
 #####################################################
 # Helpers (prefix with underscore)
 #####################################################
-
-def _escape_single_quote(s):
-    return s.replace("\'", "\'\'")
-
-def _unescape_single_quote(s):
-    return s.replace("\'\'", "\'")
-
 
 def _load_db():
 
@@ -111,7 +106,8 @@ def _display_grid_df(df,
                     selection_mode="multiple", 
                     page_size=_GRID_OPTIONS["paginationPageSize"],
                     grid_height=_GRID_OPTIONS["grid_height"],
-                    editable_columns=[]):
+                    editable_columns=[],
+                    clickable_columns=[]):
     """show df in a grid and return selected row
     """
     # st.dataframe(df) 
@@ -124,6 +120,13 @@ def _display_grid_df(df,
     gb.configure_pagination(paginationAutoPageSize=False, 
         paginationPageSize=page_size)
     gb.configure_columns(editable_columns, editable=True)
+
+    cell_renderer =  JsCode("""
+    function(params) {return `<a href=${params.value} target="_blank">${params.value}</a>`}
+    """)
+    for col_name in clickable_columns:
+        gb.configure_column(col_name, cellRenderer=cell_renderer)
+
     gb.configure_grid_options(domLayout='normal')
     grid_response = AgGrid(
         df, 
@@ -147,16 +150,7 @@ def _db_execute(sql_statement, DEBUG=True):
         _conn.execute(sql_statement)
         _conn.commit()           
 
-def _db_select_note(table_name=TABLE_NOTE, orderby_cols = ["ts desc"]):
-    with DBConn() as _conn:
-        sql_stmt = f"""
-            select {",".join(TABLE_COLUMNS[table_name])}
-            from {table_name} 
-            order by {",".join(orderby_cols)};
-        """
-        return pd.read_sql(sql_stmt, _conn)
-
-def _db_delete_note(data, table_name=TABLE_NOTE):
+def _db_delete(data, table_name=TABLE_NOTE):
     if not data: 
         return
     
@@ -171,7 +165,7 @@ def _db_delete_note(data, table_name=TABLE_NOTE):
     """
     _db_execute(delete_sql)         
 
-def _db_update_note(data, table_name=TABLE_NOTE):
+def _db_update(data, table_name=TABLE_NOTE):
     if not data or len(data) < 3: 
         return
     
@@ -189,7 +183,7 @@ def _db_update_note(data, table_name=TABLE_NOTE):
         if col not in all_cols:
             print(f"[WARN] column '{col}' not found in {str(all_cols)}")
             continue
-        set_clause.append(f"{col} = '{_escape_single_quote(val)}'")
+        set_clause.append(f"{col} = '{escape_single_quote(val)}'")
     update_sql = f"""
         update {table_name}
         set {', '.join(set_clause)}
@@ -197,7 +191,7 @@ def _db_update_note(data, table_name=TABLE_NOTE):
     """
     _db_execute(update_sql)   
 
-def _db_insert_note(data, table_name=TABLE_NOTE):
+def _db_insert(data, table_name=TABLE_NOTE):
     if not data: 
         return
     
@@ -218,7 +212,7 @@ def _db_insert_note(data, table_name=TABLE_NOTE):
         if col in ["id","ts"]:
             val_clause.append(f"'{val}'")
         else:
-            val_clause.append(f"'{_escape_single_quote(val)}'")
+            val_clause.append(f"'{escape_single_quote(val)}'")
 
     insert_sql = f"""
         insert into {table_name} (
@@ -230,8 +224,31 @@ def _db_insert_note(data, table_name=TABLE_NOTE):
     """
     _db_execute(insert_sql)
 
+def _db_upsert_group(data):
+    _research_group = data.get("research_group", "")
+    if not _research_group: return
 
-def _db_select(table_name=TABLE_FACULTY, orderby_cols=[]):
+    with DBConn() as _conn:
+        df = pd.read_sql(f"""
+            select research_group from {TABLE_RESEARCH_GROUP}
+            where research_group='{_research_group}';
+        """, _conn)
+
+    _url = data.get("url", "")
+    if df.shape[0] > 0:  # update
+        sql_stmt = f"""
+            update {TABLE_RESEARCH_GROUP}
+            set url = '{_url}'
+            where research_group='{_research_group}';
+        """
+    else:
+        sql_stmt = f"""
+            insert into {TABLE_RESEARCH_GROUP} (research_group, url)
+            values ('{_research_group}', '{_url}');
+        """
+    _db_execute(sql_stmt)
+
+def _db_select(table_name=TABLE_NOTE, orderby_cols=[]):
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ' '
         sql_stmt = f"""
@@ -241,15 +258,25 @@ def _db_select(table_name=TABLE_FACULTY, orderby_cols=[]):
         """
         return pd.read_sql(sql_stmt, _conn)
 
-def _display_grid(form_name=TABLE_FACULTY, orderby_cols=[]):
+def _move_url_2nd(df, url_col="url"):
+    cols = df.columns
+    if not url_col in cols:
+        return df
+    cols_new = [cols[0], url_col] + [c for c in cols[1:] if c != url_col]
+    return df[cols_new]
+
+def _display_grid(form_name=TABLE_NOTE, orderby_cols=[]):
     st.session_state["form_name"] = form_name
     all_cols = TABLE_COLUMNS[form_name]
     df = _db_select(table_name=form_name, orderby_cols=orderby_cols)
+    if form_name==TABLE_FACULTY:
+        df = _move_url_2nd(df)
     grid_response = _display_grid_df(df, 
-                            selection_mode="single", 
-                            page_size=10, 
-                            grid_height=370,
-                            editable_columns=EDITABLE_COLUMNS[form_name]
+                        selection_mode="single", 
+                        page_size=10, 
+                        grid_height=370,
+                        editable_columns=EDITABLE_COLUMNS[form_name],
+                        clickable_columns=CLICKABLE_COLUMNS[form_name],
                     )
     selected_row = None
     if grid_response:
@@ -287,12 +314,13 @@ def _display_buttons(form_name=TABLE_NOTE):
 def _display_grid_note(form_name=TABLE_NOTE):
     st.session_state["form_name"] = form_name
     all_cols = TABLE_COLUMNS[form_name]
-    df_note = _db_select_note()
+    df_note = _db_select(table_name=form_name, orderby_cols = ["ts desc"])
     grid_response = _display_grid_df(df_note, 
                         selection_mode="single", 
                         page_size=10, 
                         grid_height=370,
                         editable_columns=EDITABLE_COLUMNS[form_name],
+                        clickable_columns=CLICKABLE_COLUMNS[form_name],
                     )
     selected_row = None
     if grid_response:
@@ -337,23 +365,23 @@ def _display_grid_note(form_name=TABLE_NOTE):
     if btn_add and any([data.get(col) for col in all_cols if col not in ["id","ts"]]):
         if data.get("id"):
             data.update({"ts": str(datetime.now()),})
-            _db_update_note(data)
+            _db_update(data)
         else:
             data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
-            _db_insert_note(data)
+            _db_insert(data)
 
     elif btn_update and selected_row is not None:
         data.update({"ts": str(datetime.now()),})
-        _db_update_note(data)
+        _db_update(data)
 
     elif btn_delete and selected_row is not None:
-        _db_delete_note(data)
+        _db_delete(data)
 
     # not working
     # if any([btn_add, btn_update, btn_delete]):
     #     _clear_form()
 
-# quick add note (not required, will remove)
+# quick add note
 def _sidebar_display_add_note(form_name="new_note"):
     with st.expander("Add Note", expanded=True):
         with st.form(key=form_name):
@@ -372,11 +400,34 @@ def _sidebar_add_note(form_name="new_note"):
     
     for col in NOTE_DATA_COLS:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_insert_note(data)
+    _db_insert(data)
     _sidebar_clear_note_form()
 
 def _sidebar_clear_note_form(form_name="new_note"):
     for col in NOTE_DATA_COLS:
+        st.session_state[f"{form_name}_{col}"] = ""
+
+
+# quick add group
+def _sidebar_display_add_group(form_name="new_group"):
+    with st.expander("Add Research Group", expanded=True):
+        with st.form(key=form_name):
+            for col in GROUP_DATA_COLS:
+                st.text_input(col.capitalize(), value="", key=f"{form_name}_{col}")
+            st.form_submit_button('Add', on_click=_sidebar_add_group)
+
+def _sidebar_add_group(form_name="new_group"):
+    _research_group = st.session_state.get(f"{form_name}_research_group","")
+    if not _research_group: return
+
+    data = {}
+    for col in GROUP_DATA_COLS:
+        data.update({col: st.session_state.get(f"{form_name}_{col}","")})
+    _db_upsert_group(data)
+    _sidebar_clear_group_form()
+
+def _sidebar_clear_group_form(form_name="new_group"):
+    for col in GROUP_DATA_COLS:
         st.session_state[f"{form_name}_{col}"] = ""
 
 #####################################################
@@ -433,7 +484,8 @@ def do_sidebar():
 
         if menu_item == _STR_MENU_NOTE:
             _sidebar_display_add_note()
-
+        elif menu_item == _STR_MENU_RESEARCH_GROUP:
+            _sidebar_display_add_group()
         else:
             pass
 
