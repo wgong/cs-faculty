@@ -55,7 +55,7 @@ def _file_mtime_in_hour(filename):
     return age
 
 
-def _df_to_csv(df, index=False):
+def df_to_csv(df, index=False):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv(index=index).encode('utf-8')
 

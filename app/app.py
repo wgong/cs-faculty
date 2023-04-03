@@ -28,7 +28,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 from db import *
 from cfg import *
-from helper import (escape_single_quote, unescape_single_quote)
+from helper import (escape_single_quote, df_to_csv)
 
 ##====================================================
 _STR_APP_NAME               = "CS Faculty"
@@ -152,27 +152,29 @@ def _db_execute(sql_statement, DEBUG=True):
 
 def _db_delete(data, table_name=TABLE_NOTE):
     if not data: 
-        return
+        return None
     
     primary_key = data.get("id")
     if not primary_key:
         print(f"[ERROR] missing primary key: 'id'")
-        return    
+        return None
     
     delete_sql = f"""
         delete from {table_name}
         where id = '{primary_key}';
     """
-    _db_execute(delete_sql)         
+    _db_execute(delete_sql)
+
+    return _db_select(table_name=table_name)        
 
 def _db_update(data, table_name=TABLE_NOTE):
     if not data or len(data) < 3: 
-        return
+        return None
     
     primary_key = data.get("id")
     if not primary_key:
         print(f"[ERROR] missing primary key: 'id'")
-        return    
+        return None   
 
     # build SQL
     all_cols = TABLE_COLUMNS[table_name]
@@ -191,14 +193,16 @@ def _db_update(data, table_name=TABLE_NOTE):
     """
     _db_execute(update_sql)   
 
+    return _db_select(table_name=table_name) 
+
 def _db_insert(data, table_name=TABLE_NOTE):
     if not data: 
-        return
+        return None
     
     primary_key = data.get("id")
     if not primary_key:
         print(f"[ERROR] missing primary key: 'id'")
-        return    
+        return None 
 
     all_cols = TABLE_COLUMNS[table_name]
     # build SQL
@@ -224,29 +228,33 @@ def _db_insert(data, table_name=TABLE_NOTE):
     """
     _db_execute(insert_sql)
 
-def _db_upsert_group(data):
+    return _db_select(table_name=table_name) 
+
+def _db_upsert_group(data, table_name=TABLE_RESEARCH_GROUP):
     _research_group = data.get("research_group", "")
-    if not _research_group: return
+    if not _research_group: return None
 
     with DBConn() as _conn:
         df = pd.read_sql(f"""
-            select research_group from {TABLE_RESEARCH_GROUP}
+            select research_group from {table_name}
             where research_group='{_research_group}';
         """, _conn)
 
     _url = data.get("url", "")
     if df.shape[0] > 0:  # update
         sql_stmt = f"""
-            update {TABLE_RESEARCH_GROUP}
+            update {table_name}
             set url = '{_url}'
             where research_group='{_research_group}';
         """
     else:
         sql_stmt = f"""
-            insert into {TABLE_RESEARCH_GROUP} (research_group, url)
+            insert into {table_name} (research_group, url)
             values ('{_research_group}', '{_url}');
         """
     _db_execute(sql_stmt)
+
+    return _db_select(table_name=table_name) 
 
 def _db_select(table_name=TABLE_NOTE, orderby_cols=[]):
     with DBConn() as _conn:
@@ -272,11 +280,11 @@ def _display_grid(form_name=TABLE_NOTE, orderby_cols=[]):
     if form_name==TABLE_FACULTY:
         df = _move_url_2nd(df)
     grid_response = _display_grid_df(df, 
-                        selection_mode="single", 
-                        page_size=10, 
-                        grid_height=370,
-                        editable_columns=EDITABLE_COLUMNS[form_name],
-                        clickable_columns=CLICKABLE_COLUMNS[form_name],
+                            selection_mode="single", 
+                            page_size=10, 
+                            grid_height=370,
+                            editable_columns=EDITABLE_COLUMNS[form_name],
+                            clickable_columns=CLICKABLE_COLUMNS[form_name],
                     )
     selected_row = None
     if grid_response:
@@ -284,6 +292,8 @@ def _display_grid(form_name=TABLE_NOTE, orderby_cols=[]):
         if selected_rows and len(selected_rows):
             selected_row = selected_rows[0]
 
+    if form_name.startswith("t_"):
+        st.session_state[f"df_{form_name[2:]}"] = df
 
 def _clear_form():
     form_name = st.session_state.get("form_name", TABLE_NOTE)  # same as table_name
@@ -362,24 +372,23 @@ def _display_grid_note(form_name=TABLE_NOTE):
         if val != dict_old_val[col]: 
             data.update({col : val})
 
+    df_new = None
     if btn_add and any([data.get(col) for col in all_cols if col not in ["id","ts"]]):
         if data.get("id"):
             data.update({"ts": str(datetime.now()),})
-            _db_update(data)
+            df_new = _db_update(data)
         else:
             data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
-            _db_insert(data)
+            df_new = _db_insert(data)
 
     elif btn_update and selected_row is not None:
         data.update({"ts": str(datetime.now()),})
-        _db_update(data)
+        df_new = _db_update(data)
 
     elif btn_delete and selected_row is not None:
-        _db_delete(data)
+        df_new = _db_delete(data)
 
-    # not working
-    # if any([btn_add, btn_update, btn_delete]):
-    #     _clear_form()
+    st.session_state["df_note"] = df_new if df_new is not None else df_note
 
 # quick add note
 def _sidebar_display_add_note(form_name="new_note"):
@@ -388,6 +397,15 @@ def _sidebar_display_add_note(form_name="new_note"):
             for col in NOTE_DATA_COLS:
                 st.text_input(col.capitalize(), value="", key=f"{form_name}_{col}")
             st.form_submit_button('Add', on_click=_sidebar_add_note)
+
+    df_note = st.session_state.get("df_note", None)
+    if df_note is not None:
+        st.download_button(
+            label="Download CSV",
+            data=df_to_csv(df_note, index=False),
+            file_name=f"df_note-{str(datetime.now())}.csv",
+            mime='text/csv',
+        )            
 
 def _sidebar_add_note(form_name="new_note"):
     _title = st.session_state.get(f"{form_name}_title","")
@@ -400,7 +418,9 @@ def _sidebar_add_note(form_name="new_note"):
     
     for col in NOTE_DATA_COLS:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_insert(data)
+    df_new = _db_insert(data)
+    if df_new is not None:
+        st.session_state["df_note"] = df_new
     _sidebar_clear_note_form()
 
 def _sidebar_clear_note_form(form_name="new_note"):
@@ -416,6 +436,16 @@ def _sidebar_display_add_group(form_name="new_group"):
                 st.text_input(col.capitalize(), value="", key=f"{form_name}_{col}")
             st.form_submit_button('Add', on_click=_sidebar_add_group)
 
+    df_research_group = st.session_state.get("df_research_group", None)
+    if df_research_group is not None:
+        st.download_button(
+            label="Download CSV",
+            data=df_to_csv(df_research_group, index=False),
+            file_name=f"df_research_group-{str(datetime.now())}.csv",
+            mime='text/csv',
+        )
+
+
 def _sidebar_add_group(form_name="new_group"):
     _research_group = st.session_state.get(f"{form_name}_research_group","")
     if not _research_group: return
@@ -423,12 +453,31 @@ def _sidebar_add_group(form_name="new_group"):
     data = {}
     for col in GROUP_DATA_COLS:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_upsert_group(data)
+    df_new = _db_upsert_group(data)
+    if df_new is not None:
+        st.session_state["df_research_group"] = df_new
     _sidebar_clear_group_form()
 
 def _sidebar_clear_group_form(form_name="new_group"):
     for col in GROUP_DATA_COLS:
         st.session_state[f"{form_name}_{col}"] = ""
+
+# quick add faculty
+def _sidebar_display_faculty(form_name="new_faculty"):
+    # with st.expander("Add Research Group", expanded=True):
+    #     with st.form(key=form_name):
+    #         for col in GROUP_DATA_COLS:
+    #             st.text_input(col.capitalize(), value="", key=f"{form_name}_{col}")
+    #         st.form_submit_button('Add', on_click=_sidebar_add_group)
+
+    df_faculty = st.session_state.get("df_faculty", None)
+    if df_faculty is not None:
+        st.download_button(
+            label="Download CSV",
+            data=df_to_csv(df_faculty, index=False),
+            file_name=f"df_faculty-{str(datetime.now())}.csv",
+            mime='text/csv',
+        )
 
 #####################################################
 # Menu Handlers
@@ -484,8 +533,14 @@ def do_sidebar():
 
         if menu_item == _STR_MENU_NOTE:
             _sidebar_display_add_note()
+
+
         elif menu_item == _STR_MENU_RESEARCH_GROUP:
             _sidebar_display_add_group()
+
+        elif menu_item == _STR_MENU_FACULTY:
+            _sidebar_display_faculty()
+
         else:
             pass
 
