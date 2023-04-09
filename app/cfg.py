@@ -32,27 +32,15 @@ TABLE_COLUMNS = {
     ],
 }
 
+KEY_COLUMNS = {
+    "t_faculty": 'name',
+    't_note': 'id',
+    't_research_group': 'research_group',    
+}
+
+
 EDITABLE_COLUMNS =  {
-    "t_faculty": [
-        'job_title',
-        'phd_univ',
-        'phd_year',
-        'research_area',
-        'research_concentration',
-        'research_focus',
-        'phone',
-        'email',
-        'cell_phone',
-        'office_address',
-        'department',
-        'school'    
-    ],
-    't_note': [
-        'title', 'url', 'note', 'tags'
-    ],
-    't_research_group': [
-        'research_group', 'url'
-    ],
+    table : [c for c in TABLE_COLUMNS[table] if c != KEY_COLUMNS[table]] for table in TABLE_COLUMNS.keys()
 }
 
 CLICKABLE_COLUMNS = {
@@ -67,3 +55,15 @@ CLICKABLE_COLUMNS = {
         'url',
     ],    
 }
+
+DATA_COLUMNS = {
+    "t_faculty": ['name', 'url', 'job_title',
+        'research_area', 'email','department', 
+        'phd_univ','phd_year'],
+    't_research_group': ['research_group', 'url'],
+    't_note': [col for col in TABLE_COLUMNS["t_note"] if col not in ["id", "ts"]],
+}
+
+FACULTY_DATA_COLS = DATA_COLUMNS["t_faculty"]
+GROUP_DATA_COLS = DATA_COLUMNS["t_research_group"]
+NOTE_DATA_COLS = DATA_COLUMNS["t_note"]
