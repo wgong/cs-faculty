@@ -636,8 +636,15 @@ def do_welcome():
     - [Drafty Project](https://drafty.cs.brown.edu/)
     - [CSRankings.org](https://csrankings.org/#/fromyear/2011/toyear/2023/index?ai&vision&mlmining&nlp&inforet&act&crypt&log&us)
     - [CS Faculty Info](https://github.com/wgong/py4kids/tree/master/lesson-11-scrapy/scrap-cs-faculty) : scraped a few top US CS schools (work in progress)
+    - Schools:
+        - [MIT-AID](https://www.eecs.mit.edu/role/faculty-aid/)
+        - [MIT-CS](https://www.eecs.mit.edu/role/faculty-cs/)
+        - [Stanford-CS](https://cs.stanford.edu/directory/faculty)
+        - [CMU-CS](https://csd.cmu.edu/people/faculty)
+        - [UCB-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
+        - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
+        - [Cornell-CS](https://www.cs.cornell.edu/people/faculty)
     """, unsafe_allow_html=True)
-
 
 
 def do_faculty():
