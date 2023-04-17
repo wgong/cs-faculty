@@ -9,26 +9,34 @@ TABLE_RESEARCH_GROUP = "t_research_group"
 TABLE_COLUMNS = {
     't_faculty': [
         'name',
+        'url',
         'job_title',
         'phd_univ',
         'phd_year',
         'research_area',
         'research_concentration',
         'research_focus',
-        'url',
         'img_url',
         'phone',
         'email',
         'cell_phone',
         'office_address',
         'department',
-        'school'
+        'school',
+        'note',
     ],
     't_note': [
-        'title', 'url', 'note', 'tags', 'ts', 'id'
+        'title', 
+        'url', 
+        'note', 
+        'tags', 
+        'ts', 
+        'id'
     ],
     't_research_group': [
-        'research_group', 'url'
+        'research_group', 
+        'url',
+        'note',
     ],
 }
 
@@ -59,8 +67,8 @@ CLICKABLE_COLUMNS = {
 DATA_COLUMNS = {
     "t_faculty": ['name', 'url', 'job_title',
         'research_area', 'email','department', 
-        'phd_univ','phd_year'],
-    't_research_group': ['research_group', 'url'],
+        'phd_univ','phd_year','note',],
+    't_research_group': ['research_group', 'url','note',],
     't_note': [col for col in TABLE_COLUMNS["t_note"] if col not in ["id", "ts"]],
 }
 

@@ -3,22 +3,27 @@
 
 entity should have :
 
+table prefix: "t_"
+
+- system-columns (required): 
+        - id, 
+        - ts (last update timestamp), 
+        - uid (last updated by user, foreign key to t_user table)
+        - ts_creation (creation timestamp)
+        - uid_creation (creation user)
+
 - user-keys (required): name | title, url
-- system-key (optional): id, ts
+
 - data columns: note, ... 
 - editable columns: 
 - clickable columns: url, url_img
-- attachment columns: note
+- attachment column: note (free-form long description field)
 
-note is free-form long description field
-id, ts are system-fields to track activities, e.g. t_note, t_work
-
-table prefix: "t_"
 
 # entity
 3 broad categories:
 - product - what
-- people - who
+- people - who, org
 - process - how/when/where
 
 ## product related (what) 
@@ -49,8 +54,6 @@ table prefix: "t_"
 - authors
 - tags
 - note
-- id
-- ts
 
 ## people (who) related 
 
@@ -58,6 +61,14 @@ table prefix: "t_"
 - name
 - url
 - note
+
+### user (table t_user)
+- userid
+- password
+- name
+- url
+- note
+- is_active
 
 ### person (table t_person)
 - name
@@ -85,8 +96,6 @@ table prefix: "t_"
 
 ### team_member (table t_person_team)
 intersection between t_person and t_team
-- id
-- ts
 - ref_type: t_faculty
 - ref_key: url ## name  (delimiter=" ## ")
 - ref_type_2
@@ -94,20 +103,16 @@ intersection between t_person and t_team
 
 ### publications (table t_person_work)
 intersection between t_person and t_work
-- id
-- ts
 - ref_type: t_faculty | t_person
 - ref_key: url ## name  (delimiter=" ## ")
-- ref_type_2
-- ref_key_2
+- ref_type_2 t_work # publication (delimiter=" # ")
+- ref_key_2  url ## title
 
 ### notes (table t_note)
 intersection between t_person and any other entity
-- id
-- ts
 - title
 - url
 - note
 - tags
-- ref_type
-- ref_key
+- ref_type (optional)
+- ref_key (optional)
