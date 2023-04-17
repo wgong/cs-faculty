@@ -140,7 +140,7 @@ def _display_grid_df(df,
                     clickable_columns=[]):
     """show df in a grid and return selected row
     """
-    # st.dataframe(df) 
+
     gb = GridOptionsBuilder.from_dataframe(df)
     gb.configure_selection(selection_mode,
             use_checkbox=True,
@@ -252,7 +252,7 @@ def _db_update(data):
     all_cols = TABLE_COLUMNS[table_name]
     set_clause = []
     for col,val in data.items():
-        if col == key_col or col == '_selectedRowNodeInfo': 
+        if col == key_col or col in ['_selectedRowNodeInfo', 'table_name']: 
             continue
         if col not in all_cols:
             print(f"[WARN] column '{col}' not found in {str(all_cols)}")
@@ -385,8 +385,6 @@ def _db_upsert_faculty(data,
 
     return _db_select(table_name=table_name) 
 
-
-
 def _move_url_2nd(df, url_col="url"):
     cols = df.columns
     if not url_col in cols:
@@ -394,15 +392,14 @@ def _move_url_2nd(df, url_col="url"):
     cols_new = [cols[0], url_col] + [c for c in cols[1:] if c != url_col]
     return df[cols_new]
 
-def _display_grid(form_name=TABLE_NOTE, 
+def _display_grid(form_name=TABLE_RESEARCH_GROUP, 
                   orderby_cols=[], 
                   selection_mode="single"):
     st.session_state["form_name"] = form_name
     all_cols = TABLE_COLUMNS[form_name]
     df = _db_select(table_name=form_name, orderby_cols=orderby_cols)
-    if form_name==TABLE_FACULTY:
-        df = _move_url_2nd(df)
-    grid_response = _display_grid_df(df, 
+
+    grid_resp = _display_grid_df(df, 
                             selection_mode=selection_mode, 
                             page_size=10, 
                             grid_height=370,
@@ -410,109 +407,115 @@ def _display_grid(form_name=TABLE_NOTE,
                             clickable_columns=CLICKABLE_COLUMNS[form_name],
                     )
     selected_row = {}
-    if grid_response and grid_response.get('selected_rows'):
-        selected_row = grid_response['selected_rows'][0]
+    if grid_resp and grid_resp.get('selected_rows'):
+        selected_row = grid_resp['selected_rows'][0]
 
-    df_new = None
-    btn_save = st.button("Save", key=f"{form_name}_save")
-    if btn_save and selected_row:
+    if not selected_row:
+        return
+    
+    if st.button("Save", key=f"{form_name}_save"):
         data = selected_row
         data.update({"table_name": form_name})
-        df_new = _db_update(data=data)
+        _ = _db_update(data=data)
 
-    if form_name.startswith("t_"):
-        df_name = f"df_{form_name[2:]}"
-        st.session_state[df_name] = df_new if df_new is not None else df
-
-    if form_name == TABLE_FACULTY:
-        faculty_name = selected_row.get("name")
-        primary_key = selected_row.get("url")
-        if not faculty_name:
-            return
-        
-        menu_options = ["Work", "Team", "Note"]
-        default_ix = menu_options.index("Work")
-        data_dict = {
-            "Work": {
-                "sql": f"""
-                    select w.* from t_person_work pw
-                    join t_work w
-                        on pw.ref_type_2 = 't_work' and pw.ref_key_2 = w.id
-                    where pw.ref_type = 't_faculty'
-                    and pw.ref_key = '{primary_key}'
-                """,
-            },
-            "Team": {
-                "sql": f"""
-                    with team as (
-                        select ref_key as team_url
-                        from t_person_team
-                        where ref_type = 't_team' and
-                        ref_type_2 = 't_faculty' and ref_key_2 = '{primary_key}'
-                    )
-                    select p.* 
-                    from t_person p 
-                    join t_person_team pt
-                        on pt.ref_type_2 = 't_person' and pt.ref_key_2 = p.url
-                    join team t
-                        on pt.ref_type = 't_team' and pt.ref_key = t.team_url
-                """,
-            },
-            "Note": {
-                "sql": f"""
-                    select * 
-                    from t_note
-                    where ref_type = 't_faculty' and ref_key = '{primary_key}'  
-                """,
-            },
-        }
-
-        menu_item = st.selectbox(f"{faculty_name} :      {primary_key}", 
-                                 menu_options, index=default_ix, key="faculty_menu_item")
-
-        with DBConn() as _conn:
-            df = pd.read_sql(data_dict[menu_item]["sql"], _conn)
-            grid_resp = _display_grid_df(df,
-                        selection_mode="single", 
-                        page_size=5, 
-                        grid_height=200,
-                        clickable_columns=["url"],                                             
-                    )
-
-
-
-
-def _clear_form():
-    form_name = st.session_state.get("form_name", TABLE_NOTE)  # same as table_name
-    if not form_name: return
-    for col in TABLE_COLUMNS[form_name]:
-        ui_key = f"col_{form_name}_{col}"
-        if not ui_key in st.session_state: continue
-        st.session_state[ui_key] = ""
-
-def _display_crud_buttons(form_name=TABLE_NOTE):
-    """button UI key: btn_<table_name>_action
-        action: refresh, upsert, delete
-    """
+def _display_grid_faculty(form_name=TABLE_FACULTY, 
+                  orderby_cols=["name"], 
+                  selection_mode="single"):
     st.session_state["form_name"] = form_name
-    c0, c1, _, c2, c4 = st.columns([3,3,4,2,7])
-    with c0:
-        btn_save = st.button(STR_SAVE, key=f"btn_{form_name}_upsert")
-    with c1:
-        btn_refresh = st.button(STR_REFRESH, key=f"btn_{form_name}_refresh", on_click=_clear_form)
-    with c2:
-        btn_delete = st.button(STR_DELETE, key=f"btn_{form_name}_delete")
-    with c4:
-        st.info(STR_REFRESH_HINT)
-    return btn_save, btn_refresh, btn_delete
+    all_cols = TABLE_COLUMNS[form_name]
+    df = _db_select(table_name=form_name, orderby_cols=orderby_cols)
+    df = _move_url_2nd(df)
+    grid_resp = _display_grid_df(df, 
+                            selection_mode=selection_mode, 
+                            page_size=10, 
+                            grid_height=370,
+                            editable_columns=EDITABLE_COLUMNS[form_name],
+                            clickable_columns=CLICKABLE_COLUMNS[form_name],
+                    )
+    
+    selected_row = {}
+    if grid_resp and grid_resp.get('selected_rows'):
+        selected_row = grid_resp['selected_rows'][0]
 
-def _display_grid_form_note(form_name=TABLE_NOTE):
+    if not selected_row:
+        return
+
+    if st.button("Save", key=f"{form_name}_save"):
+        data = selected_row
+        data.update({"table_name": form_name})
+        _ = _db_update(data=data)
+
+    primary_key = selected_row.get("url")
+    if not primary_key:
+        print(f"[ERROR] Missing primary key: 'url' field")
+        return
+    
+    # NOTE:
+    # when using st.tab, grid not displayed correctly
+    # use st.selectbox instead
+    menu_options = ["Work", "Team", "Note"]
+    default_ix = menu_options.index("Work")
+    data_dict = {
+        "Work": {
+            "table": "t_person_work",
+            "sql": f"""
+                select w.* from t_person_work pw
+                join t_work w
+                    on pw.ref_type_2 = 't_work' and pw.ref_key_2 = w.id
+                where pw.ref_type = 't_faculty'
+                and pw.ref_key = '{primary_key}'
+            """,
+        },
+        "Team": {
+            "table": "t_person_team",
+            "sql": f"""
+                with team as (
+                    select ref_key as team_url
+                    from t_person_team
+                    where ref_type = 't_team' and
+                    ref_type_2 = 't_faculty' and ref_key_2 = '{primary_key}'
+                )
+                select p.* 
+                from t_person p 
+                join t_person_team pt
+                    on pt.ref_type_2 = 't_person' and pt.ref_key_2 = p.url
+                join team t
+                    on pt.ref_type = 't_team' and pt.ref_key = t.team_url
+            """,
+        },
+        "Note": {
+            "table": "t_note",
+            "sql": f"""
+                select * from t_note
+                where ref_type = 't_faculty' and ref_key = '{primary_key}'  
+            """,
+        },
+    }
+
+    faculty_name = selected_row.get("name")
+    menu_item = st.selectbox(f"{faculty_name} : {primary_key}", 
+                                menu_options, index=default_ix, key="faculty_menu_item")
+
+    with DBConn() as _conn:
+        df = pd.read_sql(data_dict[menu_item]["sql"], _conn)
+        child_grid_resp = _display_grid_df(df,
+                    selection_mode="single", 
+                    page_size=5, 
+                    grid_height=200,
+                    clickable_columns=["url"],                                             
+                )
+    # TODO
+    # handle child grid form based on selected menu_item
+    # copy logic from _display_grid_form_all_notes()
+
+
+def _display_grid_form_all_notes(form_name=TABLE_NOTE):
     st.session_state["form_name"] = form_name
     all_cols = TABLE_COLUMNS[form_name]
 
     # display grid
     df_note = _db_select(table_name=form_name, orderby_cols = ["ts desc"])
-    grid_response = _display_grid_df(df_note, 
+    grid_resp = _display_grid_df(df_note, 
                         selection_mode="single", 
                         page_size=10, 
                         grid_height=370,
@@ -520,20 +523,20 @@ def _display_grid_form_note(form_name=TABLE_NOTE):
                         clickable_columns=CLICKABLE_COLUMNS[form_name],
                     )
     selected_row = None
-    if grid_response:
-        selected_rows = grid_response['selected_rows']
+    if grid_resp:
+        selected_rows = grid_resp['selected_rows']
         if selected_rows and len(selected_rows):
             selected_row = selected_rows[0]
 
-    dict_old_val = {}
+    old_row = {}
     for col in all_cols:
-        dict_old_val[col] = selected_row.get(col) if selected_row is not None else ""
+        old_row[col] = selected_row.get(col) if selected_row is not None else ""
 
     dict_col_label = {col: col.capitalize() for col in all_cols}
     dict_col_label.update({"id": "ID", "ts": "Timestamp", "url": "URL"})
 
     # display CRUD form
-    btn_save, btn_refresh, btn_delete = _display_crud_buttons(form_name=form_name)
+    btn_save, btn_refresh, btn_delete = _display_crud_buttons_all_notes(form_name=form_name)
 
     data = {"table_name": form_name}
 
@@ -542,40 +545,64 @@ def _display_grid_form_note(form_name=TABLE_NOTE):
     with col_left:
         left_columns = ["title", "url", "tags"]
         for col in left_columns:
-            val = st.text_input(dict_col_label.get(col), value=dict_old_val[col], key=f"col_{form_name}_{col}")
-            if val != dict_old_val[col]: 
+            val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}")
+            if val != old_row[col]: 
                 data.update({col : val})
 
     with col_right:
         right_columns = ["id", "ts", "note"]
         for col in right_columns:
             if col == "id":     # read only
-                val = st.text_input(dict_col_label.get(col), value=dict_old_val[col], key=f"col_{form_name}_{col}", disabled=True)
+                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", disabled=True)
                 data.update({col : val})
 
             elif col == "ts":
-                val = st.text_input(dict_col_label.get(col), value=dict_old_val[col], key=f"col_{form_name}_{col}")
+                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}")
                 data.update({col : val})
 
             elif col == "note":   # text_area
-                val = st.text_area(dict_col_label.get(col), value=dict_old_val[col], height=125, key=f"col_{form_name}_{col}")
-                if val != dict_old_val[col]: 
+                val = st.text_area(dict_col_label.get(col), value=old_row[col], height=125, key=f"col_{form_name}_{col}")
+                if val != old_row[col]: 
                     data.update({col : val})
 
-    df_new = None
     if btn_save:
         if selected_row is not None and data.get("id"):
             data.update({"ts": str(datetime.now()),})
-            df_new = _db_update(data)
+            _ = _db_update(data)
         else:
             data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
-            df_new = _db_insert(data)
+            _ = _db_insert(data)
 
     elif btn_delete and selected_row is not None and data.get("id"):
-        df_new = _db_delete(data)
+        _ = _db_delete(data)
 
 
-def download_df(df, filename_csv):
+def _display_crud_buttons_all_notes(form_name=TABLE_NOTE):
+    """button UI key: btn_<table_name>_action
+        action: refresh, upsert, delete
+    """
+    st.session_state["form_name"] = form_name
+    c0, c1, _, c2, c4 = st.columns([3,3,4,2,7])
+    with c0:
+        btn_save = st.button(STR_SAVE, key=f"btn_{form_name}_upsert")
+    with c1:
+        btn_refresh = st.button(STR_REFRESH, key=f"btn_{form_name}_refresh", on_click=_clear_crud_form_all_notes)
+    with c2:
+        btn_delete = st.button(STR_DELETE, key=f"btn_{form_name}_delete")
+    with c4:
+        st.info(STR_REFRESH_HINT)
+    return btn_save, btn_refresh, btn_delete
+
+def _clear_crud_form_all_notes():
+    form_name = st.session_state.get("form_name", TABLE_NOTE)  # same as table_name
+    if not form_name: return
+    for col in TABLE_COLUMNS[form_name]:
+        ui_key = f"col_{form_name}_{col}"
+        if not ui_key in st.session_state: continue
+        st.session_state[ui_key] = ""
+
+
+def _download_df(df, filename_csv):
     """Download input df to CSV
     """
     if df is not None:
@@ -695,7 +722,7 @@ def do_welcome():
 
 def do_faculty():
     st.subheader(f"{_STR_MENU_FACULTY}")
-    _display_grid(form_name=TABLE_FACULTY, orderby_cols=["name"])
+    _display_grid_faculty()
 
 def do_research_group():
     st.subheader(f"{_STR_MENU_RESEARCH_GROUP}")
@@ -703,9 +730,7 @@ def do_research_group():
 
 def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
-    _display_grid_form_note()
-
-
+    _display_grid_form_all_notes()
 
 #####################################################
 # setup menu_items 
@@ -730,7 +755,6 @@ def do_sidebar():
 
         if menu_item == _STR_MENU_NOTE:
             _sidebar_display_add_note()
-
 
         elif menu_item == _STR_MENU_RESEARCH_GROUP:
             _sidebar_display_add_group()
