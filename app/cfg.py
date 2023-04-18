@@ -6,6 +6,7 @@ TABLE_NOTE = "t_note"
 TABLE_FACULTY = "t_faculty"
 TABLE_RESEARCH_GROUP = "t_research_group"
 
+# run query for this meta-info
 TABLE_COLUMNS = {
     't_faculty': [
         'name',
@@ -23,7 +24,7 @@ TABLE_COLUMNS = {
         'office_address',
         'department',
         'school',
-        'note',
+        'note'
     ],
     't_note': [
         'title', 
@@ -37,6 +38,7 @@ TABLE_COLUMNS = {
         'research_group', 
         'url',
         'note',
+
     ],
 }
 
@@ -64,11 +66,12 @@ CLICKABLE_COLUMNS = {
     ],    
 }
 
+# derived - non system-cols
 DATA_COLUMNS = {
     "t_faculty": ['name', 'url', 'job_title',
         'research_area', 'email','department', 
         'phd_univ','phd_year','note',],
-    't_research_group': ['research_group', 'url','note',],
+    't_research_group': ['research_group', 'url', 'note',],
     't_note': [col for col in TABLE_COLUMNS["t_note"] if col not in ["id", "ts"]],
 }
 

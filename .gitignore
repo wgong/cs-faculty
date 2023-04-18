@@ -3,6 +3,7 @@
 **/settings*Copy.yaml
 **/Untitled*.ipynb
 **/gpt3sql-*.sqlite
+**/*Copy*.duckdb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

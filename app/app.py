@@ -87,11 +87,13 @@ _GRID_OPTIONS = {
 # Helpers (prefix with underscore)
 #####################################################
 
-def _create_label(col):
+def _gen_label(col):
     "Convert table column into form label"
     if "_" not in col:
-        if col.upper() == "URL":
-            return "URL"
+        if col.upper() in ["URL","ID"]:
+            return col.upper()
+        elif col.upper() == "TS":
+            return "Timestamp"
         return col.capitalize()
 
     cols = []
@@ -506,10 +508,9 @@ def _display_grid_faculty(form_name=TABLE_FACULTY,
                 )
     # TODO
     # handle child grid form based on selected menu_item
-    # copy logic from _display_grid_form_all_notes()
 
 
-def _display_grid_form_all_notes(form_name=TABLE_NOTE):
+def _crud_display_grid_form_all_notes(form_name=TABLE_NOTE):
     st.session_state["form_name"] = form_name
     all_cols = TABLE_COLUMNS[form_name]
 
@@ -532,15 +533,15 @@ def _display_grid_form_all_notes(form_name=TABLE_NOTE):
     for col in all_cols:
         old_row[col] = selected_row.get(col) if selected_row is not None else ""
 
-    dict_col_label = {col: col.capitalize() for col in all_cols}
-    dict_col_label.update({"id": "ID", "ts": "Timestamp", "url": "URL"})
+    dict_col_label = {col: _gen_label(col) for col in all_cols}
 
-    # display CRUD form
-    btn_save, btn_refresh, btn_delete = _display_crud_buttons_all_notes(form_name=form_name)
+    ## Form Layout
+
+    # display buttons
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons_all_notes(form_name=form_name)
 
     data = {"table_name": form_name}
-
-    # setup form and populate data dict
+    # display form and populate data dict
     col_left,col_right = st.columns([9,5])
     with col_left:
         left_columns = ["title", "url", "tags"]
@@ -550,14 +551,10 @@ def _display_grid_form_all_notes(form_name=TABLE_NOTE):
                 data.update({col : val})
 
     with col_right:
-        right_columns = ["id", "ts", "note"]
+        right_columns = ["id", "note"]
         for col in right_columns:
             if col == "id":     # read only
                 val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", disabled=True)
-                data.update({col : val})
-
-            elif col == "ts":
-                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}")
                 data.update({col : val})
 
             elif col == "note":   # text_area
@@ -565,6 +562,7 @@ def _display_grid_form_all_notes(form_name=TABLE_NOTE):
                 if val != old_row[col]: 
                     data.update({col : val})
 
+    # handle buttons
     if btn_save:
         if selected_row is not None and data.get("id"):
             data.update({"ts": str(datetime.now()),})
@@ -577,29 +575,29 @@ def _display_grid_form_all_notes(form_name=TABLE_NOTE):
         _ = _db_delete(data)
 
 
-def _display_crud_buttons_all_notes(form_name=TABLE_NOTE):
+def _crud_display_buttons_all_notes(form_name=TABLE_NOTE):
     """button UI key: btn_<table_name>_action
         action: refresh, upsert, delete
     """
     st.session_state["form_name"] = form_name
-    c0, c1, _, c2, c4 = st.columns([3,3,4,2,7])
-    with c0:
+    c_save, c_refresh, _, c_delete, c_info = st.columns([3,3,4,2,7])
+    with c_save:
         btn_save = st.button(STR_SAVE, key=f"btn_{form_name}_upsert")
-    with c1:
-        btn_refresh = st.button(STR_REFRESH, key=f"btn_{form_name}_refresh", on_click=_clear_crud_form_all_notes)
-    with c2:
+    with c_refresh:
+        btn_refresh = st.button(STR_REFRESH, key=f"btn_{form_name}_refresh", on_click=_crud_clear_form_all_notes)
+    with c_delete:
         btn_delete = st.button(STR_DELETE, key=f"btn_{form_name}_delete")
-    with c4:
+    with c_info:
         st.info(STR_REFRESH_HINT)
     return btn_save, btn_refresh, btn_delete
 
-def _clear_crud_form_all_notes():
-    form_name = st.session_state.get("form_name", TABLE_NOTE)  # same as table_name
+def _crud_clear_form_all_notes():
+    form_name = st.session_state.get("form_name", "")  # same as table_name
     if not form_name: return
     for col in TABLE_COLUMNS[form_name]:
-        ui_key = f"col_{form_name}_{col}"
-        if not ui_key in st.session_state: continue
-        st.session_state[ui_key] = ""
+        col_key = f"col_{form_name}_{col}"
+        if not col_key in st.session_state: continue
+        st.session_state[col_key] = ""
 
 
 def _download_df(df, filename_csv):
@@ -616,10 +614,10 @@ def _download_df(df, filename_csv):
 
 ### quick add note
 def _sidebar_display_add_note(form_name="new_note"):
-    with st.expander(f"{STR_QUICK_ADD}", expanded=True):
+    with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
             for col in NOTE_DATA_COLS:
-                st.text_input(_create_label(col), value="", key=f"{form_name}_{col}")
+                st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
             st.form_submit_button(STR_ADD, on_click=_sidebar_add_note)
 
 def _sidebar_add_note(form_name="new_note"):
@@ -648,7 +646,7 @@ def _sidebar_display_add_group(form_name="new_group"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
             for col in GROUP_DATA_COLS:
-                st.text_input(_create_label(col), value="", key=f"{form_name}_{col}")
+                st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
             st.form_submit_button(STR_ADD, on_click=_sidebar_add_group)
 
 
@@ -674,7 +672,7 @@ def _sidebar_display_faculty(form_name="new_faculty"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
             for col in FACULTY_DATA_COLS:
-                st.text_input(_create_label(col), value="", key=f"{form_name}_{col}")
+                st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
             st.form_submit_button(STR_ADD, on_click=_sidebar_add_faculty)
 
 def _sidebar_add_faculty(form_name="new_faculty"):
@@ -730,7 +728,7 @@ def do_research_group():
 
 def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
-    _display_grid_form_all_notes()
+    _crud_display_grid_form_all_notes()
 
 #####################################################
 # setup menu_items 
