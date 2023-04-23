@@ -1,6 +1,12 @@
 """
 Streamlit app to manage CS Faculty data backed by DuckDB 
 
+
+TODO:
+- [2023-04-21] 
+    - upgrade streamlit to 1.21
+    - replace st.cache to st.cache_data
+
 """
 __author__ = "wgong"
 SRC_URL = "https://github.com/wgong/cs-faculty"
@@ -27,7 +33,7 @@ import streamlit as st
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 
 from db import *
-from cfg import *
+from config import *
 from helper import (escape_single_quote, df_to_csv)
 
 ##====================================================
@@ -62,6 +68,7 @@ _STR_MENU_HOME              = STR_WELCOME
 _STR_MENU_FACULTY           = STR_FACULTY
 _STR_MENU_RESEARCH_GROUP    = STR_RESEARCH_GROUP
 _STR_MENU_NOTE              = STR_NOTE
+_STR_MENU_NOTE_2      = STR_NOTE + "-2"
 
 
 
@@ -86,7 +93,7 @@ _GRID_OPTIONS = {
 #####################################################
 # Helpers (prefix with underscore)
 #####################################################
-
+@st.cache
 def _gen_label(col):
     "Convert table column into form label"
     if "_" not in col:
@@ -102,6 +109,11 @@ def _gen_label(col):
         if not c: continue
         cols.append(c.capitalize())
     return " ".join(cols)
+
+@st.cache
+def _get_columns(table_name, prop_name="is_visible"):
+    return [k for k,v in COLUMN_PROPS[table_name].items() if v.get(prop_name, False) ]
+
 
 def _load_db():
 
@@ -230,6 +242,26 @@ def _db_delete(data):
 
     return _db_select(table_name=table_name)        
 
+def _db_delete_by_id(data):
+    if not data: 
+        return None
+    
+    table_name = data.get("table_name", "")
+    if not table_name:
+        raise Exception(f"[ERROR] Missing key: table_name: {data}")
+
+    id_val = data.get("id", "")
+    if not id_val:
+        return None
+    
+    delete_sql = f"""
+        delete from {table_name}
+        where id = '{id_val}';
+    """
+    _db_execute(delete_sql)
+
+    return _db_select(table_name=table_name)        
+
 def _db_update(data):
     if not data: 
         return None
@@ -272,6 +304,37 @@ def _db_update(data):
 
     return _db_select(table_name=table_name) 
 
+def _db_update_by_id(data):
+    if not data: 
+        return None
+    
+    table_name = data.get("table_name", "")
+    if not table_name:
+        raise Exception(f"[ERROR] Missing key: table_name: {data}")
+
+    id_val = data.get("id", "")
+    if not id_val:
+        return None
+
+    editable_columns = _get_columns(table_name, prop_name="is_editable")
+
+    # build SQL
+    set_clause = []
+    for col,val in data.items():
+        if col not in editable_columns: 
+            continue
+        set_clause.append(f"{col} = '{escape_single_quote(val)}'")
+
+    if set_clause:
+        update_sql = f"""
+            update {table_name}
+            set {', '.join(set_clause)}
+            where id = '{id_val}';
+        """
+        _db_execute(update_sql)   
+
+    return _db_select(table_name=table_name) 
+
 def _db_insert(data):
     if not data: 
         return None
@@ -280,25 +343,15 @@ def _db_insert(data):
     if not table_name:
         raise Exception(f"[ERROR] Missing key: table_name: {data}")
 
-    key_col = KEY_COLUMNS[table_name]
-    key_val = data.get(key_col)
-    if not key_val:
-        print(f"[ERROR] missing primary key: '{key_col}'")
-        return None 
-
-    all_cols = TABLE_COLUMNS[table_name]
     # build SQL
+    visible_columns = _get_columns(table_name, prop_name="is_visible")
     col_clause = []
     val_clause = []
     for col,val in data.items():
-        if col not in all_cols:
-            print(f"[WARN] column '{col}' not found in {str(all_cols)}")
+        if col not in visible_columns:
             continue
         col_clause.append(col) 
-        if col == key_col:
-            val_clause.append(f"'{val}'")
-        else:
-            val_clause.append(f"'{escape_single_quote(val)}'")
+        val_clause.append(f"'{escape_single_quote(val)}'")
 
     insert_sql = f"""
         insert into {table_name} (
@@ -423,7 +476,7 @@ def _display_grid(form_name=TABLE_RESEARCH_GROUP,
 def _display_grid_faculty(form_name=TABLE_FACULTY, 
                   orderby_cols=["name"], 
                   selection_mode="single"):
-    st.session_state["form_name"] = form_name
+    st.session_state["form_name_parent"] = form_name
     all_cols = TABLE_COLUMNS[form_name]
     df = _db_select(table_name=form_name, orderby_cols=orderby_cols)
     df = _move_url_2nd(df)
@@ -456,7 +509,7 @@ def _display_grid_faculty(form_name=TABLE_FACULTY,
     # when using st.tab, grid not displayed correctly
     # use st.selectbox instead
     menu_options = ["Work", "Team", "Note"]
-    default_ix = menu_options.index("Work")
+    default_ix = menu_options.index("Note")
     data_dict = {
         "Work": {
             "table": "t_person_work",
@@ -498,17 +551,179 @@ def _display_grid_faculty(form_name=TABLE_FACULTY,
     menu_item = st.selectbox(f"{faculty_name} : {primary_key}", 
                                 menu_options, index=default_ix, key="faculty_menu_item")
 
-    with DBConn() as _conn:
-        df = pd.read_sql(data_dict[menu_item]["sql"], _conn)
-        child_grid_resp = _display_grid_df(df,
-                    selection_mode="single", 
-                    page_size=5, 
-                    grid_height=200,
-                    clickable_columns=["url"],                                             
-                )
-    # TODO
-    # handle child grid form based on selected menu_item
+    if menu_item == "Note":
+        form_name = "t_note"
+        _crud_display_grid_form(form_name, ref_type="t_faculty", ref_key=primary_key,
+                                page_size=5, grid_height=200)
+    else:
+        with DBConn() as _conn:
+            df = pd.read_sql(data_dict[menu_item]["sql"], _conn)
+            child_grid_resp = _display_grid_df(df,
+                        selection_mode="single", 
+                        page_size=5, 
+                        grid_height=200,
+                        clickable_columns=["url"],                                             
+                    )
 
+def _crud_display_grid_form(form_name, ref_type="", ref_key="", orderby_cols=[], 
+                            page_size=10, grid_height=370):
+    """Render grid according to column properties, 
+    used to display a database table, or child table when ref_type/_key are given
+
+    Inputs:
+        form_name (required): 
+            table name if ref_type is not given
+
+        ref_type: must be parent table name if given, form_name can be different from underlying table name
+        ref_key: foreign key
+
+    Outputs:
+    Buttons on top for Upsert, Delete action
+    Fields below in columns: 1, 2, or 3 specified by 'form_column'
+    """
+    table_name = form_name
+    # validate table_name exists
+    if not table_name in COLUMN_PROPS:
+        st.error(f"Invalid table name: {table_name}")
+        return 
+    COL_DEFS = COLUMN_PROPS[table_name]
+    orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ' '
+    visible_columns = _get_columns(table_name, prop_name="is_visible")
+    editable_columns = _get_columns(table_name, prop_name="is_editable")
+    clickable_columns = _get_columns(table_name, prop_name="is_clickable")
+    st.session_state["form_name"] = form_name
+    st.session_state["visible_columns"] = visible_columns
+
+    where_clause = ""
+    with DBConn() as _conn:
+        if ref_type and "ref_type" in COL_DEFS and \
+            ref_key and "ref_key" in COL_DEFS:
+            where_clause = f"""
+                where ref_type = '{ref_type}'
+                and ref_key = '{ref_key}'
+            """
+        sql_stmt = f"""
+            select {",".join(visible_columns)}
+            from {table_name} 
+            {where_clause}
+            {orderby_clause};
+        """
+        df = pd.read_sql(sql_stmt, _conn)
+    grid_resp = _display_grid_df(df, 
+                    selection_mode="single", 
+                    page_size=page_size, 
+                    grid_height=grid_height,
+                    editable_columns=editable_columns,
+                    clickable_columns=clickable_columns)
+    selected_row = None
+    if grid_resp:
+        selected_rows = grid_resp['selected_rows']
+        if selected_rows and len(selected_rows):
+            selected_row = selected_rows[0]
+
+    # st.write(f"selected_row:\n{selected_row}")
+
+    old_row = {}
+    dict_col_label = {}
+    for col in visible_columns:
+        old_row[col] = selected_row.get(col) if selected_row is not None else ""
+        if 'label_text' in COL_DEFS[col]:
+            dict_col_label[col] = COL_DEFS[col]['label_text']
+        else:
+            dict_col_label[col] = _gen_label(col)
+
+    ## Form Layout
+
+    # display buttons
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons()
+
+    data = {"table_name": table_name, "ref_type":ref_type, "ref_key":ref_key}
+    # display form and populate data dict
+    col1_columns = []
+    col2_columns = []
+    for c in visible_columns:
+        if COL_DEFS[c].get("form_column", "").startswith("col1-"):
+            col1_columns.append(c)
+        elif COL_DEFS[c].get("form_column", "").startswith("col2-"):
+            col2_columns.append(c) 
+
+    col1,col2 = st.columns([8,7])
+    with col1:
+        for col in col1_columns:
+            widget_type = COL_DEFS[col].get("widget_type", "text_input")
+            if widget_type == "text_area":
+                kwargs = {"height":125}
+                val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+            else:
+                kwargs = {}
+                if COL_DEFS[col].get("is_system_col", False):
+                    kwargs.update({"disabled":True})
+                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+
+            if val != old_row[col]:
+                data.update({col : val})
+
+    with col2:
+        for col in col2_columns:
+            widget_type = COL_DEFS[col].get("widget_type", "text_input")
+            if widget_type == "text_area":
+                kwargs = {"height":125}
+                val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+            else:
+                kwargs = {}
+                if COL_DEFS[col].get("is_system_col", False):
+                    kwargs.update({"disabled":True})
+                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+
+            if val != old_row[col]: 
+                data.update({col : val})
+
+    # copy id if present
+    id_val = old_row.get("id", "")
+    if id_val:
+        data.update({"id" : id_val})
+
+    # st.write(f"data={data}")
+    # handle buttons
+    if btn_save:
+        if selected_row is not None and data.get("id"):
+            data.update({"ts": str(datetime.now()),})
+            _ = _db_update_by_id(data)
+        else:
+            data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
+            _ = _db_insert(data)
+
+    elif btn_delete and selected_row is not None and data.get("id"):
+        _ = _db_delete_by_id(data)
+
+def _crud_display_buttons():
+    """button UI key: btn_<table_name>_action
+        action: refresh, upsert, delete
+    """
+    form_name = st.session_state.get("form_name", "")
+    if not form_name: 
+        return
+    c_save, c_refresh, _, c_delete, c_info = st.columns([3,3,3,3,7])
+    with c_save:
+        btn_save = st.button(STR_SAVE, key=f"btn_{form_name}_upsert")
+    with c_refresh:
+        btn_refresh = st.button(STR_REFRESH, key=f"btn_{form_name}_refresh", on_click=_crud_clear_form)
+    with c_delete:
+        btn_delete = st.button(STR_DELETE, key=f"btn_{form_name}_delete")
+    with c_info:
+        st.info(STR_REFRESH_HINT)
+    return btn_save, btn_refresh, btn_delete
+
+def _crud_clear_form():
+    form_name = st.session_state.get("form_name", "")
+    if not form_name: 
+        return
+
+    for col in st.session_state.get("visible_columns", []):
+        col_key = f"col_{form_name}_{col}"
+        if not col_key in st.session_state: 
+            continue
+        st.session_state[col_key] = ""
 
 def _crud_display_grid_form_all_notes(form_name=TABLE_NOTE):
     st.session_state["form_name"] = form_name
@@ -542,7 +757,7 @@ def _crud_display_grid_form_all_notes(form_name=TABLE_NOTE):
 
     data = {"table_name": form_name}
     # display form and populate data dict
-    col_left,col_right = st.columns([9,5])
+    col_left,col_right = st.columns([8,7])
     with col_left:
         left_columns = ["title", "url", "tags"]
         for col in left_columns:
@@ -561,6 +776,7 @@ def _crud_display_grid_form_all_notes(form_name=TABLE_NOTE):
                 val = st.text_area(dict_col_label.get(col), value=old_row[col], height=125, key=f"col_{form_name}_{col}")
                 if val != old_row[col]: 
                     data.update({col : val})
+
 
     # handle buttons
     if btn_save:
@@ -590,6 +806,7 @@ def _crud_display_buttons_all_notes(form_name=TABLE_NOTE):
     with c_info:
         st.info(STR_REFRESH_HINT)
     return btn_save, btn_refresh, btn_delete
+
 
 def _crud_clear_form_all_notes():
     form_name = st.session_state.get("form_name", "")  # same as table_name
@@ -728,6 +945,10 @@ def do_research_group():
 
 def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
+    _crud_display_grid_form("t_note")
+
+def do_note_2():
+    st.subheader(f"{_STR_MENU_NOTE_2}")
     _crud_display_grid_form_all_notes()
 
 #####################################################
@@ -738,6 +959,7 @@ menu_dict = {
     _STR_MENU_FACULTY:              {"fn": do_faculty},
     _STR_MENU_RESEARCH_GROUP:       {"fn": do_research_group},
     _STR_MENU_NOTE:                 {"fn": do_note},
+    # _STR_MENU_NOTE_2:                 {"fn": do_note_2},
 }
 
 ## sidebar Menu

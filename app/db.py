@@ -1,8 +1,7 @@
 import sqlite3
 import duckdb
 
-from cfg import *
-
+from config_poc import *
 
 class DBConn(object):
     def __init__(self):

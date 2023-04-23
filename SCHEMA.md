@@ -5,20 +5,22 @@ entity should have :
 
 table prefix: "t_"
 
-- system-columns (required): 
-        - id, 
+- system columns:
+        - id (required),  
         - ts (last update timestamp), 
         - uid (last updated by user, foreign key to t_user table)
         - ts_creation (creation timestamp)
         - uid_creation (creation user)
 
-- user-keys (required): name | title, url
+- user-keys columns: 
+        - name (required)
+        - url 
+- note: long description
 
-- data columns: note, ... 
-- editable columns: 
-- clickable columns: url, url_img
-- attachment column: note (free-form long description field)
-
+- editable columns: appear in CRUD form
+- clickable columns: 
+        - url
+        - url_img
 
 # entity
 3 broad categories:
@@ -31,25 +33,30 @@ table prefix: "t_"
 ### research_discipline (table t_discipline)
 - name (e.g. CS, Physics, ...)
 - url (e.g. wikipedia link)
-- description
 - note
 
 ### research_field (table t_research_field)
 - name (e.g. AI, security, ...)
 - url (e.g. wikipedia link)
-- description
 - note
 
 ### research_group (table t_research_group)
 - name (e.g. UCB System, ...)
 - url (e.g. school link)
-- description
 - note
 
-### research_work  (table t_work)
-- type: publication, preprint, talk, poster, project, startup, company...
-- title
+### notes (table t_note)
+- name
 - url
+- tags
+- note
+- ref_type (optional) if this note belongs to an entity
+- ref_key (optional)
+
+### research_work  (table t_work)
+- name
+- url
+- type: publication, preprint, talk, poster, project, startup, company...
 - summary
 - authors
 - tags
@@ -63,56 +70,52 @@ table prefix: "t_"
 - note
 
 ### user (table t_user)
-- userid
+- userid  (unique string like email)
 - password
-- name
-- url
-- note
 - is_active
+- note
+
+system user: id = 0, userid = admin
 
 ### person (table t_person)
 - name
 - url
 - email
+- job_title
+- phd_univ
+- phd_year
+- research_area
+- research_concentration
+- research_focus
 - first_name
 - mid_name
 - last_name
+- img_url
+- phone
+- cell_phone
+- office_address
+- department
+- school
+- org
 - note
-
-### faculty  (table t_faculty)
-        'name',
-        'url',
-        'job_title',
-        'phd_univ',
-        'phd_year',
-        'research_area',
-        ...
 
 ### team (table t_team)
 - name
 - url
+- note
+
+### entity with 3 common columns (table s_entity)
+- entity_type  [t_team, t_org, t_discipline, t_research_field, t_research_group]
+- name
+- url
+- note
 
 ## process related (how - operational data)
 
-### team_member (table t_person_team)
-intersection between t_person and t_team
-- ref_type: t_faculty
-- ref_key: url ## name  (delimiter=" ## ")
-- ref_type_2
-- ref_key_2
+### team_member (table t_relation)
+intersection between two entities, e.g., t_person and t_team, t_person and t_work
+- ref_type: t_person
+- ref_key: name ## url (delimiter=" ## ")
+- ref_type_2: t_team
+- ref_key_2:
 
-### publications (table t_person_work)
-intersection between t_person and t_work
-- ref_type: t_faculty | t_person
-- ref_key: url ## name  (delimiter=" ## ")
-- ref_type_2 t_work # publication (delimiter=" # ")
-- ref_key_2  url ## title
-
-### notes (table t_note)
-intersection between t_person and any other entity
-- title
-- url
-- note
-- tags
-- ref_type (optional)
-- ref_key (optional)

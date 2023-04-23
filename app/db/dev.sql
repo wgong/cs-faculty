@@ -28,6 +28,9 @@ describe t_work;
 alter table t_work add id text;
 alter table t_work add ts text;
 
+alter table t_team add id text;
+select * from t_team;
+
 insert into t_person_work(id, ts, ref_type, ref_key, ref_type_2, ref_key_2)
 values (
 'atang/pub/21/NeurIPS-2021.pdf',
@@ -278,3 +281,122 @@ t_person_work (
         ,ref_key_2  text not null
     );
 describe t_person_work;    
+
+
+-- Meta table
+select  c.table_name, c.column_name, c.data_type --, c.*
+from information_schema.columns c
+where 1=1
+and c.table_catalog like 'faculty-Cornell-CS%'
+and c.table_schema = 'main'
+and c.table_name in (
+	--'t_note'
+	select table_name from information_schema.tables t
+	where t.table_catalog like 'faculty-Cornell-CS%'
+	and t.table_schema = 'main'
+)
+order by c.table_name, c.ordinal_position
+;
+
+CREATE TYPE field_ui_type AS ENUM ('text_input', 'text_area', 'select_box', 'check_box');
+create table t_column_props (
+table_name VARCHAR,
+col_name VARCHAR,
+is_system_col BOOLEAN,
+is_user_key BOOLEAN,
+is_required BOOLEAN,
+is_visible BOOLEAN,
+is_editable BOOLEAN,
+is_clickable BOOLEAN,
+form_column VARCHAR,
+widget_type field_ui_type,
+label_text VARCHAR 
+);
+
+
+select  c.table_name, c.column_name, c.data_type --, c.*
+from information_schema.columns c
+where 1=1
+--and c.table_catalog like 'faculty-Cornell-CS%'
+and c.table_schema = 'main'
+and c.table_name in (
+	--'t_note'
+	select table_name from information_schema.tables t
+	where 1=1
+	--and t.table_catalog like 'faculty-Cornell-CS%'
+	and t.table_schema = 'main'
+)
+and c.table_name not like 't1_%'
+order by c.table_catalog,c.table_schema,c.table_name, c.ordinal_position
+;
+
+select * from information_schema.tables t;
+
+select * from t_column_props;
+
+create table t1_faculty as select * from t_faculty;
+create table t1_note as select * from t_note;
+create table t1_person as 
+select * from t_person;
+create table t1_person_team as select * from t_person_team;
+create table t1_person_work as 
+select * from t_person_work;
+create table t1_research_group as select * from t_research_group;
+create table t1_team as select * from t_team;
+create table t1_work as 
+select * from t_work;
+
+delete from t_work where authors='Y. Bi and A. Tang';
+
+select * from t1_faculty;
+select name,url,job_title,phd_univ,phd_year,research_area,research_concentration,research_focus,img_url,phone,email,cell_phone,office_address,department,school,note from t1_faculty order by name
+
+
+select * from t1_person;
+
+select * from t1_research_group;
+
+select * from t1_work;
+
+alter table t_note rename column title to name;
+alter table t_research_group rename column research_group to name;
+alter table t_work rename column title to name;
+
+
+-- merge t_faculty into t_person 
+update t_person set id = email;
+select * from t_person;
+select * from t_faculty order by name;
+
+select current_schema();
+select gen_random_uuid() as id from t_person;
+SELECT strftime(TIMESTAMP '1992-03-02 20:32:45', '%A, %-d %B %Y - %I:%M:%S %p');
+
+alter table t_person add column id text;
+alter table t_person add column ts text;
+alter table t_person add column job_title text;
+alter table t_person add column person_type text;
+alter table t_person add column phd_univ text;
+alter table t_person add column phd_year text;
+alter table t_person add column research_area text;
+alter table t_person add column research_concentration text;
+alter table t_person add column research_focus text;
+alter table t_person add column img_url text;
+alter table t_person add column phone text;
+alter table t_person add column cell_phone text;
+alter table t_person add column office_address text;
+alter table t_person add column department text;
+alter table t_person add column school text;
+alter table t_person add column org text;
+
+select * from t_person_work;
+update t_person_work set ref_type='t_person' where ref_type='t_faculty';
+
+select * from t_note;
+update t_note set ref_type='t_person' where ref_type='t_faculty';
+
+select * from t_team;
+select * from t_person_team;
+update t_person_team 
+set ref_type_2='t_person', id = 't_person # http://people.ece.cornell.edu/atang/'
+where id = 't_faculty # http://people.ece.cornell.edu/atang/';

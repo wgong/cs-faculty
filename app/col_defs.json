@@ -1,0 +1,242 @@
+{
+  "t_note": {
+    "is_system_col": [
+      "id",
+      "ts"
+    ],
+    "is_user_key": [
+      "name"
+    ],
+    "is_required": [
+      "name",
+      "id"
+    ],
+    "is_visible": [
+      "name",
+      "url",
+      "tags",
+      "id",
+      "note"
+    ],
+    "is_editable": [
+      "name",
+      "url",
+      "tags",
+      "note"
+    ],
+    "is_clickable": [
+      "url"
+    ],
+    "form_column": {
+      "name": "col1-1",
+      "url": "col1-2",
+      "tags": "col1-3",
+      "id": "col2-1",
+      "note": "col2-2"
+    },
+    "widget_type": {
+      "name": "text_input",
+      "url": "text_input",
+      "tags": "text_input",
+      "id": "text_input",
+      "note": "text_area"
+    },
+    "label_text": {
+      "url": "URL",
+      "id": "ID",
+      "name": "Name",
+      "tags": "Tags",
+      "note": "Note"
+    }
+  },
+  "t_team": {
+    "is_system_col": [
+      "id"
+    ],
+    "is_user_key": [
+      "name"
+    ],
+    "is_required": [
+      "name",
+      "id"
+    ],
+    "is_visible": [
+      "name",
+      "url",
+      "id",
+      "note"
+    ],
+    "is_editable": [
+      "name",
+      "url",
+      "note"
+    ],
+    "is_clickable": [
+      "url"
+    ],
+    "form_column": {
+      "name": "col1-1",
+      "url": "col1-2",
+      "id": "col2-1",
+      "note": "col2-2"
+    },
+    "widget_type": {
+      "name": "text_input",
+      "url": "text_input",
+      "id": "text_input",
+      "note": "text_area"
+    },
+    "label_text": {
+      "id": "ID",
+      "name": "Name",
+      "url": "URL",
+      "note": "Note"
+    }
+  },
+  "t_work": {
+    "is_system_col": [
+      "id",
+      "ts_created",
+      "ts"
+    ],
+    "is_user_key": [
+      "name"
+    ],
+    "is_required": [
+      "name",
+      "id"
+    ],
+    "is_visible": [
+      "type",
+      "name",
+      "url",
+      "authors",
+      "tags",
+      "id",
+      "summary",
+      "note"
+    ],
+    "is_editable": [
+      "type",
+      "name",
+      "url",
+      "authors",
+      "tags",
+      "summary",
+      "note"
+    ],
+    "is_clickable": [
+      "url"
+    ],
+    "form_column": {
+      "type": "col1-1",
+      "name": "col1-2",
+      "url": "col1-3",
+      "authors": "col1-4",
+      "tags": "col1-5",
+      "id": "col2-1",
+      "summary": "col2-2",
+      "note": "col2-3",
+      "ts_created": "col3-1",
+      "ts": "col3-2"
+    },
+    "widget_type": {
+      "type": "text_input",
+      "name": "text_input",
+      "url": "text_input",
+      "authors": "text_input",
+      "tags": "text_input",
+      "id": "text_input",
+      "summary": "text_area",
+      "note": "text_area",
+      "ts_created": "text_input",
+      "ts": "text_input"
+    },
+    "label_text": {
+      "type": "Type",
+      "name": "Name",
+      "url": "URL",
+      "authors": "Authors",
+      "tags": "Tags",
+      "id": "ID",
+      "summary": "Summary",
+      "note": "Note",
+      "ts_created": "Created At",
+      "ts": "Timestamp"
+    }
+  },
+  "t_person_team": {
+    "is_system_col": [
+      "id",
+      "ts"
+    ],
+    "is_user_key": {},
+    "is_required": [
+      "id"
+    ],
+    "is_visible": {},
+    "is_editable": {},
+    "is_clickable": {},
+    "form_column": {
+      "id": "col1-1",
+      "ts": "col1-1",
+      "ref_type": "col1-1",
+      "ref_key": "col1-1",
+      "ref_type_2": "col1-1",
+      "ref_key_2": "col1-1"
+    },
+    "widget_type": {
+      "id": "text_input",
+      "ts": "text_input",
+      "ref_type": "text_input",
+      "ref_key": "text_input",
+      "ref_type_2": "text_input",
+      "ref_key_2": "text_input"
+    },
+    "label_text": {
+      "id": "ID",
+      "ts": "Timestamp",
+      "ref_type": "Ref Type",
+      "ref_key": "Ref Key",
+      "ref_type_2": "Ref Type 2",
+      "ref_key_2": "Ref Key 2"
+    }
+  },
+  "t_person_work": {
+    "is_system_col": [
+      "id",
+      "ts"
+    ],
+    "is_user_key": {},
+    "is_required": [
+      "id"
+    ],
+    "is_visible": {},
+    "is_editable": {},
+    "is_clickable": {},
+    "form_column": {
+      "id": "col1-1",
+      "ts": "col1-1",
+      "ref_type": "col1-1",
+      "ref_key": "col1-1",
+      "ref_type_2": "col1-1",
+      "ref_key_2": "col1-1"
+    },
+    "widget_type": {
+      "id": "text_input",
+      "ts": "text_input",
+      "ref_type": "text_input",
+      "ref_key": "text_input",
+      "ref_type_2": "text_input",
+      "ref_key_2": "text_input"
+    },
+    "label_text": {
+      "id": "ID",
+      "ts": "Timestamp",
+      "ref_type": "Ref Type",
+      "ref_key": "Ref Key",
+      "ref_type_2": "Ref Type 2",
+      "ref_key_2": "Ref Key 2"
+    }
+  }
+}

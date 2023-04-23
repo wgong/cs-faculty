@@ -11,3 +11,20 @@ and c.table_name in (
 )
 order by c.table_catalog,c.table_schema,c.table_name, c.ordinal_position
 ;
+
+CREATE TYPE field_ui_type AS ENUM ('text_input', 'text_area', 'select_box', 'check_box');
+create table t_column_props (
+table_name VARCHAR,
+col_name VARCHAR,
+is_system_col BOOLEAN,
+is_user_key BOOLEAN,
+is_required BOOLEAN,
+is_visible BOOLEAN,
+is_editable BOOLEAN,
+is_clickable BOOLEAN,
+form_column VARCHAR,
+widget_type field_ui_type,
+label_text VARCHAR 
+);
+
+select * from t_column_props;

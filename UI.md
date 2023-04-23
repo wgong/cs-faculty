@@ -9,11 +9,12 @@ c1: {
 	is_system_col: T/F,   # read-only, maybe hidden such as id,ts,uid
 	is_user_key: T/F,
 	is_required: T/F,
+	is_visible: T/F,  # appear in form or not
 	is_editable: T/F,
 	is_clickable: T/F,  # URL link
 
 	form_column: left-n (default, required) | mid-n | right-n  # n sequence, mid/right
-	widget_type: text_input (default) | selectbox | text_area | ... (see st API docs)
+	widget_type: text_input (default) | selectbox | checkbox | text_area | ... (see st API docs)
 	label_text: "C1", # optional, use _gen_label(col) when unavailable
 
 }
