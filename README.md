@@ -12,6 +12,11 @@ open browser at http://localhost:8501/
 
 ## Screenshots
 
+- List of Faculties
+![Faculties](https://github.com/wgong/cs-faculty/blob/main/docs/Screenshots/1-faculty-1_work.jpg "Faculties")
+- Edit Work
+![Faculties](https://github.com/wgong/cs-faculty/blob/main/docs/Screenshots/1-faculty-1_work-edit.jpg "Work")
+
 - [List of Faculties](https://github.com/wgong/cs-faculty/blob/main/docs/Screenshots/1-faculty-1_work.jpg)
 - [Edit Work](https://github.com/wgong/cs-faculty/blob/main/docs/Screenshots/1-faculty-1_work-edit.jpg)
 - [More can be found here](https://github.com/wgong/cs-faculty/tree/main/docs/Screenshots)
