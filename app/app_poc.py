@@ -1465,20 +1465,29 @@ def do_welcome():
     st.header("CS Faculty")
 
     st.markdown(f"""
+    #### Intro 
+    This app helps one manage and track CS faculty and research information.
+
+    It is built on [Streamlit](https://streamlit.io/) (frontend) and [DuckDb](https://duckdb.org/) (backend). All the logic is written in python, no HTML/CSS/JS is involved.
+    
+    The GitHub source code is at: https://github.com/wgong/cs-faculty
+    
+    The CS Faculty dataset is [scraped](https://github.com/wgong/py4kids/tree/master/lesson-11-scrapy/scrap-cs-faculty) from the following CS Faculty homepages:
+    - [MIT-AID](https://www.eecs.mit.edu/role/faculty-aid/)
+    - [MIT-CS](https://www.eecs.mit.edu/role/faculty-cs/)
+    - [Stanford-CS](https://cs.stanford.edu/directory/faculty)
+    - [CMU-CS](https://csd.cmu.edu/people/faculty)
+    - [UCB-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
+    - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
+    - [Cornell-CS](https://www.cs.cornell.edu/people/faculty)
+    
+    #### Additional Resources
     - [CS Faculty Composition and Hiring Trends (Blog)](https://jeffhuang.com/computer-science-open-data/#cs-faculty-composition-and-hiring-trends)
     - [2200 Computer Science Professors in 50 top US Graduate Programs](https://cs.brown.edu/people/apapouts/faculty_dataset.html)
     - [CS Professors (Data Explorer)](https://drafty.cs.brown.edu/csprofessors?src=csopendata)
     - [Drafty Project](https://drafty.cs.brown.edu/)
     - [CSRankings.org](https://csrankings.org/#/fromyear/2011/toyear/2023/index?ai&vision&mlmining&nlp&inforet&act&crypt&log&us)
-    - [CS Faculty Info](https://github.com/wgong/py4kids/tree/master/lesson-11-scrapy/scrap-cs-faculty) : scraped a few top US CS schools (work in progress)
-    - Schools:
-        - [MIT-AID](https://www.eecs.mit.edu/role/faculty-aid/)
-        - [MIT-CS](https://www.eecs.mit.edu/role/faculty-cs/)
-        - [Stanford-CS](https://cs.stanford.edu/directory/faculty)
-        - [CMU-CS](https://csd.cmu.edu/people/faculty)
-        - [UCB-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
-        - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
-        - [Cornell-CS](https://www.cs.cornell.edu/people/faculty)
+
     """, unsafe_allow_html=True)
 
 
