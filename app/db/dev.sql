@@ -400,3 +400,31 @@ select * from t_person_team;
 update t_person_team 
 set ref_type_2='t_person', id = 't_person # http://people.ece.cornell.edu/atang/'
 where id = 't_faculty # http://people.ece.cornell.edu/atang/';
+
+select * from t_research_group order by name;
+select * from t_research_group where url = '' order by name;
+--delete from t_research_group where url = '';
+alter table t_research_group add column id text;
+alter table t_research_group add column ts text;
+
+alter table t_team add column team_lead text;
+update t_team set team_lead= 'http://people.ece.cornell.edu/atang/', id=url
+where name='Networks Group at Cornell';
+
+select * from t_person where person_type='faculty' order by name;
+
+with per as (
+    select 
+        pt.ref_key_2 person_url
+    from t_team t 
+    join t_person_team pt
+        on pt.ref_key = t.url 
+            and pt.ref_type = 't_team' 
+            and pt.ref_type_2 = 't_person' 
+    where t.team_lead = 'http://people.ece.cornell.edu/atang/'
+)
+select p.* 
+from t_person p 
+join per 
+    on per.person_url = p.url
+where p.url != 'http://people.ece.cornell.edu/atang/';

@@ -1,8 +1,13 @@
 """
 Streamlit app to manage CS Faculty data backed by DuckDB 
 
-
 TODO:
+- [2023-04-23] 
+    - complete _db_insert_person_team()
+    - add menus: Team, Work, Person, 
+    - add data from other schools
+    - revise table definitions
+
 - [2023-04-21] 
     - upgrade streamlit to 1.21
     - replace st.cache to st.cache_data
@@ -18,13 +23,15 @@ SRC_URL = "https://github.com/wgong/cs-faculty"
 from datetime import datetime, date, timedelta
 import glob
 from io import StringIO
+import yaml
+import sys
+
 from pathlib import Path
 import pandas as pd
 from shutil import copy
-import sys
 from traceback import format_exc
 from uuid import uuid4
-import yaml
+
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -184,8 +191,8 @@ COLUMN_DEFS = _parse_column_props()
 FACULTY_DATA_COLS = ['name', 'url', 'job_title',
         'research_area', 'email','department', 
         'phd_univ','phd_year','note',]
-GROUP_DATA_COLS = ['research_group', 'url', 'note',]
-NOTE_DATA_COLS = COLUMN_DEFS["t_note"]['is_editable']
+GROUP_DATA_COLS =  ['name', 'url', 'note',]
+NOTE_DATA_COLS = COLUMN_DEFS[TABLE_NOTE]['is_editable']
 
 def _load_db():
 
@@ -292,7 +299,7 @@ def _db_select_by_key(table_name, key_value=""):
         """
         return pd.read_sql(sql_stmt, _conn)
 
-def _db_delete(data):
+def _db_delete_by_key(data):
     if not data: 
         return None
     
@@ -312,9 +319,89 @@ def _db_delete(data):
     """
     _db_execute(delete_sql)
 
-    return _db_select(table_name=table_name)        
+    # return _db_select(table_name=table_name)        
 
-# TODO-TEST
+
+def _db_delete_person_team(data):
+    if not data: 
+        return None
+    
+    inter_table_name = data.get("inter_table_name", "")
+    if not inter_table_name:
+        raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
+    
+    ref_type = data.get("ref_type", "")
+    team_lead = data.get("team_lead", "")
+    ref_type_2 = data.get("ref_type_2", "")
+    ref_key_2 = data.get("ref_key_2", "")
+
+    delete_sql = f"""
+        delete from {inter_table_name}
+        where 1=1 
+        and ref_type = '{ref_type}' 
+        and ref_key in (
+            select url from TABLE_TEAM 
+            where team_lead = '{team_lead}' 
+        )
+        and ref_type_2 = '{ref_type_2}' 
+        and ref_key_2 = '{ref_key_2}'
+        ;
+    """
+    _db_execute(delete_sql)
+
+# TODO
+def _db_insert_person_team(data):
+    """insert into both child and intersection tables
+    """
+    if not data: 
+        return None
+    
+    table_name = data.get("table_name", "")
+    if not table_name:
+        raise Exception(f"[ERROR] Missing key: table_name: {data}")
+    
+    inter_table_name = data.get("inter_table_name", "")
+    if not inter_table_name:
+        raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
+    
+    ref_type = data.get("ref_type", "")
+    ref_key = data.get("ref_key", "")
+    ref_type_2 = data.get("ref_type_2", "")
+    ref_key_2 = data.get("ref_key_2", "")
+
+    # build SQL
+    visible_columns = _get_columns(table_name, prop_name="is_visible")
+    col_clause = []
+    val_clause = []
+    for col,val in data.items():
+        if col not in visible_columns:
+            continue
+        col_clause.append(col) 
+        val_clause.append(f"'{escape_single_quote(val)}'")
+
+    _id = str(uuid4())
+    _ts = data.get("ts", str(datetime.now()))
+    insert_sql = f"""
+        -- insert child table
+        insert into {table_name} (
+            {", ".join(col_clause)}
+        )
+        values (
+            {", ".join(val_clause)}
+        );
+
+        -- insert intersection table
+        insert into {inter_table_name} (
+            id, ts, ref_type, ref_key, ref_type_2, ref_key_2
+        )
+        values (
+            '{_id}', '{_ts}', '{ref_type}','{ref_key}','{ref_type_2}','{ref_key_2}'
+        );
+    """
+    # TODO
+    # _db_execute(insert_sql)
+
+
 def _db_delete_by_id_child(data):
     if not data: 
         return None
@@ -337,7 +424,8 @@ def _db_delete_by_id_child(data):
     """
     _db_execute(delete_sql)
 
-# TODO
+
+
 def _db_insert_child(data):
     """insert into both child and intersection tables
     """
@@ -405,8 +493,7 @@ def _db_delete_by_id(data):
         where id = '{id_val}';
     """
     _db_execute(delete_sql)
-
-    return _db_select(table_name=table_name)        
+  
 
 def _db_update(data):
     if not data: 
@@ -448,7 +535,7 @@ def _db_update(data):
         """
         _db_execute(update_sql)   
 
-    return _db_select(table_name=table_name) 
+    # return _db_select(table_name=table_name) 
 
 def _db_update_by_id(data):
     if not data: 
@@ -479,7 +566,7 @@ def _db_update_by_id(data):
         """
         _db_execute(update_sql)   
 
-    return _db_select(table_name=table_name) 
+    # return _db_select(table_name=table_name) 
 
 def _db_insert(data):
     if not data: 
@@ -509,7 +596,7 @@ def _db_insert(data):
     """
     _db_execute(insert_sql)
 
-    return _db_select(table_name=table_name) 
+    # return _db_select(table_name=table_name) 
 
 
 
@@ -538,7 +625,7 @@ def _db_upsert_group(data, table_name=TABLE_RESEARCH_GROUP):
         """
     _db_execute(sql_stmt)
 
-    return _db_select(table_name=table_name) 
+    # return _db_select(table_name=table_name) 
 
 def _db_upsert_faculty(data, 
                        table_name=TABLE_FACULTY, 
@@ -587,9 +674,29 @@ def _db_upsert_faculty(data,
     if sql_stmt:
         _db_execute(sql_stmt)
 
-    return _db_select(table_name=table_name) 
+    # return _db_select(table_name=table_name) 
+
+def _move_sys_col_end(cols, sys_cols=["id"]):
+    """move id, ts sys column to last position
+    """
+    new_sys_cols = []
+    new_cols = []
+    for c in cols:
+        if c in sys_cols:
+            new_sys_cols.append(c)
+        else:
+            new_cols.append(c)
+    if sys_cols:
+        if len(new_cols) == len(cols):
+            return new_cols
+        else:
+            return new_cols + new_sys_cols
+    else:
+        return cols
 
 def _move_url_2nd(df, url_col="url"):
+    """move url column to 2nd position
+    """
     cols = df.columns
     if not url_col in cols:
         return df
@@ -620,7 +727,7 @@ def _display_grid(form_name=TABLE_RESEARCH_GROUP,
     if st.button("Save", key=f"{form_name}_save"):
         data = selected_row
         data.update({"table_name": form_name})
-        _ = _db_update(data=data)
+        _db_update(data=data)
 
 def _display_grid_faculty(form_name=TABLE_FACULTY, 
                   orderby_cols=["name"], 
@@ -658,7 +765,7 @@ def _display_grid_faculty(form_name=TABLE_FACULTY,
     if st.button("Save", key=f"{form_name}_save"):
         data = selected_row
         data.update({"table_name": form_name})
-        _ = _db_update(data=data)
+        _db_update(data=data)
 
     primary_key = selected_row.get("url")
     if not primary_key:
@@ -669,70 +776,40 @@ def _display_grid_faculty(form_name=TABLE_FACULTY,
     # when using st.tab, grid not displayed correctly
     # use st.selectbox instead
     menu_options = ["Work", "Team", "Note"]
-    default_ix = menu_options.index("Work")
-    data_dict = {
-        "Work": {
-            "table": TABLE_PERSON_WORK,
-            "sql": f"""
-                select w.* from {TABLE_PERSON_WORK} pw
-                join {TABLE_WORK} w
-                    on pw.ref_type_2 = '{TABLE_WORK}' and pw.ref_key_2 = w.id
-                where pw.ref_type = '{TABLE_PERSON}'
-                and pw.ref_key = '{primary_key}'
-            """,
-        },
-        "Team": {
-            "table": TABLE_PERSON_TEAM,
-            "sql": f"""
-                with team as (
-                    select ref_key as team_url
-                    from {TABLE_PERSON_TEAM}
-                    where ref_type = '{TABLE_TEAM}' and
-                    ref_type_2 = '{TABLE_PERSON}' and ref_key_2 = '{primary_key}'
-                )
-                select p.* 
-                from {TABLE_PERSON} p 
-                join {TABLE_PERSON_TEAM} pt
-                    on pt.ref_type_2 = '{TABLE_PERSON}' and pt.ref_key_2 = p.url
-                join team t
-                    on pt.ref_type = '{TABLE_TEAM}' and pt.ref_key = t.team_url
-                where p.url != '{primary_key}';
-            """,
-        },
-        "Note": {
-            "table": TABLE_NOTE,
-            "sql": f"""
-                select * from {TABLE_NOTE}
-                where ref_type = '{TABLE_PERSON}' and ref_key = '{primary_key}'  
-            """,
-        },
-    }
+    idx_default = menu_options.index("Work")
 
     faculty_name = selected_row.get("name")
     menu_item = st.selectbox(f"{faculty_name} : {primary_key}", 
-                                menu_options, index=default_ix, key="faculty_menu_item")
+                                menu_options, index=idx_default, key="faculty_menu_item")
 
     if menu_item == "Note":
         form_name = TABLE_NOTE
         _crud_display_grid_form_note(form_name, ref_type=TABLE_PERSON, ref_key=primary_key,
-                                page_size=5, grid_height=200)
+                                page_size=5, grid_height=220)
         
     elif menu_item == "Work":
         try:
             form_name = TABLE_WORK
             _crud_display_grid_form_work(form_name, ref_type=TABLE_PERSON, ref_key=primary_key,
-                                    page_size=5, grid_height=200)
+                                    page_size=5, grid_height=220)
         except:
             pass  # workaround to fix an streamlit issue
-    else:
-        with DBConn() as _conn:
-            df = pd.read_sql(data_dict[menu_item]["sql"], _conn)
-            child_grid_resp = _display_grid_df(df,
-                        selection_mode="single", 
-                        page_size=5, 
-                        grid_height=200,
-                        clickable_columns=["url"],                                             
-                    )
+    elif menu_item == "Team":
+        try:
+            form_name = TABLE_PERSON_TEAM
+            _crud_display_grid_form_team(form_name, ref_type=TABLE_PERSON, ref_key=primary_key,
+                                    page_size=5, grid_height=220)
+        except:
+            pass  # workaround to fix an streamlit issue
+    # else:
+    #     with DBConn() as _conn:
+    #         df = pd.read_sql(data_dict[menu_item]["sql"], _conn)
+    #         child_grid_resp = _display_grid_df(df,
+    #                     selection_mode="single", 
+    #                     page_size=5, 
+    #                     grid_height=200,
+    #                     clickable_columns=["url"],                                             
+    #                 )
 
 def _crud_display_grid_form_work(form_name, ref_type=TABLE_PERSON, ref_key="",  
                             page_size=10, grid_height=370):
@@ -867,6 +944,150 @@ def _crud_display_grid_form_work(form_name, ref_type=TABLE_PERSON, ref_key="",
     elif btn_delete and selected_row is not None and data.get("id"):
         _db_delete_by_id_child(data)
 
+def _crud_display_grid_form_team(form_name, ref_type=TABLE_PERSON, ref_key="",  
+                            page_size=10, grid_height=370):
+    """Render grid according to column properties, 
+    used to display a database table, or child table when ref_type/_key are given
+
+    Inputs:
+        form_name (required): 
+            table name if ref_type is not given
+
+        ref_type: must be parent table name if given, form_name can be different from underlying table name
+        ref_key: foreign key
+
+    Outputs:
+    Buttons on top for Upsert, Delete action
+    Fields below in columns: 1, 2, or 3 specified by 'form_column'
+    """
+
+    table_name = form_name
+    # validate table_name exists
+    if not table_name in COLUMN_DEFS:
+        st.error(f"Invalid table name: {table_name}")
+        return 
+    
+    COL_DEFS = COLUMN_DEFS[TABLE_PERSON]
+    visible_columns = COL_DEFS["is_visible"]
+    editable_columns = COL_DEFS["is_editable"]
+    clickable_columns = COL_DEFS["is_clickable"]
+    st.session_state["form_name"] = form_name
+    st.session_state["visible_columns"] = visible_columns
+
+    selected_cols = ",".join([f"p.{c}" for c in visible_columns])
+    select_sql = f"""
+        with per as (
+            select 
+                pt.ref_key_2 person_url
+            from {TABLE_TEAM} t 
+            join {TABLE_PERSON_TEAM} pt
+                on pt.ref_key = t.url 
+                    and pt.ref_type = '{TABLE_TEAM}' 
+                    and pt.ref_type_2 = '{TABLE_PERSON}' 
+            where t.team_lead = '{ref_key}'
+        )
+        select {selected_cols} 
+        from {TABLE_PERSON} p
+        join per 
+            on per.person_url = p.url
+        where p.url != '{ref_key}';
+    """
+    
+
+    with DBConn() as _conn:
+        df = pd.read_sql(select_sql, _conn)
+    grid_resp = _display_grid_df(df, 
+                    selection_mode="single", 
+                    page_size=page_size, 
+                    grid_height=grid_height,
+                    editable_columns=editable_columns,
+                    clickable_columns=clickable_columns)
+    selected_row = None
+    if grid_resp:
+        selected_rows = grid_resp['selected_rows']
+        if selected_rows and len(selected_rows):
+            selected_row = selected_rows[0]
+
+    # st.write(f"selected_row:\n{selected_row}")
+
+    old_row = {}
+    dict_col_label = COL_DEFS['label_text']
+    for col in visible_columns:
+        old_row[col] = selected_row.get(col) if selected_row is not None else ""
+
+    ## Form Layout
+
+    # display buttons
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons()
+
+    data = {"table_name": TABLE_PERSON, 
+            "inter_table_name": TABLE_PERSON_TEAM, 
+            "ref_type":TABLE_TEAM, 
+            "team_lead":ref_key,
+            "ref_type_2":TABLE_PERSON, 
+            "ref_key_2":old_row.get("url"),
+            }
+    # display form and populate data dict
+    col1_columns = COL_DEFS['col1_columns']
+    col2_columns = COL_DEFS['col2_columns']
+
+    idx_default = PERSON_TYPES.index("student")
+    col1,col2 = st.columns([8,7])
+    with col1:
+        for col in col1_columns:
+            widget_type = COL_DEFS['widget_type'][col]
+            if widget_type == "text_area":
+                kwargs = {"height":200}
+                val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+            else:
+                kwargs = {}
+                if col in COL_DEFS["is_system_col"]:
+                    kwargs.update({"disabled":True})
+                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+
+            if val != old_row[col]:
+                data.update({col : val})
+
+    with col2:
+        for col in col2_columns:
+            if col == "person_type":
+                val = st.selectbox(dict_col_label.get(col), options=PERSON_TYPES, index=idx_default, key=f"col_{form_name}_{col}")
+            else:
+                widget_type = COL_DEFS['widget_type'][col]
+                if widget_type == "text_area":
+                    kwargs = {"height":200}
+                    val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+                else:
+                    kwargs = {}
+                    if col in COL_DEFS["is_system_col"]:
+                        kwargs.update({"disabled":True})
+                    val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+
+            if val != old_row[col]: 
+                data.update({col : val})
+
+    # copy id if present
+    id_val = old_row.get("id", "")
+    if id_val:
+        data.update({"id" : id_val})
+
+    # st.write(f"data={data}")
+
+    # handle buttons
+    if btn_save:
+        _ts = str(datetime.now())
+        if selected_row is not None and data.get("id"):
+            data.update({"ts": _ts,})
+            _db_update_by_id(data)
+        else:
+            _id = str(uuid4())
+            data.update({"id": _id, 
+                         "ts": _ts })
+            _db_insert_person_team(data)
+
+    elif btn_delete and selected_row is not None and data.get("id"):
+        _db_delete_person_team(data)
+
 
 def _crud_display_grid_form_note(form_name, ref_type="", ref_key="", orderby_cols=[], 
                             page_size=10, grid_height=370):
@@ -991,13 +1212,137 @@ def _crud_display_grid_form_note(form_name, ref_type="", ref_key="", orderby_col
     if btn_save:
         if selected_row is not None and data.get("id"):
             data.update({"ts": str(datetime.now()),})
-            _ = _db_update_by_id(data)
+            _db_update_by_id(data)
         else:
             data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
-            _ = _db_insert(data)
+            _db_insert(data)
 
     elif btn_delete and selected_row is not None and data.get("id"):
-        _ = _db_delete_by_id(data)
+        _db_delete_by_id(data)
+
+
+def _crud_display_grid_form(table_name, orderby_cols=["name"],
+                            page_size=10, grid_height=370):
+    """Render grid according to column properties, 
+    used to display a database table, or child table when ref_type/_key are given
+
+    Inputs:
+        table_name (required): 
+
+    Outputs:
+    Buttons on top for Upsert, Delete action
+    Fields below in columns: 1, 2, or 3 specified by 'form_column'
+    """
+    # validate table_name exists
+    if not table_name in COLUMN_PROPS:
+        st.error(f"Invalid table name: {table_name}")
+        return 
+    form_name = table_name
+    COL_DEFS = COLUMN_PROPS[table_name]
+    orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ' '
+    visible_columns = _get_columns(table_name, prop_name="is_visible")
+    editable_columns = _get_columns(table_name, prop_name="is_editable")
+    clickable_columns = _get_columns(table_name, prop_name="is_clickable")
+    st.session_state["form_name"] = form_name
+    st.session_state["visible_columns"] = visible_columns
+
+    where_clause = ""
+    with DBConn() as _conn:
+        selected_cols = _move_sys_col_end(visible_columns, sys_cols=["id","ts"])
+        sql_stmt = f"""
+            select {",".join(selected_cols)}
+            from {table_name} 
+            {where_clause}
+            {orderby_clause};
+        """
+        df = pd.read_sql(sql_stmt, _conn)
+    grid_resp = _display_grid_df(df, 
+                    selection_mode="single", 
+                    page_size=page_size, 
+                    grid_height=grid_height,
+                    editable_columns=editable_columns,
+                    clickable_columns=clickable_columns)
+    selected_row = None
+    if grid_resp:
+        selected_rows = grid_resp['selected_rows']
+        if selected_rows and len(selected_rows):
+            selected_row = selected_rows[0]
+
+    # st.write(f"selected_row:\n{selected_row}")
+
+    old_row = {}
+    dict_col_label = {}
+    for col in visible_columns:
+        old_row[col] = selected_row.get(col) if selected_row is not None else ""
+        if 'label_text' in COL_DEFS[col]:
+            dict_col_label[col] = COL_DEFS[col]['label_text']
+        else:
+            dict_col_label[col] = _gen_label(col)
+
+    ## Form Layout
+
+    # display buttons
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons()
+
+    data = {"table_name": table_name, }
+    # display form and populate data dict
+    col1_columns = []
+    col2_columns = []
+    for c in visible_columns:
+        if COL_DEFS[c].get("form_column", "").startswith("col1-"):
+            col1_columns.append(c)
+        elif COL_DEFS[c].get("form_column", "").startswith("col2-"):
+            col2_columns.append(c) 
+
+    col1,col2 = st.columns([8,7])
+    with col1:
+        for col in col1_columns:
+            widget_type = COL_DEFS[col].get("widget_type", "text_input")
+            if widget_type == "text_area":
+                kwargs = {"height":125}
+                val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+            else:
+                kwargs = {}
+                if COL_DEFS[col].get("is_system_col", False):
+                    kwargs.update({"disabled":True})
+                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+
+            if val != old_row[col]:
+                data.update({col : val})
+
+    with col2:
+        for col in col2_columns:
+            widget_type = COL_DEFS[col].get("widget_type", "text_input")
+            if widget_type == "text_area":
+                kwargs = {"height":125}
+                val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+            else:
+                kwargs = {}
+                if COL_DEFS[col].get("is_system_col", False):
+                    kwargs.update({"disabled":True})
+                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+
+            if val != old_row[col]: 
+                data.update({col : val})
+
+    # copy id if present
+    id_val = old_row.get("id", "")
+    if id_val:
+        data.update({"id" : id_val})
+
+    # st.write(f"data={data}")
+    # handle buttons
+    if btn_save:
+        if selected_row is not None and data.get("id"):
+            data.update({"ts": str(datetime.now()),})
+            _db_update_by_id(data)
+        else:
+            data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
+            _db_insert(data)
+
+    elif btn_delete and selected_row is not None and data.get("id"):
+        _db_delete_by_id(data)
+
 
 def _crud_display_buttons():
     """button UI key: btn_<table_name>_action
@@ -1051,7 +1396,7 @@ def _sidebar_add_note(form_name="new_note"):
     
     for col in NOTE_DATA_COLS:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    df_new = _db_insert(data)
+    _db_insert(data)
 
     _sidebar_clear_note_form()
 
@@ -1078,7 +1423,7 @@ def _sidebar_add_group(form_name="new_group"):
     }
     for col in GROUP_DATA_COLS:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    df_new = _db_upsert_group(data)
+    _db_upsert_group(data)
 
     _sidebar_clear_group_form()
 
@@ -1087,7 +1432,7 @@ def _sidebar_clear_group_form(form_name="new_group"):
         st.session_state[f"{form_name}_{col}"] = ""
 
 ### quick add faculty
-def _sidebar_display_faculty(form_name="new_faculty"):
+def _sidebar_display_add_faculty(form_name="new_faculty"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
             for col in FACULTY_DATA_COLS:
@@ -1104,7 +1449,7 @@ def _sidebar_add_faculty(form_name="new_faculty"):
 
     for col in FACULTY_DATA_COLS:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    df_new = _db_upsert_faculty(data)
+    _db_upsert_faculty(data)
 
     _sidebar_clear_faculty_form()
 
@@ -1143,7 +1488,7 @@ def do_faculty():
 
 def do_research_group():
     st.subheader(f"{_STR_MENU_RESEARCH_GROUP}")
-    _display_grid(form_name=TABLE_RESEARCH_GROUP, orderby_cols=["name"])
+    _crud_display_grid_form(table_name=TABLE_RESEARCH_GROUP)
 
 def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
@@ -1182,7 +1527,7 @@ def do_sidebar():
             _sidebar_display_add_group()
 
         elif menu_item == _STR_MENU_FACULTY:
-            _sidebar_display_faculty()
+            _sidebar_display_add_faculty()
 
         else:
             pass

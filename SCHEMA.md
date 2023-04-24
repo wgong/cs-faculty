@@ -82,6 +82,7 @@ system user: id = 0, userid = admin
 - url
 - email
 - job_title
+- person_type (e.g. faculty, student, staff, other)
 - phd_univ
 - phd_year
 - research_area
@@ -102,10 +103,11 @@ system user: id = 0, userid = admin
 ### team (table t_team)
 - name
 - url
+- team_lead (FK to person's name)
 - note
 
-### entity with 3 common columns (table s_entity)
-- entity_type  [t_team, t_org, t_discipline, t_research_field, t_research_group]
+### entity with 3 common attributes (table s_entity)
+- entity_type  [t_org, t_discipline, t_research_field, t_research_group]
 - name
 - url
 - note
@@ -115,7 +117,7 @@ system user: id = 0, userid = admin
 ### team_member (table t_relation)
 intersection between two entities, e.g., t_person and t_team, t_person and t_work
 - ref_type: t_person
-- ref_key: name ## url (delimiter=" ## ")
-- ref_type_2: t_team
-- ref_key_2:
+- ref_key: id or name ## url (delimiter=" ## ") 
+- ref_type_2: t_work
+- ref_key_2: id or name ## url
 
