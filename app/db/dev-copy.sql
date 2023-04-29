@@ -12,7 +12,7 @@ and c.table_name in (
 order by c.table_catalog,c.table_schema,c.table_name, c.ordinal_position
 ;
 
-CREATE TYPE field_ui_type AS ENUM ('text_input', 'text_area', 'select_box', 'check_box');
+CREATE TYPE field_ui_type AS ENUM ('text_input', 'text_area', 'selectbox', 'checkbox');
 create table t_column_props (
 table_name VARCHAR,
 col_name VARCHAR,

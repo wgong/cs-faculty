@@ -9,6 +9,7 @@ table prefix: "t_"
         - id (required),  
         - ts (last update timestamp), 
         - uid (last updated by user, foreign key to t_user table)
+        
         - ts_creation (creation timestamp)
         - uid_creation (creation user)
 

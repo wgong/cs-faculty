@@ -428,3 +428,24 @@ from t_person p
 join per 
     on per.person_url = p.url
 where p.url != 'http://people.ece.cornell.edu/atang/';
+
+select * from t_person where name like '%%be%%';
+select * from t_person where name like '%be%';
+
+select * from g_entity;
+
+select * from g_relation;
+alter table g_relation add column ref_tab text;
+alter table g_relation add column ref_tab_sub text;
+
+select split_part(ref_key, '#', 1) from g_relation;
+
+update g_relation 
+set ref_tab='g_person', ref_tab_sub='g_work',
+ref_key='url', ref_key_sub='id'
+where rel_type = 'person-work';
+
+update g_relation 
+set ref_tab='g_person', ref_tab_sub='g_person',
+ref_key='url', ref_key_sub='url'
+where rel_type = 'team-person';
