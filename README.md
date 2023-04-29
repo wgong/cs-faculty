@@ -16,6 +16,6 @@ open browser at http://localhost:8501/
 ![Faculties](https://github.com/wgong/cs-faculty/blob/main/docs/Screenshots/1-faculty-1_work.jpg "Faculties")
 - Edit Work
 ![Faculties](https://github.com/wgong/cs-faculty/blob/main/docs/Screenshots/1-faculty-1_work-edit.jpg "Work")
-- [More can be found here](https://github.com/wgong/cs-faculty/tree/main/docs/Screenshots)
+- [... More screenshots are here](https://github.com/wgong/cs-faculty/tree/main/docs/Screenshots)
 
 ## Credits
