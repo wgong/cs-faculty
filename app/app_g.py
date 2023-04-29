@@ -44,7 +44,7 @@ import streamlit as st
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
 
 from config_g import *
-from helper import (escape_single_quote, df_to_csv)
+from helper import (escape_single_quote, df_to_csv, list2sql_str)
 from db import *
 
 ##====================================================
@@ -78,6 +78,9 @@ STR_WORK_ALL        = "Work (All)"
 STR_PERSON_ALL      = "Person (All)"
 STR_REFRESH_HINT    = "Click 'Refresh' button to clear form"
 STR_DOWNLOAD_CSV    = "Download CSV"
+STR_IMPORT_EXPORT   = "Data Import/Export"
+STR_IMPORT          = "Data Import"
+STR_EXPORT          = "Data Export"
 
 ## menu
 _STR_MENU_HOME              = STR_WELCOME
@@ -86,6 +89,7 @@ _STR_MENU_RESEARCH_GROUP    = STR_RESEARCH_GROUP
 _STR_MENU_NOTE              = STR_NOTE_ALL
 _STR_MENU_WORK              = STR_WORK_ALL
 _STR_MENU_PERSON            = STR_PERSON_ALL
+_STR_MENU_IMP_EXP           = STR_IMPORT_EXPORT
 
 # Aggrid options
 _GRID_OPTIONS = {
@@ -315,20 +319,26 @@ def _layout_form_inter(table_name,
     # display form and populate data dict
     col1_columns = []
     col2_columns = []
+    col3_columns = []
     for c in visible_columns:
         if form_columns.get(c, "").startswith("col1-"):
             col1_columns.append(c)
         elif form_columns.get(c, "").startswith("col2-"):
             col2_columns.append(c) 
+        elif form_columns.get(c, "").startswith("col3-"):
+            col3_columns.append(c) 
 
-    col1,col2 = st.columns([8,7])
+    col1,col2,col3 = st.columns([6,5,4])
     with col1:
         for col in col1_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
-
     with col2:
         for col in col2_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+    with col3:
+        for col in col3_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
 
@@ -379,6 +389,7 @@ def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type="
     # display form and populate data dict
     col1_columns = []
     col2_columns = []
+    col3_columns = []
     for c in visible_columns:
         if form_name_suffix and c in ["ref_key", "ref_val"]:
             # no need to display ref_key, ref_val for parent/child view
@@ -386,16 +397,21 @@ def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type="
         if form_columns.get(c, "").startswith("col1-"):
             col1_columns.append(c)
         elif form_columns.get(c, "").startswith("col2-"):
-            col2_columns.append(c) 
+            col2_columns.append(c)
+        elif form_columns.get(c, "").startswith("col3-"):
+            col3_columns.append(c) 
 
-    col1,col2 = st.columns([8,7])
+    col1,col2,col3 = st.columns([6,5,4])
     with col1:
         for col in col1_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
-
     with col2:
         for col in col2_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+    with col3:
+        for col in col3_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
 
@@ -436,7 +452,7 @@ def _db_select(table_name, orderby_cols=[]):
             from {table_name} 
             {orderby_clause};
         """
-        return pd.read_sql(sql_stmt, _conn)
+        return pd.read_sql(sql_stmt, _conn).fillna("")
 
 def _db_select_by_id(table_name, id_value=""):
     """Select row by key"""
@@ -448,7 +464,7 @@ def _db_select_by_id(table_name, id_value=""):
             from {table_name} 
             where id = '{id_value}' ;
         """
-        return pd.read_sql(sql_stmt, _conn)
+        return pd.read_sql(sql_stmt, _conn).fillna("")
 
 def _db_select_by_key(table_name, key_value=""):
     """Select row by key"""
@@ -462,7 +478,7 @@ def _db_select_by_key(table_name, key_value=""):
             where 
             {where_clause};
         """
-        return pd.read_sql(sql_stmt, _conn)
+        return pd.read_sql(sql_stmt, _conn).fillna("")
 
 def _db_delete_by_key(data):
     if not data: 
@@ -793,7 +809,7 @@ def _db_upsert_group(data, table_name=TABLE_RESEARCH_GROUP):
         df = pd.read_sql(f"""
             select name from {table_name}
             where name='{_research_group}';
-        """, _conn)
+        """, _conn).fillna("")
 
     _url = data.get("url", "")
     if df.shape[0] > 0:  # update
@@ -823,7 +839,7 @@ def _db_upsert_faculty(data,
         df = pd.read_sql(f"""
             select * from {table_name}
             where {use_key_col} = '{_user_key_val}';
-        """, _conn)
+        """, _conn).fillna("")
 
 
     if df.shape[0] > 0:  # update
@@ -897,6 +913,7 @@ def _push_selected_cols_to_front(cols, selected_cols=["name","url"]):
 # _STR_MENU_FACULTY
 def _crud_display_grid_parent_child(table_name,
                 person_type="faculty",
+                org_list=["Cornell Univ"],
                 form_name_suffix="",
                 orderby_cols=["name"], 
                 selection_mode="single"):
@@ -919,6 +936,8 @@ def _crud_display_grid_parent_child(table_name,
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
         where_clause = f" where person_type = '{person_type}' "
+        if org_list:
+            where_clause += f" and org in {list2sql_str(org_list)} "
         selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         sql_stmt = f"""
@@ -927,7 +946,7 @@ def _crud_display_grid_parent_child(table_name,
             {where_clause}
             {orderby_clause};
         """
-        df = pd.read_sql(sql_stmt, _conn)
+        df = pd.read_sql(sql_stmt, _conn).fillna("")
 
     grid_resp = _display_grid_df(df, 
                         selection_mode=selection_mode, 
@@ -1012,7 +1031,10 @@ def _layout_form_fields(data,form_name,old_row,col,
             # check if options is avail, otherwise display as text_input
             if col in SELECTBOX_OPTIONS:
                 try:
-                    val = st.selectbox(col_labels.get(col), SELECTBOX_OPTIONS.get(col,[]), index=0, key=f"col_{form_name}_{col}")
+                    _options = SELECTBOX_OPTIONS.get(col,[])
+                    _old_opt = old_row.get(col, "")
+                    _idx = _options.index(_old_opt)
+                    val = st.selectbox(col_labels.get(col), _options, index=_idx, key=f"col_{form_name}_{col}")
                 except ValueError:
                     opts = SELECTBOX_OPTIONS.get(col,[])
                     val = opts[0] if opts else "" # workaround for refresh error
@@ -1077,11 +1099,11 @@ def _crud_display_grid_form_inter(table_name,
                 and it.ref_val = '{ref_val}'
                 and it.ref_tab_sub = '{table_name}'
         """
-        df_1 = pd.read_sql(sql_stmt, _conn)    
+        df_1 = pd.read_sql(sql_stmt, _conn).fillna("")  
         rows = df_1.groupby("key_col")["key_val"].apply(list).to_dict()
         where_clause = []
         for k,v in rows.items():
-            where_clause.append(f" {k} in {str(v).replace('[','(').replace(']',')')}")
+            where_clause.append(f" {k} in {list2sql_str(v)}")
 
         # fetch child table rows
         selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
@@ -1091,7 +1113,7 @@ def _crud_display_grid_form_inter(table_name,
             from {table_name}
             where {" or ".join(where_clause)}
         """
-        df = pd.read_sql(sql_stmt, _conn)    
+        df = pd.read_sql(sql_stmt, _conn).fillna("")    
 
     grid_resp = _display_grid_df(df, 
                     selection_mode="single", 
@@ -1163,7 +1185,7 @@ def _crud_display_grid_form_subject(table_name,
             {where_clause}
             {orderby_clause};
         """
-        df = pd.read_sql(sql_stmt, _conn)
+        df = pd.read_sql(sql_stmt, _conn).fillna("")
 
     ## show data grid
     grid_resp = _display_grid_df(df, 
@@ -1222,7 +1244,7 @@ def _crud_display_grid_form_entity(table_name,
             {orderby_clause};
         """
         # print(sql_stmt)
-        df = pd.read_sql(sql_stmt, _conn)
+        df = pd.read_sql(sql_stmt, _conn).fillna("")
 
     ## show data grid
     grid_resp = _display_grid_df(df, 
@@ -1368,12 +1390,12 @@ def do_welcome():
     
     The CS Faculty dataset is [scraped](https://github.com/wgong/py4kids/tree/master/lesson-11-scrapy/scrap-cs-faculty) from the following CS Faculty homepages:
     - [Cornell-CS](https://www.cs.cornell.edu/people/faculty)
-    - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
-    - [UCB-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
-    - [CMU-CS](https://csd.cmu.edu/people/faculty)
     - [MIT-AID](https://www.eecs.mit.edu/role/faculty-aid/)
     - [MIT-CS](https://www.eecs.mit.edu/role/faculty-cs/)
+    - [CMU-CS](https://csd.cmu.edu/people/faculty)
+    - [Berkeley-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
     - [Stanford-CS](https://cs.stanford.edu/directory/faculty)
+    - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
     
     #### Additional Resources
     - [CS Faculty Composition and Hiring Trends (Blog)](https://jeffhuang.com/computer-science-open-data/#cs-faculty-composition-and-hiring-trends)
@@ -1387,7 +1409,10 @@ def do_welcome():
 
 def do_faculty():
     st.subheader(f"{_STR_MENU_FACULTY}")
-    _crud_display_grid_parent_child(TABLE_FACULTY)
+    org_list = [ORG_ALIAS.get(k,"") for k,v in st.session_state.get("org_menu", {}).items() if v]
+    # if org_list: st.write(str(org_list))
+
+    _crud_display_grid_parent_child(TABLE_FACULTY, org_list=org_list)
 
 def do_research_group():
     st.subheader(f"{_STR_MENU_RESEARCH_GROUP}")
@@ -1405,6 +1430,10 @@ def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
     _crud_display_grid_form_subject(TABLE_NOTE)
 
+def do_import_export():
+    st.subheader(f"{STR_IMPORT}")
+    st.subheader(f"{STR_EXPORT}")
+
 
 
 
@@ -1418,6 +1447,7 @@ menu_dict = {
     _STR_MENU_PERSON:               {"fn": do_person},
     _STR_MENU_WORK:                 {"fn": do_work},
     _STR_MENU_NOTE:                 {"fn": do_note},
+    _STR_MENU_IMP_EXP:              {"fn": do_import_export},
 
 }
 
@@ -1433,6 +1463,11 @@ def do_sidebar():
         # keep menu item in the same order as i18n strings
 
         if menu_item == _STR_MENU_FACULTY:
+            org_menus = {}
+            for org in ORG_ALIAS.keys():
+                org_menus[org] = st.checkbox(org,value=False if org != "Cornell" else True)
+            st.session_state["org_menu"] = org_menus
+
             _sidebar_display_add_faculty()
 
         elif menu_item == _STR_MENU_RESEARCH_GROUP:

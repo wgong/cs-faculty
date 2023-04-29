@@ -449,3 +449,5 @@ update g_relation
 set ref_tab='g_person', ref_tab_sub='g_person',
 ref_key='url', ref_key_sub='url'
 where rel_type = 'team-person';
+
+select * from g_person;
