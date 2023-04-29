@@ -2,20 +2,19 @@ FILE_ROOT = "./db"
 FILE_DB = f"{FILE_ROOT}/faculty-Cornell-CS-20230422.duckdb"
 FILE_XLSX = f"{FILE_ROOT}/faculty-Cornell-CS.xlsx"
 
-SYS_COLS = ["id","ts","uid"]
-TABLE_NOTE = "g_note" # done
-TABLE_ENTITY = "g_entity" # replaced with g_entity (entity_type=research_group)
-TABLE_RESEARCH_GROUP = "g_entity" # replaced with g_entity (entity_type=research_group)
-
-TABLE_FACULTY = "g_person"  # replaced with g_person (person_type=faculty)
-TABLE_PERSON = "g_person"
-TABLE_TEAM = "t_team"   # deprecated
-TABLE_WORK = "g_work"
-TABLE_PERSON_TEAM = "t_person_team"  # replaced with g_relation (rel_type=team-person)
-TABLE_PERSON_WORK = "t_person_work"  # replaced with g_relation (rel_type=person-work)
+# generic object
 TABLE_ENTITY = "g_entity"
 TABLE_RELATION = "g_relation"
+# simple entity
+TABLE_RESEARCH_GROUP = "g_entity" # replaced with g_entity (entity_type=research_group)
+# subject entity
+TABLE_FACULTY = "g_person"  # replaced with g_person (person_type=faculty)
+TABLE_PERSON = "g_person"
+TABLE_WORK = "g_work"
+TABLE_NOTE = "g_note" # done
 
+# LOV
+SYS_COLS = ["id","ts","uid"]
 
 PROPS = [
     'is_system_col',
@@ -27,27 +26,33 @@ PROPS = [
     'form_column',
     'widget_type',
     'label_text',
-    'kwargs']
+    'kwargs'
+]
 
-ENTITY_TYPES = ('research_group',
-                )
+ENTITY_TYPES = (
+    'research_group',
+)
 
-WORK_TYPES = ('publication', 
-              'preprint', 
-              'talk', 
-              'poster', 
-              'documentation', 
-              'project', 
-              'startup', 
-              'company',
-              'other',
-              )
+WORK_TYPES = (
+    'publication', 
+    'preprint', 
+    'talk', 
+    'poster',
+    'course',
+    'documentation', 
+    'project', 
+    'startup', 
+    'company',
+    'other',
+)
 
-PERSON_TYPES = ('faculty', 
-                'student', 
-                'staff', 
-                'other',
-                )
+PERSON_TYPES = (
+    '',
+    'faculty', 
+    'student', 
+    'staff', 
+    'other',
+)
 
 SELECTBOX_OPTIONS = {
     "entity_type": ENTITY_TYPES,
@@ -96,28 +101,9 @@ KEY_COLUMNS = {
     'g_entity': 'name',    
 }
 
-
-EDITABLE_COLUMNS =  {
-    table : [c for c in TABLE_COLUMNS[table] if c != KEY_COLUMNS[table]] for table in TABLE_COLUMNS.keys()
-}
-
-CLICKABLE_COLUMNS = {
-    "g_person": [
-        'url',
-        'img_url',
-    ],
-    'g_note': [
-        'url',
-    ],
-    'g_entity': [
-        'url',
-    ],    
-}
-
-
 ## TODO
 # move data into g_column_props table
-# this will be defined by UI
+# in order to become UI-configurable
 COLUMN_PROPS = {
 
     "g_entity": {

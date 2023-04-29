@@ -488,103 +488,39 @@ def _db_delete_by_key(data):
     # return _db_select(table_name=table_name)        
 
 
-def _db_delete_person_team(data):
-    if not data: 
-        return None
-    
-    inter_table_name = data.get("inter_table_name", "")
-    if not inter_table_name:
-        raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
-    
-    ref_type = data.get("ref_type", "")
-    team_lead = data.get("team_lead", "")
-    ref_type_2 = data.get("ref_type_2", "")
-    ref_key_2 = data.get("ref_key_2", "")
 
-    delete_sql = f"""
-        delete from {inter_table_name}
-        where 1=1 
-        and ref_type = '{ref_type}' 
-        and ref_key in (
-            select url from TABLE_TEAM 
-            where team_lead = '{team_lead}' 
-        )
-        and ref_type_2 = '{ref_type_2}' 
-        and ref_key_2 = '{ref_key_2}'
-        ;
-    """
-    _db_execute(delete_sql)
-
-# TODO
-def _db_insert_person_team(data):
-    """insert into both child and intersection tables
-    """
+def _db_delete_by_id_inter(data):
     if not data: 
         return None
     
     table_name = data.get("table_name", "")
     if not table_name:
         raise Exception(f"[ERROR] Missing key: table_name: {data}")
-    
+
     inter_table_name = data.get("inter_table_name", "")
     if not inter_table_name:
         raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
     
-    ref_type = data.get("ref_type", "")
+    rel_type = data.get("rel_type", "")
+    ref_tab = data.get("ref_tab", "")
     ref_key = data.get("ref_key", "")
-    ref_type_2 = data.get("ref_type_2", "")
-    ref_key_2 = data.get("ref_key_2", "")
+    ref_val = data.get("ref_val", "")
+    ref_tab_sub = table_name
+    ref_key_sub = "id"
+    ref_val_sub = data.get(ref_key_sub, "")
 
-    # build SQL
-    visible_columns = _get_columns(table_name, prop_name="is_visible")
-    col_clause = []
-    val_clause = []
-    for col,val in data.items():
-        if col not in visible_columns:
-            continue
-        col_clause.append(col) 
-        val_clause.append(f"'{escape_single_quote(val)}'")
+    inter_col_clause = ['rel_type', 'ref_tab', 'ref_key', 'ref_val', 'ref_tab_sub', 'ref_key_sub', 'ref_val_sub']
+    inter_vals = [rel_type, ref_tab, ref_key, ref_val, ref_tab_sub, ref_key_sub, ref_val_sub]
+    inter_where_clause = ["1=1"]
+    for n,col in enumerate(inter_col_clause):
+        val = inter_vals[n]
+        inter_where_clause.append(f" {col} = '{escape_single_quote(val)}' ")
 
-    _id = str(uuid4())
-    _ts = data.get("ts", str(datetime.now()))
-    insert_sql = f"""
-        -- insert child table
-        insert into {table_name} (
-            {", ".join(col_clause)}
-        )
-        values (
-            {", ".join(val_clause)}
-        );
-
-        -- insert intersection table
-        insert into {inter_table_name} (
-            id, ts, ref_type, ref_key, ref_type_2, ref_key_2
-        )
-        values (
-            '{_id}', '{_ts}', '{ref_type}','{ref_key}','{ref_type_2}','{ref_key_2}'
-        );
-    """
-    # TODO
-    # _db_execute(insert_sql)
-
-def _db_delete_by_id_inter(data):
-    if not data: 
-        return None
-    
-    inter_table_name = data.get("inter_table_name", "")
-    if not inter_table_name:
-        raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
-    
-    ref_type = data.get("ref_type", "")
-    ref_key = data.get("ref_key", "")
-    ref_type_2 = data.get("ref_type_2", "")
-    ref_key_2 = data.get("ref_key_2", "")
-
+    # remove row from intersection table only
+    where_clause_str = " and ".join(inter_where_clause)
     delete_sql = f"""
         delete from {inter_table_name}
-        where 1=1 
-        and ref_type = '{ref_type}' and ref_key = '{ref_key}'
-        and ref_type_2 = '{ref_type_2}' and ref_key_2 = '{ref_key_2}'
+        where {where_clause_str}
         ;
     """
     _db_execute(delete_sql)
@@ -603,10 +539,21 @@ def _db_insert_inter(data):
     if not inter_table_name:
         raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
     
-    ref_type = data.get("ref_type", "")
+    rel_type = data.get("rel_type", "")
+    ref_tab = data.get("ref_tab", "")
     ref_key = data.get("ref_key", "")
-    ref_type_2 = data.get("ref_type_2", "")
-    ref_key_2 = data.get("ref_key_2", "")
+    ref_val = data.get("ref_val", "")
+    ref_tab_sub = table_name
+    ref_key_sub = "id"
+    ref_val_sub = data.get(ref_key_sub, "")
+    id = str(uuid4())
+    ts = data.get("ts", str(datetime.now()))
+
+    inter_col_clause = ['id', 'ts', 'rel_type', 'ref_tab', 'ref_key', 'ref_val', 'ref_tab_sub', 'ref_key_sub', 'ref_val_sub']
+    inter_vals = [id, ts, rel_type, ref_tab, ref_key, ref_val, ref_tab_sub, ref_key_sub, ref_val_sub]
+    inter_val_clause = []
+    for val in inter_vals:
+        inter_val_clause.append(f"'{escape_single_quote(val)}'")
 
     # build SQL
     visible_columns = _get_columns(table_name, prop_name="is_visible")
@@ -618,8 +565,6 @@ def _db_insert_inter(data):
         col_clause.append(col) 
         val_clause.append(f"'{escape_single_quote(val)}'")
 
-    _id = str(uuid4())
-    _ts = data.get("ts", str(datetime.now()))
     insert_sql = f"""
         -- insert child table
         insert into {table_name} (
@@ -631,10 +576,10 @@ def _db_insert_inter(data):
 
         -- insert intersection table
         insert into {inter_table_name} (
-            id, ts, ref_type, ref_key, ref_type_2, ref_key_2
+            {", ".join(inter_col_clause)}
         )
         values (
-            '{_id}', '{_ts}', '{ref_type}','{ref_key}','{ref_type_2}','{ref_key_2}'
+            {", ".join(inter_val_clause)}
         );
     """
     _db_execute(insert_sql)
@@ -951,7 +896,8 @@ def _push_selected_cols_to_front(cols, selected_cols=["name","url"]):
 
 
 # _STR_MENU_FACULTY
-def _display_grid_faculty(table_name=TABLE_FACULTY,
+def _crud_display_grid_parent_child(table_name,
+                person_type="faculty",
                 form_name_suffix="",
                 orderby_cols=["name"], 
                 selection_mode="single"):
@@ -961,17 +907,19 @@ def _display_grid_faculty(table_name=TABLE_FACULTY,
         return
      
     form_name = f"{table_name}#{form_name_suffix}"
+    st.session_state["form_name"] = form_name
 
     COL_DEFS = COLUMN_DEFS[table_name]
     visible_columns = COL_DEFS["is_visible"]
     editable_columns = COL_DEFS["is_editable"]
     clickable_columns = COL_DEFS["is_clickable"]
 
-    st.session_state["form_name"] = form_name
+    # make sure orderby_cols exists
+    orderby_cols = list(set(orderby_cols).intersection(set(visible_columns)))
 
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
-        where_clause = " where person_type = 'faculty' "
+        where_clause = f" where person_type = '{person_type}' "
         selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         sql_stmt = f"""
@@ -1019,7 +967,6 @@ def _display_grid_faculty(table_name=TABLE_FACULTY,
 
     if menu_item == "Work":
         try:
-            # _crud_display_grid_form_work(TABLE_WORK, 
             table_name = TABLE_WORK
             _crud_display_grid_form_inter(table_name, 
                         ref_tab=TABLE_PERSON, 
@@ -1168,306 +1115,6 @@ def _crud_display_grid_form_inter(table_name,
                 ref_val,
                 inter_table_name,
                 rel_type)
-
-def _crud_display_grid_form_work(table_name, 
-                    ref_tab,  
-                    ref_key,  
-                    ref_val,
-                    form_name_suffix="",
-                    inter_table_name=TABLE_RELATION,
-                    rel_type='person-work',
-                    page_size=10, grid_height=370):
-    """Render grid according to column properties, 
-    used to display a database table, or child table when ref_type/_key are given
-
-    Inputs:
-        form_name (required): 
-            table name if ref_type is not given
-
-        ref_type: must be parent table name if given, form_name can be different from underlying table name
-        ref_key: foreign key
-
-    Outputs:
-    Buttons on top for Upsert, Delete action
-    Fields below in columns: 1, 2, or 3 specified by 'form_column'
-    """
-    if not table_name in COLUMN_PROPS or not table_name in COLUMN_DEFS:
-        st.error(f"Invalid table name: {table_name}")
-        return
-    
-    form_name = f"{table_name}#{form_name_suffix}"
-    
-    COL_DEFS = COLUMN_DEFS[table_name]
-    visible_columns = COL_DEFS["is_visible"]
-    editable_columns = COL_DEFS["is_editable"]
-    clickable_columns = COL_DEFS["is_clickable"]
-
-    st.session_state["form_name"] = form_name
-    st.session_state["visible_columns"] = visible_columns
-
-    # prepare dataframe
-    with DBConn() as _conn:
-        # fetch child table keys first
-        sql_stmt = f"""
-            select 
-                it.ref_key_sub as "key_col", 
-                it.ref_val_sub as "key_val"
-            from {inter_table_name} it 
-            where it.rel_type = '{rel_type}'
-                and it.ref_tab = '{ref_tab}'
-                and it.ref_key = '{ref_key}'
-                and it.ref_val = '{ref_val}'
-                and it.ref_tab_sub = '{table_name}'
-        """
-        df_1 = pd.read_sql(sql_stmt, _conn)    
-        rows = df_1.groupby("key_col")["key_val"].apply(list).to_dict()
-        where_clause = []
-        for k,v in rows.items():
-            where_clause.append(f" {k} in {str(v).replace('[','(').replace(']',')')}")
-
-        # fetch child table rows
-        selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
-        selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
-        sql_stmt = f"""
-            select {", ".join(selected_cols)}
-            from {table_name}
-            where {" or ".join(where_clause)}
-        """
-        df = pd.read_sql(sql_stmt, _conn)    
-
-    grid_resp = _display_grid_df(df, 
-                    selection_mode="single", 
-                    page_size=page_size, 
-                    grid_height=grid_height,
-                    editable_columns=editable_columns,
-                    clickable_columns=clickable_columns)
-    selected_row = None
-    if grid_resp:
-        selected_rows = grid_resp['selected_rows']
-        if selected_rows and len(selected_rows):
-            selected_row = selected_rows[0]
-
-    # st.write(f"selected_row:\n{selected_row}")
-
-    # old_row = {}
-    # dict_col_label = COL_DEFS['label_text']
-    # for col in visible_columns:
-    #     old_row[col] = selected_row.get(col) if selected_row is not None else ""
-
-    # ## Form Layout
-
-    # # display buttons
-    # btn_save, btn_refresh, btn_delete = _crud_display_buttons()
-
-    # data = {"table_name": table_name, "inter_table_name": data_dict["Work"]["table"], 
-    #         "ref_type":ref_type, "ref_key":ref_key,
-    #         "ref_type_2":TABLE_WORK, "ref_key_2":old_row.get("id"),
-    #         }
-    # # display form and populate data dict
-    # col1_columns = COL_DEFS['col1_columns']
-    # col2_columns = COL_DEFS['col2_columns']
-
-    # idx_default = WORK_TYPES.index("publication")
-    # col1,col2 = st.columns([8,7])
-    # with col1:
-    #     for col in col1_columns:
-    #         if col == "type":
-    #             # hard-code col=type via st.selectbox
-    #             val = st.selectbox(dict_col_label.get(col), WORK_TYPES, index=idx_default, key=f"col_{form_name}_{col}")
-    #         else:
-    #             widget_type = COL_DEFS['widget_type'][col]
-    #             if widget_type == "text_area":
-    #                 kwargs = {"height":200}
-    #                 val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-    #             else:
-    #                 kwargs = {}
-    #                 if col in COL_DEFS["is_system_col"]:
-    #                     kwargs.update({"disabled":True})
-    #                 val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-
-    #         if val != old_row[col]:
-    #             data.update({col : val})
-
-    # with col2:
-    #     for col in col2_columns:
-    #         widget_type = COL_DEFS['widget_type'][col]
-    #         if widget_type == "text_area":
-    #             kwargs = {"height":200}
-    #             val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-    #         else:
-    #             kwargs = {}
-    #             if col in COL_DEFS["is_system_col"]:
-    #                 kwargs.update({"disabled":True})
-    #             val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-
-    #         if val != old_row[col]: 
-    #             data.update({col : val})
-
-    # # copy id if present
-    # id_val = old_row.get("id", "")
-    # if id_val:
-    #     data.update({"id" : id_val})
-
-    # # st.write(f"data={data}")
-    # # handle buttons
-    # if btn_save:
-    #     _ts = str(datetime.now())
-    #     if selected_row is not None and data.get("id"):
-    #         data.update({"ts": _ts,})
-    #         _db_update_by_id(data)
-    #     else:
-    #         _id = str(uuid4())
-    #         data.update({"id": _id, 
-    #                      "ts": _ts,
-    #                      "ref_key_2": _id })
-    #         _db_insert_child(data)
-
-    # elif btn_delete and selected_row is not None and data.get("id"):
-    #     _db_delete_by_id_child(data)
-
-def _crud_display_grid_form_team(form_name, ref_type=TABLE_PERSON, ref_key="",  
-                            page_size=10, grid_height=370):
-    """Render grid according to column properties, 
-    used to display a database table, or child table when ref_type/_key are given
-
-    Inputs:
-        form_name (required): 
-            table name if ref_type is not given
-
-        ref_type: must be parent table name if given, form_name can be different from underlying table name
-        ref_key: foreign key
-
-    Outputs:
-    Buttons on top for Upsert, Delete action
-    Fields below in columns: 1, 2, or 3 specified by 'form_column'
-    """
-
-    table_name = form_name
-    # validate table_name exists
-    if not table_name in COLUMN_DEFS:
-        st.error(f"Invalid table name: {table_name}")
-        return 
-    
-    COL_DEFS = COLUMN_DEFS[TABLE_PERSON]
-    visible_columns = COL_DEFS["is_visible"]
-    editable_columns = COL_DEFS["is_editable"]
-    clickable_columns = COL_DEFS["is_clickable"]
-    st.session_state["form_name"] = form_name
-    st.session_state["visible_columns"] = visible_columns
-
-    selected_cols = ",".join([f"p.{c}" for c in visible_columns])
-    select_sql = f"""
-        with per as (
-            select 
-                pt.ref_key_2 person_url
-            from {TABLE_TEAM} t 
-            join {TABLE_PERSON_TEAM} pt
-                on pt.ref_key = t.url 
-                    and pt.ref_type = '{TABLE_TEAM}' 
-                    and pt.ref_type_2 = '{TABLE_PERSON}' 
-            where t.team_lead = '{ref_key}'
-        )
-        select {selected_cols} 
-        from {TABLE_PERSON} p
-        join per 
-            on per.person_url = p.url
-        where p.url != '{ref_key}';
-    """
-    
-
-    with DBConn() as _conn:
-        df = pd.read_sql(select_sql, _conn)
-    grid_resp = _display_grid_df(df, 
-                    selection_mode="single", 
-                    page_size=page_size, 
-                    grid_height=grid_height,
-                    editable_columns=editable_columns,
-                    clickable_columns=clickable_columns)
-    selected_row = None
-    if grid_resp:
-        selected_rows = grid_resp['selected_rows']
-        if selected_rows and len(selected_rows):
-            selected_row = selected_rows[0]
-
-    # st.write(f"selected_row:\n{selected_row}")
-
-    old_row = {}
-    dict_col_label = COL_DEFS['label_text']
-    for col in visible_columns:
-        old_row[col] = selected_row.get(col) if selected_row is not None else ""
-
-    ## Form Layout
-
-    # display buttons
-    btn_save, btn_refresh, btn_delete = _crud_display_buttons()
-
-    data = {"table_name": TABLE_PERSON, 
-            "inter_table_name": TABLE_PERSON_TEAM, 
-            "ref_type":TABLE_TEAM, 
-            "team_lead":ref_key,
-            "ref_type_2":TABLE_PERSON, 
-            "ref_key_2":old_row.get("url"),
-            }
-    # display form and populate data dict
-    col1_columns = COL_DEFS['col1_columns']
-    col2_columns = COL_DEFS['col2_columns']
-
-    idx_default = PERSON_TYPES.index("student")
-    col1,col2 = st.columns([8,7])
-    with col1:
-        for col in col1_columns:
-            widget_type = COL_DEFS['widget_type'][col]
-            if widget_type == "text_area":
-                kwargs = {"height":200}
-                val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-            else:
-                kwargs = {}
-                if col in COL_DEFS["is_system_col"]:
-                    kwargs.update({"disabled":True})
-                val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-
-            if val != old_row[col]:
-                data.update({col : val})
-
-    with col2:
-        for col in col2_columns:
-            if col == "person_type":
-                val = st.selectbox(dict_col_label.get(col), options=PERSON_TYPES, index=idx_default, key=f"col_{form_name}_{col}")
-            else:
-                widget_type = COL_DEFS['widget_type'][col]
-                if widget_type == "text_area":
-                    kwargs = {"height":200}
-                    val = st.text_area(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-                else:
-                    kwargs = {}
-                    if col in COL_DEFS["is_system_col"]:
-                        kwargs.update({"disabled":True})
-                    val = st.text_input(dict_col_label.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
-
-            if val != old_row[col]: 
-                data.update({col : val})
-
-    # copy id if present
-    id_val = old_row.get("id", "")
-    if id_val:
-        data.update({"id" : id_val})
-
-    # st.write(f"data={data}")
-
-    # handle buttons
-    if btn_save:
-        _ts = str(datetime.now())
-        if selected_row is not None and data.get("id"):
-            data.update({"ts": _ts,})
-            _db_update_by_id(data)
-        else:
-            _id = str(uuid4())
-            data.update({"id": _id, 
-                         "ts": _ts })
-            _db_insert_person_team(data)
-
-    elif btn_delete and selected_row is not None and data.get("id"):
-        _db_delete_person_team(data)
 
 # _STR_MENU_NOTE
 def _crud_display_grid_form_subject(table_name, 
@@ -1626,8 +1273,6 @@ def _crud_clear_form():
         st.session_state[col_key] = ""
 
 
-
-
 ### quick add note
 def _sidebar_display_add_note(form_name="new_note"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
@@ -1726,13 +1371,13 @@ def do_welcome():
     The GitHub source code is at: https://github.com/wgong/cs-faculty
     
     The CS Faculty dataset is [scraped](https://github.com/wgong/py4kids/tree/master/lesson-11-scrapy/scrap-cs-faculty) from the following CS Faculty homepages:
+    - [Cornell-CS](https://www.cs.cornell.edu/people/faculty)
+    - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
+    - [UCB-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
+    - [CMU-CS](https://csd.cmu.edu/people/faculty)
     - [MIT-AID](https://www.eecs.mit.edu/role/faculty-aid/)
     - [MIT-CS](https://www.eecs.mit.edu/role/faculty-cs/)
     - [Stanford-CS](https://cs.stanford.edu/directory/faculty)
-    - [CMU-CS](https://csd.cmu.edu/people/faculty)
-    - [UCB-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
-    - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
-    - [Cornell-CS](https://www.cs.cornell.edu/people/faculty)
     
     #### Additional Resources
     - [CS Faculty Composition and Hiring Trends (Blog)](https://jeffhuang.com/computer-science-open-data/#cs-faculty-composition-and-hiring-trends)
@@ -1746,7 +1391,7 @@ def do_welcome():
 
 def do_faculty():
     st.subheader(f"{_STR_MENU_FACULTY}")
-    _display_grid_faculty()
+    _crud_display_grid_parent_child(TABLE_FACULTY)
 
 def do_research_group():
     st.subheader(f"{_STR_MENU_RESEARCH_GROUP}")
