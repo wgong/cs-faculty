@@ -103,10 +103,14 @@ _GRID_OPTIONS = {
     "paginationPageSize": 10,
 }
 
-
+DEBUG_FLAG = True
 #####################################################
 # Helpers (prefix with underscore)
 #####################################################
+def debug_print(msg, DEBUG=DEBUG_FLAG):
+    if DEBUG and msg:
+        st.write(f"[DEBUG] {str(msg)}")
+
 def _download_df(df, filename_csv):
     """Download input df to CSV
     """
@@ -283,7 +287,6 @@ def _layout_form_inter(table_name,
     """ layout form for a table and handles button actions 
     which have intersection table dependency
     """
-    # st.write(f"selected_row:\n{selected_row}")
 
     form_name = st.session_state.get("form_name","")
 
@@ -334,8 +337,6 @@ def _layout_form_inter(table_name,
     if id_val:
         data.update({"id" : id_val})
 
-    # st.write(f"data={data}")
-
     # handle buttons
     if btn_save:
         if data.get("id"):
@@ -351,7 +352,6 @@ def _layout_form_inter(table_name,
 def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type=""):
     """ layout form for a table and handles button actions 
     """
-    # st.write(f"selected_row:\n{selected_row}")
 
     form_name = st.session_state.get("form_name","")
     form_name_suffix = form_name.split("#")[-1]
@@ -404,7 +404,6 @@ def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type="
     if id_val:
         data.update({"id" : id_val})
 
-    # st.write(f"data={data}")
 
     # handle buttons
     if btn_save:
@@ -422,7 +421,7 @@ def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type="
 ###################################################################
 # handle Note
 # ======================================
-def _db_execute(sql_statement, DEBUG=True):
+def _db_execute(sql_statement, DEBUG=DEBUG_FLAG):
     with DBConn() as _conn:
         if DEBUG: print(sql_statement)
         _conn.execute(sql_statement)
@@ -1106,8 +1105,6 @@ def _crud_display_grid_form_inter(table_name,
         if selected_rows and len(selected_rows):
             selected_row = selected_rows[0]
 
-    # st.write(f"selected_row:\n{selected_row}")
-
     _layout_form_inter(table_name, 
                 selected_row, 
                 ref_tab,
@@ -1200,7 +1197,7 @@ def _crud_display_grid_form_entity(table_name,
     Fields below in columns: 1, 2, or 3 specified by 'form_column'
     """
     # validate table_name exists
-    # st.write(COLUMN_PROPS.keys())
+    # debug_print(COLUMN_PROPS.keys())
     if not table_name in COLUMN_PROPS or not table_name in COLUMN_DEFS:
         st.error(f"Invalid table name: {table_name}")
         return
@@ -1276,7 +1273,6 @@ def _crud_clear_form():
 ### quick add note
 def _sidebar_display_add_note(form_name="new_note"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
-        st.write(NOTE_DATA_COLS)
         with st.form(key=form_name):
             for col in NOTE_DATA_COLS:
                 st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
