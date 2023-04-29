@@ -178,6 +178,9 @@ call duckdb_settings();
 
 select * from information_schema.schemata;
 
+select  t.table_name
+from information_schema.tables t where t.table_name like 'g_%';
+
 select  t.*
 from information_schema.tables t
 where 1=1
@@ -450,4 +453,10 @@ set ref_tab='g_person', ref_tab_sub='g_person',
 ref_key='url', ref_key_sub='url'
 where rel_type = 'team-person';
 
-select * from g_person;
+select org,person_type,count(*) from g_person group by org,person_type;
+
+select * from g_entity where entity_type='research_group';
+
+delete from g_entity where entity_type='research_group' and url like 'https://www2.eecs.berkeley.edu/%'
+;
+delete from g_person where org = 'Univ California Berkeley';

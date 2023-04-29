@@ -1,14 +1,78 @@
 FILE_ROOT = "./db"
-FILE_DB = f"{FILE_ROOT}/faculty-Cornell-CS.duckdb"
+FILE_DB = f"{FILE_ROOT}/cs-faculty-20230429.duckdb"
+# FILE_DB = f"{FILE_ROOT}/faculty-Cornell-CS-20230422.duckdb"
 FILE_XLSX = f"{FILE_ROOT}/faculty-Cornell-CS.xlsx"
 
-TABLE_NOTE = "t_note"
-TABLE_FACULTY = "t_faculty"
-TABLE_RESEARCH_GROUP = "t_research_group"
+ORG_ALIAS = {
+    "Cornell": "Cornell Univ",
+    "MIT": "Massachusetts Institute Technology",
+    "CMU": "Carnegie Mellon Univ",
+    "Berkely": "Univ California Berkeley",
+    "Stanford": "Stanford Univ",
+    "UIUC": "Univ Illinois Urbana-Champaign",
+}
+
+# generic object
+TABLE_ENTITY = "g_entity"
+TABLE_RELATION = "g_relation"
+# simple entity
+TABLE_RESEARCH_GROUP = "g_entity" # replaced with g_entity (entity_type=research_group)
+# subject entity
+TABLE_FACULTY = "g_person"  # replaced with g_person (person_type=faculty)
+TABLE_PERSON = "g_person"
+TABLE_WORK = "g_work"
+TABLE_NOTE = "g_note" # done
+
+# LOV
+SYS_COLS = ["id","ts","uid"]
+
+PROPS = [
+    'is_system_col',
+    'is_user_key',
+    'is_required',
+    'is_visible',
+    'is_editable',
+    'is_clickable',
+    'form_column',
+    'widget_type',
+    'label_text',
+    'kwargs'
+]
+
+ENTITY_TYPES = (
+    'research_group',
+)
+
+WORK_TYPES = (
+    'publication', 
+    'preprint', 
+    'talk', 
+    'poster',
+    'course',
+    'documentation', 
+    'project', 
+    'startup', 
+    'company',
+    'other',
+)
+
+PERSON_TYPES = (
+    '',
+    'faculty', 
+    'student', 
+    'staff', 
+    'other',
+)
+
+SELECTBOX_OPTIONS = {
+    "entity_type": ENTITY_TYPES,
+    "work_type": WORK_TYPES,
+    "person_type": PERSON_TYPES,
+}
 
 # run query for this meta-info
 TABLE_COLUMNS = {
-    't_faculty': [
+    'g_person': [
         'name',
         'url',
         'job_title',
@@ -26,7 +90,7 @@ TABLE_COLUMNS = {
         'school',
         'note'
     ],
-    't_note': [
+    'g_note': [
         'title', 
         'url', 
         'note', 
@@ -34,54 +98,244 @@ TABLE_COLUMNS = {
         'ts', 
         'id'
     ],
-    't_research_group': [
+    'g_entity': [
         'research_group', 
         'url',
         'note',
-
     ],
 }
 
 KEY_COLUMNS = {
-    "t_faculty": 'name',
-    't_note': 'id',
-    't_research_group': 'research_group',    
+    "g_person": 'name',
+    'g_note': 'id',
+    'g_entity': 'name',    
 }
 
-
-EDITABLE_COLUMNS =  {
-    table : [c for c in TABLE_COLUMNS[table] if c != KEY_COLUMNS[table]] for table in TABLE_COLUMNS.keys()
-}
-
-CLICKABLE_COLUMNS = {
-    "t_faculty": [
-        'url',
-        'img_url',
-    ],
-    't_note': [
-        'url',
-    ],
-    't_research_group': [
-        'url',
-    ],    
-}
-
-# derived - non system-cols
-DATA_COLUMNS = {
-    "t_faculty": ['name', 'url', 'job_title',
-        'research_area', 'email','department', 
-        'phd_univ','phd_year','note',],
-    't_research_group': ['research_group', 'url', 'note',],
-    't_note': [col for col in TABLE_COLUMNS["t_note"] if col not in ["id", "ts"]],
-}
-
-FACULTY_DATA_COLS = DATA_COLUMNS["t_faculty"]
-GROUP_DATA_COLS = DATA_COLUMNS["t_research_group"]
-NOTE_DATA_COLS = DATA_COLUMNS["t_note"]
-
+## TODO
+# move data into g_column_props table
+# in order to become UI-configurable
 COLUMN_PROPS = {
-    "t_note" : {
-        "title": {
+
+    "g_entity": {
+        "name": {
+            "is_system_col": False,
+            "is_user_key": True,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-1",
+            "widget_type": "text_input",
+            "label_text": "Name"
+        },
+        "url": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": True,
+            "form_column": "col1-2",
+            "widget_type": "text_input",
+            "label_text": "URL"
+        },
+
+        "note": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-1",
+            "widget_type": "text_area",
+            "label_text": "Note"
+        },
+
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col3-1",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "entity_type": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-2",
+            "widget_type": "selectbox",
+        },
+    },
+
+    "g_person": {
+        "name": {
+            "is_system_col": False,
+            "is_user_key": True,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-1",
+            "widget_type": "text_input",
+            "label_text": "Name"
+        },
+        "url": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": True,
+            "form_column": "col1-2",
+            "widget_type": "text_input",
+            "label_text": "URL"
+        },
+        "research_area": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-3",
+            "widget_type": "text_input",
+            "label_text": "Research Area"
+        },
+        "job_title": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-4",
+            "widget_type": "text_input",
+        },
+        "department": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-5",
+            "widget_type": "text_input",
+        },
+
+        "email": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-1",
+            "widget_type": "text_input",
+            "label_text": "Email"
+        },
+        "cell_phone": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-2",
+            "widget_type": "text_input",
+            "label_text": "Cell"
+        },
+        "office_address": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-3",
+            "widget_type": "text_input",
+
+        },
+        "note": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-4",
+            "widget_type": "text_area",
+            "label_text": "Note"
+        },
+
+
+
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col3-1",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "person_type": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-2",
+            "widget_type": "selectbox",
+            "label_text": "Person Type"
+        },
+        "org": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-3",
+            "widget_type": "text_input",
+        },
+
+
+        "phd_univ": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-4",
+            "widget_type": "text_input",
+        },
+        "phd_year": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-5",
+            "widget_type": "text_input",
+        },
+
+    },
+
+    "g_note" : {
+        "name": {
             'is_system_col': False,
             'is_user_key': True,
             'is_required': True,
@@ -90,7 +344,6 @@ COLUMN_PROPS = {
             'is_clickable': False,
             'form_column': 'col1-1',
             'widget_type': 'text_input',
-            'label_text': 'Title'  
         },
         "url": {
             'is_system_col': False,
@@ -134,6 +387,26 @@ COLUMN_PROPS = {
             'form_column': 'col2-2',
             'widget_type': 'text_area',
         },
+        "ref_key": {
+            'is_system_col': False,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': True,
+            'is_clickable': False,
+            'form_column': 'col3-1',
+            'widget_type': 'text_input',
+        },
+        "ref_val": {
+            'is_system_col': False,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': True,
+            'is_clickable': False,
+            'form_column': 'col3-2',
+            'widget_type': 'text_input',
+        },
         "ts": {
             'is_system_col': True,
             'is_user_key': False,
@@ -142,23 +415,172 @@ COLUMN_PROPS = {
             'is_editable': False,
             'is_clickable': False,
         },
-        "ref_type": {
-            'is_system_col': False,
-            'is_user_key': False,
-            'is_required': False,
-            'is_visible': False,
-            'is_editable': False,
-            'is_clickable': False,
-        },
+    },
+
+
+    "g_work": {
+        "name": {
+            "is_system_col": False,
+            "is_user_key": True,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-1",
+            "widget_type": "text_input",
+            },
+        "url": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": True,
+            "form_column": "col1-2",
+            "widget_type": "text_input",
+            },
+        "summary": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-3",
+            "widget_type": "text_area",
+            },
+        "authors": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-1",
+            "widget_type": "text_input",
+            },
+        "tags": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-2",
+            "widget_type": "text_input",
+            },
+        "note": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-3",
+            "widget_type": "text_area",
+            },
+
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col3-1",
+            "widget_type": "text_input",
+            },
+        "work_type": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-2",
+            "widget_type": "selectbox",
+            },
+
+
+        "ts": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": False,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col3-3",
+            "widget_type": "text_input",
+            }
+    },
+
+
+    "g_relation": {
+        "rel_type": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-1",
+            "widget_type": "text_input",
+            },
         "ref_key": {
-            'is_system_col': False,
-            'is_user_key': False,
-            'is_required': False,
-            'is_visible': False,
-            'is_editable': False,
-            'is_clickable': False,
-        },
-    }
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": False,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col1-2",
+            "widget_type": "text_input",
+            },
+        "ref_val": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": False,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col1-3",
+            "widget_type": "text_input",
+            },
+
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": False,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col2-1",
+            "widget_type": "text_input",
+            },
+
+        "ref_key_sub": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": False,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col2-2",
+            "widget_type": "text_input",
+            },
+        "ref_val_sub": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": False,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col2-3",
+            "widget_type": "text_input",
+            },
+    },
+
+
 }
 
 

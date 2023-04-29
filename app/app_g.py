@@ -119,12 +119,13 @@ def _download_df(df, filename_csv):
     """Download input df to CSV
     """
     if df is not None:
+        st.dataframe(df)
         st.download_button(
             label=STR_DOWNLOAD_CSV,
             data=df_to_csv(df, index=False),
             file_name=filename_csv,
             mime='text/csv',
-        )            
+        )  
 
 @st.cache
 def _gen_label(col):
@@ -935,9 +936,11 @@ def _crud_display_grid_parent_child(table_name,
 
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
-        where_clause = f" where person_type = '{person_type}' "
         if org_list:
-            where_clause += f" and org in {list2sql_str(org_list)} "
+            where_clause = f" where person_type = '{person_type}' and org in {list2sql_str(org_list)} "
+        else:
+            where_clause = " where 1=2 "
+            
         selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         sql_stmt = f"""
@@ -1432,7 +1435,89 @@ def do_note():
 
 def do_import_export():
     st.subheader(f"{STR_IMPORT}")
+    c_left,c_right = st.columns([5,1])
+    df_dict = {}
+    filename = ""
+    with c_right:
+        uploaded_file = st.file_uploader("Upload file", type=["csv","xlsx"])
+        if uploaded_file is not None:
+            filename = uploaded_file.name
+            file_ext = filename.split(".")[-1].lower()
+            if file_ext == "csv":
+                df_dict[filename] = pd.read_csv(uploaded_file)
+            elif file_ext == "xlsx":
+                xlsx_obj = pd.ExcelFile(uploaded_file, engine="openpyxl")
+                for sheet in xlsx_obj.sheet_names:
+                    key = sheet.lower().replace(" ", "_")
+                    df_dict[key] = pd.read_excel(xlsx_obj, sheet, keep_default_na=False)
+
+    with c_left:
+        if filename: st.write(f"filename: {filename}")
+        for key in df_dict.keys():
+            st.write(f"{key} df:")
+            st.dataframe(df_dict[key])
+
+    import_btn = st.empty()
+    if filename:
+        import_btn = st.button("Import Data ...")
+    if import_btn:
+        with DBConn() as _conn:
+            for key in df_dict.keys():
+                view_name = f"v_{key}"
+                st.write(f"view_name = {view_name}")
+                df = df_dict[key]
+                st.write(f"columns = {df.columns}")
+                _conn.register(f"{view_name}", df)
+
+                if key == "faculty":
+                    sql_stmt = f"""insert into g_person (
+                            id, person_type, name, job_title, phd_univ, phd_year, 
+                            research_area, research_concentration, 
+                            research_focus, url, img_url, phone, email, cell_phone, 
+                            office_address, department, org
+                        )
+                        select 
+                            uuid() as id, 'faculty', name, job_title, phd_univ, phd_year, 
+                            research_area, research_concentration, 
+                            research_focus, url, img_url, phone, email, cell_phone, 
+                            office_address, department, org 
+                        from {view_name}
+                    """
+                    st.write(f"sql_stmt =\n {sql_stmt}")
+                    res = _conn.execute(sql_stmt).df()
+                    st.dataframe(res)
+                elif key == "research_groups":
+                    sql_stmt = f"""insert into g_entity (
+                            id, entity_type, name, url
+                        )
+                        select 
+                            uuid() as id, 'research_group', research_group, url 
+                        from {view_name}
+                    """
+                    st.write(f"sql_stmt =\n {sql_stmt}")
+                    res = _conn.execute(sql_stmt).df()
+                    st.dataframe(res)
+
+
     st.subheader(f"{STR_EXPORT}")
+
+    with DBConn() as _conn:
+        sql_stmt = """select t.table_name
+            from information_schema.tables t where t.table_name like 'g_%';
+        """
+        df1 = pd.read_sql(sql_stmt, _conn)
+        table_list = df1["table_name"].to_list()
+        idx_default = table_list.index("g_work")
+        selected_table = st.selectbox("Select table:", table_list, index=idx_default, key="export_table")
+
+        export_btn = st.button("Export Data ...")
+        if export_btn:
+            sql_stmt = f"""select * from {selected_table};"""
+            df = pd.read_sql(sql_stmt, _conn)
+            ts = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            filename_csv = f"{selected_table}_{ts}.csv"
+            _download_df(df, filename_csv)
+
 
 
 
