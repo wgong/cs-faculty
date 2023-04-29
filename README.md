@@ -6,7 +6,7 @@ $ git clone git@github.com:wgong/cs-faculty.git
 $ cd cs-faculty
 $ pip install -r requirements.txt
 $ cd app
-$ streamlit run app.py
+$ streamlit run app_g.py
 open browser at http://localhost:8501/
 ```
 
