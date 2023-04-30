@@ -3,20 +3,28 @@ Streamlit app to manage CS Faculty data stored in DuckDB
 
 TODO:
 - [2023-04-30]
-    - add menu: Task to manage todo list
+    - Add menu: Task to manage todo list with email/text msg alert
+    - Import data from another user, ensure no duplicates
+
+- [Long term]
+    - refactor data model to be general-purpose by using g_entity, g_extern, g_relation,
+      so that special-purpose tables become unnecessary.
 
 DONE:
 - [2023-04-29] 
-    - release 1st working version 
-    - this app manages the following entities:
+    - Release 1st working version 
+    - CS faculty dataset includes schools of Cornell, MIT, CMU, Berkeley, Stanford, UIUC
+    - Manages the following entities:
         - Person: Faculty, Student
         - Team: collection of persons
         - Work: artifact produced by person like publication, talk, course, project, company
-        - Note: writeup or attachment
-    - CS faculty dataset includes schools of Cornell, MIT, CMU, Berkeley, Stanford, UIUC
+        - Note: short writeup or attachment
+        - Research Group: team of collaborative researchers
+    - Import new scraped data
+    - Export table to CSV
 
 - [2023-04-02] 
-    - start prototyping app using streamlit and duckdb
+    - Start prototyping in streamlit and duckdb
 
 - [2023-03-21] 
     - Scrap CS faculty data (see notebooks at https://github.com/wgong/py4kids/tree/master/lesson-11-scrapy/scrap-cs-faculty)

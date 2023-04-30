@@ -76,41 +76,6 @@ FACULTY_DATA_COLS = ['name', 'url', 'job_title',
 GROUP_DATA_COLS =  ['name', 'url', 'note',]
 NOTE_DATA_COLS = ['name', 'url',"tags", 'note',]
 
-# run query for this meta-info
-TABLE_COLUMNS = {
-    'g_person': [
-        'name',
-        'url',
-        'job_title',
-        'phd_univ',
-        'phd_year',
-        'research_area',
-        'research_concentration',
-        'research_focus',
-        'img_url',
-        'phone',
-        'email',
-        'cell_phone',
-        'office_address',
-        'department',
-        'school',
-        'note'
-    ],
-    'g_note': [
-        'title', 
-        'url', 
-        'note', 
-        'tags', 
-        'ts', 
-        'id'
-    ],
-    'g_entity': [
-        'research_group', 
-        'url',
-        'note',
-    ],
-}
-
 KEY_COLUMNS = {
     "g_person": 'name',
     'g_note': 'id',
