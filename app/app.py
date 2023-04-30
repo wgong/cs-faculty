@@ -1,5 +1,25 @@
 """
-Streamlit app to manage CS Faculty data backed by DuckDB 
+Streamlit app to manage CS Faculty data stored in DuckDB 
+
+TODO:
+- [2023-04-30]
+    - add menu: Task to manage todo list
+
+DONE:
+- [2023-04-29] 
+    - release 1st working version 
+    - this app manages the following entities:
+        - Person: Faculty, Student
+        - Team: collection of persons
+        - Work: artifact produced by person like publication, talk, course, project, company
+        - Note: writeup or attachment
+    - CS faculty dataset includes schools of Cornell, MIT, CMU, Berkeley, Stanford, UIUC
+
+- [2023-04-02] 
+    - start prototyping app using streamlit and duckdb
+
+- [2023-03-21] 
+    - Scrap CS faculty data (see notebooks at https://github.com/wgong/py4kids/tree/master/lesson-11-scrapy/scrap-cs-faculty)
 
 """
 __author__ = "wgong"
@@ -187,11 +207,7 @@ def _parse_column_props():
 # define constants
 #####################################################
 COLUMN_DEFS = _parse_column_props()
-FACULTY_DATA_COLS = ['name', 'url', 'job_title',
-        'research_area', 'email','department', 'org',
-        'phd_univ','phd_year','note',]
-GROUP_DATA_COLS =  ['name', 'url', 'note',]
-NOTE_DATA_COLS = ['name', 'url',"tags", 'note',]
+
 
 # def _load_db():
 
@@ -341,7 +357,7 @@ def _layout_form_inter(table_name,
     elif btn_delete and data.get("id"):
         _db_delete_by_id_inter(data)
 
-def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type=""):
+def _layout_form(table_name, selected_row, ref_tab="", ref_key="", ref_val="", entity_type=""):
     """ layout form for a table and handles button actions 
     """
 
@@ -363,8 +379,8 @@ def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type="
     btn_save, btn_refresh, btn_delete = _crud_display_buttons()
 
     data = {"table_name": table_name}
-    if ref_key and ref_val:
-        data.update({"ref_key":ref_key, "ref_val":ref_val})
+    if all((ref_tab, ref_key, ref_val)):
+        data.update({"ref_tab":ref_tab, "ref_key":ref_key, "ref_val":ref_val})
     if entity_type:
         data.update({"entity_type":entity_type})
         
@@ -373,7 +389,7 @@ def _layout_form(table_name, selected_row, ref_key="", ref_val="", entity_type="
     col2_columns = []
     col3_columns = []
     for c in visible_columns:
-        if form_name_suffix and c in ["ref_key", "ref_val"]:
+        if form_name_suffix and c in ["ref_tab", "ref_key", "ref_val"]:
             # no need to display ref_key, ref_val for parent/child view
             continue
         if form_columns.get(c, "").startswith("col1-"):
@@ -843,7 +859,8 @@ def _crud_display_grid_parent_child(table_name,
     elif menu_item == "Note":
         table_name = TABLE_NOTE
         _crud_display_grid_form_subject(table_name,
-                        ref_key=f"{TABLE_PERSON}#url", 
+                        ref_tab=TABLE_PERSON, 
+                        ref_key="url", 
                         ref_val=primary_key,
                         form_name_suffix="faculty", 
                         page_size=5, grid_height=220)
@@ -948,11 +965,11 @@ def _crud_display_grid_form_inter(table_name,
         df = pd.read_sql(sql_stmt, _conn)   
 
     grid_resp = _display_grid_df(df, 
-                    selection_mode="single", 
-                    page_size=page_size, 
-                    grid_height=grid_height,
-                    editable_columns=editable_columns,
-                    clickable_columns=clickable_columns)
+                selection_mode="single", 
+                page_size=page_size, 
+                grid_height=grid_height,
+                editable_columns=editable_columns,
+                clickable_columns=clickable_columns)
     selected_row = None
     if grid_resp:
         selected_rows = grid_resp['selected_rows']
@@ -969,11 +986,12 @@ def _crud_display_grid_form_inter(table_name,
 
 # _STR_MENU_NOTE
 def _crud_display_grid_form_subject(table_name, 
-                    ref_key="", 
-                    ref_val="", 
-                    form_name_suffix="", 
-                    orderby_cols=["name"], 
-                    page_size=10, grid_height=400):
+                ref_tab="", 
+                ref_key="", 
+                ref_val="", 
+                form_name_suffix="", 
+                orderby_cols=["name"], 
+                page_size=10, grid_height=400):
     """Render data grid defined by column properties, 
     for table, or child table when (ref_key,ref_val) are given
 
@@ -981,7 +999,7 @@ def _crud_display_grid_form_subject(table_name,
         table_name (required): 
         form_name_suffix (optional) : used for different view on the same underlying table
 
-        (ref_key,ref_val) : reference parent entity
+        (ref_tab,ref_key,ref_val) : reference parent entity
 
     Outputs:
     Buttons: Upsert, Refresh, Delete 
@@ -1006,9 +1024,10 @@ def _crud_display_grid_form_subject(table_name,
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
         where_clause = f"""
-            where ref_key = '{ref_key}'
-            and ref_val = '{ref_val}'
-        """ if ref_key and ref_val else ""
+            where ref_tab = '{ref_tab}'
+                and ref_key = '{ref_key}'
+                and ref_val = '{ref_val}'
+        """ if all((ref_tab,ref_key,ref_val)) else ""
         selected_cols = _push_selected_cols_to_end(visible_columns, selected_cols=["ref_key","ref_val"])
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         sql_stmt = f"""
@@ -1033,7 +1052,7 @@ def _crud_display_grid_form_subject(table_name,
             selected_row = selected_rows[0]
 
     ## layout form
-    _layout_form(table_name, selected_row, ref_key=ref_key, ref_val=ref_val)
+    _layout_form(table_name, selected_row, ref_tab=ref_tab, ref_key=ref_key, ref_val=ref_val)
 
 # _STR_MENU_RESEARCH_GROUP
 def _crud_display_grid_form_entity(table_name, 
@@ -1284,6 +1303,11 @@ def do_import_export():
 
     # Import
     st.subheader(f"{STR_IMPORT}")
+    st.markdown(f"""
+    The CS Faculty dataset is scraped using [this notebook](https://github.com/wgong/py4kids/blob/master/lesson-11-scrapy/scrap-cs-faculty/bs_cornell.ipynb) <br>
+    The spreadsheet column header must be the same as that of [this sample](https://github.com/wgong/py4kids/blob/master/lesson-11-scrapy/scrap-cs-faculty/faculty-Cornell-CS.xlsx)
+    """, unsafe_allow_html=True)
+
     c_left,c_right = st.columns([5,1])
     df_dict = {}
     filename = ""

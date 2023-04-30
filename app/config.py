@@ -1,6 +1,5 @@
-FILE_ROOT = "./db"
-FILE_DB = f"{FILE_ROOT}/cs-faculty-20230429.duckdb"
-FILE_XLSX = f"{FILE_ROOT}/faculty-Cornell-CS.xlsx"
+# duckdb file
+FILE_DB = f"./db/cs-faculty-20230429.duckdb"
 
 ORG_ALIAS = {
     "Cornell": "Cornell Univ",
@@ -15,12 +14,13 @@ ORG_ALIAS = {
 TABLE_ENTITY = "g_entity"
 TABLE_RELATION = "g_relation"
 # simple entity
-TABLE_RESEARCH_GROUP = "g_entity" # replaced with g_entity (entity_type=research_group)
+TABLE_RESEARCH_GROUP = "g_entity" # g_entity (entity_type=research_group)
 # subject entity
-TABLE_FACULTY = "g_person"  # replaced with g_person (person_type=faculty)
+TABLE_FACULTY = "g_person"  # g_person (person_type=faculty)
 TABLE_PERSON = "g_person"
 TABLE_WORK = "g_work"
-TABLE_NOTE = "g_note" # done
+TABLE_NOTE = "g_note"
+TABLE_TASK = "g_task"
 
 # LOV
 SYS_COLS = ["id","ts","uid"]
@@ -68,6 +68,13 @@ SELECTBOX_OPTIONS = {
     "work_type": WORK_TYPES,
     "person_type": PERSON_TYPES,
 }
+
+# columns for Quick Add
+FACULTY_DATA_COLS = ['name', 'url', 'job_title',
+    'research_area', 'email','department', 'org',
+    'phd_univ','phd_year','note',]
+GROUP_DATA_COLS =  ['name', 'url', 'note',]
+NOTE_DATA_COLS = ['name', 'url',"tags", 'note',]
 
 # run query for this meta-info
 TABLE_COLUMNS = {
@@ -386,7 +393,7 @@ COLUMN_PROPS = {
             'form_column': 'col2-2',
             'widget_type': 'text_area',
         },
-        "ref_key": {
+        "ref_tab": {
             'is_system_col': False,
             'is_user_key': False,
             'is_required': False,
@@ -396,7 +403,7 @@ COLUMN_PROPS = {
             'form_column': 'col3-1',
             'widget_type': 'text_input',
         },
-        "ref_val": {
+        "ref_key": {
             'is_system_col': False,
             'is_user_key': False,
             'is_required': False,
@@ -404,6 +411,16 @@ COLUMN_PROPS = {
             'is_editable': True,
             'is_clickable': False,
             'form_column': 'col3-2',
+            'widget_type': 'text_input',
+        },
+        "ref_val": {
+            'is_system_col': False,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': True,
+            'is_clickable': False,
+            'form_column': 'col3-3',
             'widget_type': 'text_input',
         },
         "ts": {

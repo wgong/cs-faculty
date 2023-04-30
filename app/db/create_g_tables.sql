@@ -1,3 +1,43 @@
+/* Catalog 
+ * */
+select * from information_schema.schemata;
+
+select  c.table_name, c.column_name, c.data_type, c.*
+from information_schema.columns c
+where 1=1
+and c.table_catalog = 'faculty-Cornell-CS'
+and c.table_schema = 'main'
+and c.table_name in (
+	--'t_note'
+	select table_name from information_schema.tables t
+	where t.table_catalog = 'faculty-Cornell-CS'
+	and t.table_schema = 'main'
+)
+order by c.table_catalog,c.table_schema,c.table_name, c.ordinal_position
+;
+
+select  c.table_name, c.column_name, c.data_type
+--, c.*
+from information_schema.columns c
+where 1=1
+--and c.table_catalog = 'faculty-Cornell-CS'
+and c.table_schema = 'main'
+and c.table_name like 'g_%'
+order by c.table_catalog,c.table_schema,c.table_name, c.ordinal_position
+;
+
+select * from g_note;
+
+update g_note 
+set ref_tab = 'g_person', ref_key='url'
+where ref_key = 'g_person#url';
+
+
+select  t.table_name
+from information_schema.tables t where t.table_name like 'g_%';
+
+/* Create 
+ * */
 CREATE TYPE field_ui_type AS ENUM (
 	'text_input', 'text_area', 'selectbox', 'checkbox');
 
@@ -28,6 +68,24 @@ create table g_entity (
 	,note VARCHAR
 );
 
+-- generic table to store relationship between two entities
+-- rel_type = 
+--		person-work (represent one's work like publication, talk)
+--		team-person (represent one's team members, a faculty has a team by default)
+create table g_relation (
+	id VARCHAR NOT NULL
+	,uid VARCHAR
+	,ts VARCHAR
+	,rel_type VARCHAR
+	,ref_tab text  -- table (parent)
+	,ref_key VARCHAR  -- object (parent) e.g. person
+	,ref_val VARCHAR
+	,ref_tab_sub VARCHAR
+	,ref_key_sub VARCHAR  -- subject (child) e.g. person's work
+	,ref_val_sub VARCHAR
+);
+
+
 create table g_note (
 	id VARCHAR NOT NULL
 	,uid VARCHAR
@@ -40,6 +98,7 @@ create table g_note (
 	,ref_val VARCHAR -- e.g. url value
 );
 
+alter table g_note add column ref_tab VARCHAR;
 
 -- g_org is g_entity where entity_type = 'org'
 -- g_research_group is g_entity where entity_type = 'research_group'
@@ -83,35 +142,32 @@ create table g_work (
 	,authors VARCHAR
 	,tags VARCHAR
 );
-  
--- generic table to store relationship between two entities
--- rel_type = 
---		person-work (represent one's work like publication, talk)
---		team-person (represent one's team members, a faculty has a team by default)
-create table g_relation (
+
+
+-- TODO list
+CREATE TYPE TASK_STATUS AS ENUM (
+	'', 'In Process', 'Pending', 'Completed', 'Canceled');
+
+CREATE TYPE PRIORITY AS ENUM (
+	'', 'Urgent', 'Important-1', 'Important-2', 'Important-3');
+
+create table g_task (
 	id VARCHAR NOT NULL
 	,uid VARCHAR
 	,ts VARCHAR
-	,rel_type VARCHAR
-	,ref_tab text  -- table (parent)
-	,ref_key VARCHAR  -- object (parent) e.g. person
+	,name VARCHAR NOT NULL
+	,url VARCHAR
+	,priority PRIORITY
+	,status TASK_STATUS
+	,due_date TIMESTAMP
+	,alert_to VARCHAR  -- email or mobile
+	,alert_date TIMESTAMP
+	,alert_msg VARCHAR  -- custom message
+	,note VARCHAR
+	,tags VARCHAR
+    ,ref_tab VARCHAR
+	,ref_key VARCHAR
 	,ref_val VARCHAR
-	,ref_tab_sub VARCHAR
-	,ref_key_sub VARCHAR  -- subject (child) e.g. person's work
-	,ref_val_sub VARCHAR
 );
-
-
-select  c.table_name, c.column_name, c.data_type
---, c.*
-from information_schema.columns c
-where 1=1
---and c.table_catalog = 'faculty-Cornell-CS'
-and c.table_schema = 'main'
-and c.table_name like 'g_%'
-order by c.table_catalog,c.table_schema,c.table_name, c.ordinal_position
-;
-
-
 
     
