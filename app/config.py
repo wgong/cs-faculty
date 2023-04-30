@@ -1,6 +1,5 @@
 FILE_ROOT = "./db"
 FILE_DB = f"{FILE_ROOT}/cs-faculty-20230429.duckdb"
-# FILE_DB = f"{FILE_ROOT}/faculty-Cornell-CS-20230422.duckdb"
 FILE_XLSX = f"{FILE_ROOT}/faculty-Cornell-CS.xlsx"
 
 ORG_ALIAS = {

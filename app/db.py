@@ -2,8 +2,6 @@ import sqlite3
 import duckdb
 
 from config import *
-# from config_g import *
-# from config_poc import *
 
 class DBConn(object):
     def __init__(self):

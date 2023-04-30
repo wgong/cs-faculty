@@ -29,7 +29,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 from helper import (escape_single_quote, df_to_csv, list2sql_str)
 from db import *
 
-DEBUG_FLAG = False
+DEBUG_FLAG = True # False
 ##====================================================
 _STR_APP_NAME        = "CS Faculty"
 
@@ -809,7 +809,7 @@ def _crud_display_grid_parent_child(table_name,
     idx_default = menu_options.index("Work")
 
     faculty_name = selected_row.get("name")
-    menu_item = st.selectbox(f"{faculty_name} : {primary_key}", 
+    menu_item = st.selectbox(f"Pick from {menu_options} listed below for '{faculty_name}' ({primary_key}): ", 
                                 menu_options, index=idx_default, key="faculty_menu_item")
 
     if menu_item == "Work":
@@ -928,6 +928,7 @@ def _crud_display_grid_form_inter(table_name,
                 and it.ref_val = '{ref_val}'
                 and it.ref_tab_sub = '{table_name}'
         """
+        # print(f"sql_stmt1 = {sql_stmt}")
         df_1 = pd.read_sql(sql_stmt, _conn).fillna("")  
         rows = df_1.groupby("key_col")["key_val"].apply(list).to_dict()
         where_clause = []
@@ -937,12 +938,14 @@ def _crud_display_grid_form_inter(table_name,
         # fetch child table rows
         selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
+        where_clause_str = " or ".join(where_clause) if where_clause else " 1=2 "
         sql_stmt = f"""
             select {", ".join(selected_cols)}
             from {table_name}
-            where {" or ".join(where_clause)}
+            where {where_clause_str}
         """
-        df = pd.read_sql(sql_stmt, _conn).fillna("")    
+        # print(f"sql_stmt = {sql_stmt}")
+        df = pd.read_sql(sql_stmt, _conn)   
 
     grid_resp = _display_grid_df(df, 
                     selection_mode="single", 

@@ -455,8 +455,13 @@ where rel_type = 'team-person';
 
 select org,person_type,count(*) from g_person group by org,person_type;
 
-select * from g_entity where entity_type='research_group';
 
-delete from g_entity where entity_type='research_group' and url like 'https://www2.eecs.berkeley.edu/%'
-;
-delete from g_person where org = 'Univ California Berkeley';
+
+--delete from g_entity where entity_type='research_group' and url like 'https://www2.eecs.berkeley.edu/%' ;
+--delete from g_person where org = 'Univ California Berkeley';
+
+select * from g_entity where entity_type='research_group' and note is null;
+
+update g_entity set note='Cornell' where entity_type='research_group' and url like '%cornell%';
+update g_entity set note='Berkeley' where entity_type='research_group' and url like '%berkeley%';
+update g_entity set note='MIT' where entity_type='research_group' and url like '%mit.edu%';

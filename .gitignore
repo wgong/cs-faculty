@@ -4,6 +4,7 @@
 **/Untitled*.ipynb
 **/gpt3sql-*.sqlite
 **/*Copy*.duckdb
+**/*.duckdb.wal
 **/.~lock*
 
 # Byte-compiled / optimized / DLL files

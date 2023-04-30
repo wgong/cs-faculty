@@ -60,6 +60,7 @@ def df_to_csv(df, index=False):
     return df.to_csv(index=index).encode('utf-8')
 
 
+
 def _reverse_dedup_list(tickers):
     _map = {}
     for t in tickers:
