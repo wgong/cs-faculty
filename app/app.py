@@ -193,36 +193,36 @@ FACULTY_DATA_COLS = ['name', 'url', 'job_title',
 GROUP_DATA_COLS =  ['name', 'url', 'note',]
 NOTE_DATA_COLS = ['name', 'url',"tags", 'note',]
 
-def _load_db():
+# def _load_db():
 
-    if not Path(FILE_DB).exists():
-        if not Path(FILE_XLSX).exists():
-            raise Exception(f"source file: {FILE_XLSX} missing")
+#     if not Path(FILE_DB).exists():
+#         if not Path(FILE_XLSX).exists():
+#             raise Exception(f"source file: {FILE_XLSX} missing")
         
-        xls = pd.ExcelFile(FILE_XLSX)
-        sheet_name = STR_FACULTY
-        df_faculty = pd.read_excel(xls, sheet_name, keep_default_na=False)
-        sheet_name = STR_RESEARCH_GROUP
-        df_research_group = pd.read_excel(xls, sheet_name, keep_default_na=False)
+#         xls = pd.ExcelFile(FILE_XLSX)
+#         sheet_name = STR_FACULTY
+#         df_faculty = pd.read_excel(xls, sheet_name, keep_default_na=False)
+#         sheet_name = STR_RESEARCH_GROUP
+#         df_research_group = pd.read_excel(xls, sheet_name, keep_default_na=False)
 
-        with DBConn(FILE_DB, db_type="duckdb") as _conn:
-            _conn.register("v_faculty", df_faculty)
-            _conn.register("v_research_group", df_research_group)
+#         with DBConn(FILE_DB, db_type="duckdb") as _conn:
+#             _conn.register("v_faculty", df_faculty)
+#             _conn.register("v_research_group", df_research_group)
 
-            _conn.execute(f"Create table {TABLE_FACULTY} as select * from v_faculty;")
-            _conn.execute(f"Create table {TABLE_RESEARCH_GROUP} as select * from v_research_group;")
+#             _conn.execute(f"Create table {TABLE_FACULTY} as select * from v_faculty;")
+#             _conn.execute(f"Create table {TABLE_RESEARCH_GROUP} as select * from v_research_group;")
             
-            create_table_note_sql = f"""create table if not exists {TABLE_NOTE} (
-                    id    text not null
-                    ,name text not null
-                    ,url   text
-                    ,note  text 
-                    ,tags  text
-                    ,ts    text
-                );
-            """
-            _conn.execute(create_table_note_sql)
-            _conn.commit()
+#             create_table_note_sql = f"""create table if not exists {TABLE_NOTE} (
+#                     id    text not null
+#                     ,name text not null
+#                     ,url   text
+#                     ,note  text 
+#                     ,tags  text
+#                     ,ts    text
+#                 );
+#             """
+#             _conn.execute(create_table_note_sql)
+#             _conn.commit()
 
 def _display_grid_df(df, 
                     selection_mode="multiple", 
@@ -1395,7 +1395,7 @@ def do_body():
     menu_dict[menu_item]["fn"]()
 
 def main():
-    _load_db()
+    # _load_db()
     do_sidebar()
     do_body()
 
