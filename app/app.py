@@ -3,14 +3,27 @@ Streamlit app to manage CS Faculty data stored in DuckDB
 
 TODO:
 - [2023-04-30]
-    - Add menu: Task to manage todo list with email/text msg alert
+    - Add menus: 
+        - Task: todo list with email/text msg alert
+        - Project: work, task, person related to project
+        - Event: seminar, conference, vacation, ...
+        - Collaborator
+        - Internship
+        - Org (School, Company, ...)
+        - Google Scholar, Best Paper Award on work quality, CSRanking ?
+        - Awards: Sloan, Best Paper, NSF career
+
     - Import data from another user, ensure no duplicates
 
 - [Long term]
+    - config UI to manage g_column_props table
     - refactor data model to be general-purpose by using g_entity, g_extern, g_relation,
       so that special-purpose tables become unnecessary.
 
 DONE:
+- [2023-04-30]
+    - Added g_task table and related UI
+    
 - [2023-04-29] 
     - Release 1st working version 
     - CS faculty dataset includes schools of Cornell, MIT, CMU, Berkeley, Stanford, UIUC
@@ -82,9 +95,11 @@ STR_RESEARCH_GROUP  = "Research Group"
 STR_NOTE            = "Note"
 STR_WORK            = "Work"
 STR_PERSON          = "Person"
+STR_TASK            = "Task"
 STR_NOTE_ALL        = "Note (All)"
 STR_WORK_ALL        = "Work (All)"
 STR_PERSON_ALL      = "Person (All)"
+STR_TASK_ALL        = "Task (All)"
 STR_REFRESH_HINT    = "Click 'Refresh' button to clear form"
 STR_DOWNLOAD_CSV    = "Download CSV"
 STR_IMPORT_EXPORT   = "Data Import/Export"
@@ -98,6 +113,7 @@ _STR_MENU_RESEARCH_GROUP    = STR_RESEARCH_GROUP
 _STR_MENU_NOTE              = STR_NOTE_ALL
 _STR_MENU_WORK              = STR_WORK_ALL
 _STR_MENU_PERSON            = STR_PERSON_ALL
+_STR_MENU_TASK              = STR_TASK_ALL
 _STR_MENU_IMP_EXP           = STR_IMPORT_EXPORT
 
 # Aggrid options
@@ -460,6 +476,16 @@ def _db_select(table_name, orderby_cols=[]):
         """
         return pd.read_sql(sql_stmt, _conn).fillna("")
 
+def _db_select_by_name_url(table_name, name, url):
+    with DBConn() as _conn:
+        sql_stmt = f"""
+            select *
+            from {table_name} 
+            where name='{name}' 
+                and url='{url}';
+        """
+        return pd.read_sql(sql_stmt, _conn).fillna("").to_dict('records')
+    
 def _db_select_by_id(table_name, id_value=""):
     """Select row by key"""
     if not id_value: return []
@@ -579,11 +605,16 @@ def _db_insert(data):
     visible_columns = _get_columns(table_name, prop_name="is_visible")
     col_clause = []
     val_clause = []
+
     for col,val in data.items():
         if col not in visible_columns:
             continue
-        col_clause.append(col) 
-        val_clause.append(f"'{escape_single_quote(val)}'")
+        col_clause.append(col)
+        if col in ["due_date", "done_date", "alert_date", "alert_time"]:
+            col_val = val
+        else:
+            col_val = escape_single_quote(val)
+        val_clause.append(f"'{col_val}'")
 
     insert_sql = f"""
         insert into {table_name} (
@@ -593,6 +624,7 @@ def _db_insert(data):
             {", ".join(val_clause)}
         );
     """
+    debug_print(insert_sql)
     _db_execute(insert_sql)
 
 def _db_update_by_id(data, update_changed=True):
@@ -608,10 +640,10 @@ def _db_update_by_id(data, update_changed=True):
         return
 
     if update_changed:
-        df_old = _db_select_by_id(table_name=table_name, id_value=id_val).to_dict('records')
-        if len(df_old) < 1:
+        rows = _db_select_by_id(table_name=table_name, id_value=id_val).to_dict('records')
+        if len(rows) < 1:
             return
-        old_row = df_old[0]
+        old_row = rows[0]
 
     editable_columns = _get_columns(table_name, prop_name="is_editable")
 
@@ -620,6 +652,10 @@ def _db_update_by_id(data, update_changed=True):
     for col,val in data.items():
         if col not in editable_columns: 
             continue
+        if col in ["due_date", "done_date", "alert_date", "alert_time"]:
+            set_clause.append(f"{col} = '{val}'")
+            continue
+
         if update_changed:
             if val != old_row.get(col):
                 set_clause.append(f"{col} = '{escape_single_quote(val)}'")
@@ -670,48 +706,27 @@ def _db_upsert_group(data, table_name=TABLE_RESEARCH_GROUP):
             where name='{_research_group}';
         """
     else:
+        id = str(uuid4())
+        ts = str(datetime.now())
         sql_stmt = f"""
-            insert into {table_name} (name, url)
-            values ('{_research_group}', '{_url}');
+            insert into {table_name} (id, ts, name, url)
+            values ('{id}', '{ts}', '{_research_group}', '{_url}');
         """
     _db_execute(sql_stmt)
 
-    # return _db_select(table_name=table_name) 
+def _db_quick_add(data, table_name):
 
-def _db_upsert_faculty(data, 
-                       table_name=TABLE_FACULTY, 
-                       use_key_col="name",
-                       data_cols = FACULTY_DATA_COLS,
-                       ):
-    _user_key_val = data.get(use_key_col, "")
-    if not _user_key_val: return None
-
-    with DBConn() as _conn:
-        df = pd.read_sql(f"""
-            select * from {table_name}
-            where {use_key_col} = '{_user_key_val}';
-        """, _conn).fillna("")
-
-
-    if df.shape[0] > 0:  # update
-        set_clause = []
-        for c in data_cols:
-            if c == use_key_col: continue
-            v = data.get(c, "")
-            set_clause.append(f"{c} = '{v}'")
-
-        if set_clause:
-            sql_stmt = f"""
-                update {table_name}
-                set {", ".join(set_clause)}
-                where {use_key_col} = '{_user_key_val}';
-            """
-        else:
-            sql_stmt = ""
-    else:               # insert
+    data_cols = DATA_COLS[table_name]
+    name = data.get("name")
+    url = data.get("url")
+    rows = _db_select_by_name_url(table_name, name, url)
+    
+    if len(rows) < 1:  # insert
+        data.update({"id": str(uuid4()),
+                     "ts": str(datetime.now()),})        
         col_names = []
         col_vals = []
-        for c in data_cols:
+        for c in data_cols+["id","ts"]:
             col_names.append(c)
             v = data.get(c, "")
             col_vals.append(f"'{v}'")        
@@ -722,10 +737,26 @@ def _db_upsert_faculty(data,
             values 
             (  {", ".join(col_vals)} );
         """
-    if sql_stmt:
         _db_execute(sql_stmt)
 
-    # return _db_select(table_name=table_name) 
+        # old_row = rows[0]
+        # id = old_row.get("id")
+        # set_clause = []
+        # for c in data_cols:
+        #     if c in ["name", "url"]: continue
+        #     v = data.get(c, "")
+        #     if v == old_row.get(c,""): continue
+        #     set_clause.append(f"{c} = '{v}'")
+
+        # if set_clause:
+        #     sql_stmt = f"""
+        #         update {table_name}
+        #         set {", ".join(set_clause)}
+        #         where id = '{id}';
+        #     """
+        # else:
+        #     sql_stmt = ""
+
 
 def _push_selected_cols_to_end(cols, selected_cols=SYS_COLS):
     """move selected column to the end,
@@ -829,7 +860,7 @@ def _crud_display_grid_parent_child(table_name,
     # NOTE:
     # when using st.tab, grid not displayed correctly
     # use st.selectbox instead
-    menu_options = ["Work", "Team", "Note"]
+    menu_options = ["Work", "Team", "Note", "Task"]
     idx_default = menu_options.index("Work")
 
     faculty_name = selected_row.get("name")
@@ -873,6 +904,14 @@ def _crud_display_grid_parent_child(table_name,
                         form_name_suffix="faculty", 
                         page_size=5, grid_height=220)
 
+    elif menu_item == "Task":
+        table_name = TABLE_TASK
+        _crud_display_grid_form_subject(table_name,
+                        ref_tab=TABLE_PERSON, 
+                        ref_key="url", 
+                        ref_val=primary_key,
+                        form_name_suffix="faculty", 
+                        page_size=5, grid_height=220)
 
 def _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns):
@@ -881,6 +920,21 @@ def _layout_form_fields(data,form_name,old_row,col,
         if widget_type == "text_area":
             kwargs = {"height":125}
             val = st.text_area(col_labels.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+        elif widget_type == "date_input":
+            old_date_input = old_row[col].split("T")[0]
+            if old_date_input:
+                val_date = datetime.strptime(old_date_input, "%Y-%m-%d")
+            else:
+                val_date = datetime.now().date()
+            val = st.date_input(col_labels.get(col), value=val_date, key=f"col_{form_name}_{col}")
+            val = datetime.strftime(val, "%Y-%m-%d")
+        elif widget_type == "time_input":
+            old_time_input = old_row[col]
+            if old_time_input:
+                val_time = datetime.strptime(old_time_input.split(".")[0], "%H:%M:%S").time()
+            else:
+                val_time = datetime.now().time()
+            val = st.time_input(col_labels.get(col), value=val_time, key=f"col_{form_name}_{col}")
         elif widget_type == "selectbox":
             # check if options is avail, otherwise display as text_input
             if col in SELECTBOX_OPTIONS:
@@ -1155,81 +1209,57 @@ def _crud_clear_form():
 def _sidebar_display_add_note(form_name="new_note"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
-            for col in NOTE_DATA_COLS:
+            for col in DATA_COLS[TABLE_NOTE]:
                 st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
             st.form_submit_button(STR_ADD, on_click=_sidebar_add_note)
 
 def _sidebar_add_note(form_name="new_note"):
-    _title = st.session_state.get(f"{form_name}_title","")
-    if not _title: return
-
-    data = {
-        "table_name": TABLE_NOTE,
-        "id": uuid4(), 
-        "ts": str(datetime.now()),
-    }
-    
-    for col in NOTE_DATA_COLS:
+    data = {"table_name": TABLE_NOTE}
+    for col in DATA_COLS[TABLE_NOTE]:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_insert(data)
-
+    _db_quick_add(data, TABLE_NOTE)
     _sidebar_clear_note_form()
 
 def _sidebar_clear_note_form(form_name="new_note"):
-    for col in NOTE_DATA_COLS:
+    for col in DATA_COLS[TABLE_NOTE]:
         st.session_state[f"{form_name}_{col}"] = ""
-
 
 ### quick add group
 def _sidebar_display_add_group(form_name="new_group"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
-            for col in GROUP_DATA_COLS:
+            for col in DATA_COLS[TABLE_RESEARCH_GROUP]:
                 st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
             st.form_submit_button(STR_ADD, on_click=_sidebar_add_group)
 
-
 def _sidebar_add_group(form_name="new_group"):
-    _research_group = st.session_state.get(f"{form_name}_research_group","")
-    if not _research_group: return
-
-    data = {
-        "table_name": TABLE_RESEARCH_GROUP
-    }
-    for col in GROUP_DATA_COLS:
+    data = {"table_name": TABLE_RESEARCH_GROUP}
+    for col in DATA_COLS[TABLE_RESEARCH_GROUP]:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_upsert_group(data)
-
+    _db_quick_add(data, TABLE_RESEARCH_GROUP)
     _sidebar_clear_group_form()
 
 def _sidebar_clear_group_form(form_name="new_group"):
-    for col in GROUP_DATA_COLS:
+    for col in DATA_COLS[TABLE_RESEARCH_GROUP]:
         st.session_state[f"{form_name}_{col}"] = ""
 
 ### quick add faculty
 def _sidebar_display_add_faculty(form_name="new_faculty"):
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
-            for col in FACULTY_DATA_COLS:
+            for col in DATA_COLS[TABLE_FACULTY]:
                 st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
             st.form_submit_button(STR_ADD, on_click=_sidebar_add_faculty)
 
 def _sidebar_add_faculty(form_name="new_faculty"):
-    _name = st.session_state.get(f"{form_name}_name","")
-    if not _name: return
-
-    data = {
-        "table_name": TABLE_FACULTY
-    }
-
-    for col in FACULTY_DATA_COLS:
+    data = {"table_name": TABLE_FACULTY}
+    for col in DATA_COLS[TABLE_FACULTY]:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_upsert_faculty(data)
-
+    _db_quick_add(data, TABLE_FACULTY)
     _sidebar_clear_faculty_form()
 
 def _sidebar_clear_faculty_form(form_name="new_faculty"):
-    for col in FACULTY_DATA_COLS:
+    for col in DATA_COLS[TABLE_FACULTY]:
         st.session_state[f"{form_name}_{col}"] = ""
 
 
@@ -1288,6 +1318,10 @@ def do_work():
 def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
     _crud_display_grid_form_subject(TABLE_NOTE)
+
+def do_task():
+    st.subheader(f"{_STR_MENU_TASK}")
+    _crud_display_grid_form_subject(TABLE_TASK)
 
 def do_import_export():
     # Export
@@ -1389,6 +1423,7 @@ menu_dict = {
     _STR_MENU_PERSON:               {"fn": do_person},
     _STR_MENU_WORK:                 {"fn": do_work},
     _STR_MENU_NOTE:                 {"fn": do_note},
+    _STR_MENU_TASK:                 {"fn": do_task},
     _STR_MENU_IMP_EXP:              {"fn": do_import_export},
 
 }

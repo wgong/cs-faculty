@@ -48,6 +48,7 @@ WORK_TYPES = (
     'talk', 
     'poster',
     'course',
+    'book', 
     'documentation', 
     'project', 
     'startup', 
@@ -63,23 +64,29 @@ PERSON_TYPES = (
     'other',
 )
 
+TASK_STATUS = [
+    '', 'In Progress', 'Pending', 'Completed', 'Canceled',
+]
+
+PRIORITY = [
+    '', 'Urgent', 'Important-1', 'Important-2', 'Important-3',
+]
+
 SELECTBOX_OPTIONS = {
     "entity_type": ENTITY_TYPES,
     "work_type": WORK_TYPES,
     "person_type": PERSON_TYPES,
+    "priority": PRIORITY,
+    "task_status": TASK_STATUS,
 }
 
 # columns for Quick Add
-FACULTY_DATA_COLS = ['name', 'url', 'job_title',
-    'research_area', 'email','department', 'org',
-    'phd_univ','phd_year','note',]
-GROUP_DATA_COLS =  ['name', 'url', 'note',]
-NOTE_DATA_COLS = ['name', 'url',"tags", 'note',]
-
-KEY_COLUMNS = {
-    "g_person": 'name',
-    'g_note': 'id',
-    'g_entity': 'name',    
+DATA_COLS = {
+    TABLE_FACULTY : ['name', 'url', 'job_title',
+        'research_area', 'email','department', 'org',
+        'phd_univ','phd_year','note',],
+    TABLE_RESEARCH_GROUP: ['name', 'url', 'note',],
+    TABLE_NOTE: ['name', 'url',"tags", 'note',],
 }
 
 ## TODO
@@ -243,7 +250,7 @@ COLUMN_PROPS = {
             "is_clickable": False,
             "form_column": "col2-4",
             "widget_type": "text_area",
-            "label_text": "Note"
+            "label_text": "Note",
         },
 
 
@@ -480,6 +487,190 @@ COLUMN_PROPS = {
             "is_clickable": False,
             "form_column": "col3-2",
             "widget_type": "selectbox",
+            },
+
+
+        "ts": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": False,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col3-3",
+            "widget_type": "text_input",
+            }
+    },
+
+    "g_task": {
+        "name": {
+            "is_system_col": False,
+            "is_user_key": True,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-1",
+            "widget_type": "text_input",
+            },
+        "url": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": True,
+            "form_column": "col1-2",
+            "widget_type": "text_input",
+            },
+        "priority": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-3",
+            "widget_type": "selectbox",
+            },
+        "note": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-4",
+            "widget_type": "text_area",
+            },
+        "tags": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col1-5",
+            "widget_type": "text_input",
+            },
+
+        "task_status": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-1",
+            "widget_type": "selectbox",
+            },
+
+        "due_date": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-2",
+            "widget_type": "date_input",
+            },
+        "alert_date": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-3",
+            "widget_type": "date_input",
+            },
+        "alert_time": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-4",
+            "widget_type": "time_input",
+            },
+        "alert_to": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-5",
+            "widget_type": "text_input",
+            "label_text": "Alert To (cell or email)",
+            },
+
+        "alert_msg": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col2-6",
+            "widget_type": "text_input",
+            },
+
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "col3-1",
+            "widget_type": "text_input",
+            },
+        "ref_tab": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-2",
+            "widget_type": "text_input",
+            "label_text": "Ref Table",              
+            },
+        "ref_key": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-3",
+            "widget_type": "text_input",
+            "label_text": "Ref Column",              
+            },
+        "ref_val": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-4",
+            "widget_type": "text_input",
+            "label_text": "Ref Value",              
+            },
+        "done_date": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "col3-5",
+            "widget_type": "date_input",
+            "label_text": "Completion Date",            
             },
 
 

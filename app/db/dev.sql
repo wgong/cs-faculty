@@ -454,6 +454,9 @@ ref_key='url', ref_key_sub='url'
 where rel_type = 'team-person';
 
 select org,person_type,count(*) from g_person group by org,person_type;
+-- https://www.sqlshack.com/different-ways-to-sql-delete-duplicate-rows-from-a-sql-table/
+
+
 
 
 
@@ -465,3 +468,21 @@ select * from g_entity where entity_type='research_group' and note is null;
 update g_entity set note='Cornell' where entity_type='research_group' and url like '%cornell%';
 update g_entity set note='Berkeley' where entity_type='research_group' and url like '%berkeley%';
 update g_entity set note='MIT' where entity_type='research_group' and url like '%mit.edu%';
+
+
+select name,url, count(*) from g_work group by name,url having count(*) > 1;  -- 36 dup 
+select name,url, count(*) from g_entity group by name,url having count(*) > 1;  -- 36 dup 
+
+select name,url, count(*) from g_person group by name,url having count(*) > 1;  -- 36 dup 
+-- REMOVE DUPLICATES
+WITH dup AS (
+	SELECT name,url, id, ROW_NUMBER() OVER(PARTITION BY name,url ORDER BY id) AS dup_id
+   	FROM g_person
+)
+--SELECT * FROM dup where dup_id > 1
+--select * 
+delete from g_person where id in (
+	select id from dup where dup_id > 1
+)
+;
+

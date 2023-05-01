@@ -146,10 +146,14 @@ create table g_work (
 
 -- TODO list
 CREATE TYPE TASK_STATUS AS ENUM (
-	'', 'In Process', 'Pending', 'Completed', 'Canceled');
+	'', 'In Progress', 'Pending', 'Completed', 'Canceled');
 
 CREATE TYPE PRIORITY AS ENUM (
 	'', 'Urgent', 'Important-1', 'Important-2', 'Important-3');
+
+-- 
+drop type TASK_STATUS;
+drop table g_task;
 
 create table g_task (
 	id VARCHAR NOT NULL
@@ -158,16 +162,25 @@ create table g_task (
 	,name VARCHAR NOT NULL
 	,url VARCHAR
 	,priority PRIORITY
-	,status TASK_STATUS
-	,due_date TIMESTAMP
+	,task_status TASK_STATUS
+	,due_date VARCHAR
+	,done_date VARCHAR
+	,alert_date VARCHAR
+	,alert_time VARCHAR
 	,alert_to VARCHAR  -- email or mobile
-	,alert_date TIMESTAMP
 	,alert_msg VARCHAR  -- custom message
-	,note VARCHAR
 	,tags VARCHAR
+	,note VARCHAR
     ,ref_tab VARCHAR
 	,ref_key VARCHAR
 	,ref_val VARCHAR
 );
 
-    
+/*
+ALTER TABLE g_task drop due_date;
+ALTER TABLE g_task add column due_date DATE;
+ALTER TABLE g_task drop alert_date;
+ALTER TABLE g_task add column alert_time TIMESTAMP;
+*/
+select * from g_task;
+
