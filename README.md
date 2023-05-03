@@ -1,5 +1,8 @@
 # CS Faculty Info
 
+*Important Note*: <br>
+In order to perserve your data, make sure to backup your local duckdb file before git-pull the latest code.
+
 ## Get started
 ```
 $ git clone git@github.com:wgong/cs-faculty.git
@@ -9,6 +12,7 @@ $ cd app
 $ streamlit run app.py
 open browser at http://localhost:8501/
 ```
+
 
 ## Screenshots
 
