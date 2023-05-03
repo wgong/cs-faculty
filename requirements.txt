@@ -1,4 +1,6 @@
-streamlit>=1.13.0
-streamlit-aggrid>=0.3.3
+# since streamlit and duckdb are actively developed
+# we ping down versions
+streamlit==1.17.0
+streamlit-aggrid==0.3.3
+duckdb==0.7.1
 pandas>=1.4.0,<2.0.0
-duckdb

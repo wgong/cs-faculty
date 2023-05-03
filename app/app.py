@@ -21,6 +21,10 @@ TODO:
       so that special-purpose tables become unnecessary.
 
 DONE:
+- [2023-05-03]
+    - Added award field to g_person, g_work to indicate its quality
+    - merge db.py into helper.py
+
 - [2023-04-30]
     - Added g_task table and related UI
     
@@ -65,10 +69,12 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import streamlit as st
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode, JsCode
+from st_aggrid import (GridOptionsBuilder, AgGrid, 
+                       GridUpdateMode, DataReturnMode, JsCode)
 
-from helper import (escape_single_quote, df_to_csv, list2sql_str)
-from db import *
+from config import *
+from helper import (escape_single_quote, df_to_csv, 
+                    list2sql_str, DBConn)
 
 DEBUG_FLAG = True # False
 ##====================================================
@@ -152,7 +158,7 @@ def _download_df(df, filename_csv):
             mime='text/csv',
         )  
 
-@st.cache
+# @st.cache
 def _gen_label(col):
     "Convert table column into form label"
     if col == 'ts_created': return "Created At"
@@ -170,7 +176,7 @@ def _gen_label(col):
         cols.append(c.capitalize())
     return " ".join(cols)
 
-@st.cache
+# @st.cache
 def _get_columns(table_name, prop_name="is_visible"):
     cols_bool = []
     cols_text = {}
@@ -186,7 +192,7 @@ def _get_columns(table_name, prop_name="is_visible"):
     return cols_bool or cols_text
     # return [k for k,v in COLUMN_PROPS[table_name].items() if v.get(prop_name, False) ]
 
-@st.cache
+# @st.cache
 def _parse_column_props():
     """parse COLUMN_PROPS map
     """
@@ -343,11 +349,11 @@ def _layout_form_inter(table_name,
     col2_columns = []
     col3_columns = []
     for c in visible_columns:
-        if form_columns.get(c, "").startswith("col1-"):
+        if form_columns.get(c, "").startswith("COL_1-"):
             col1_columns.append(c)
-        elif form_columns.get(c, "").startswith("col2-"):
+        elif form_columns.get(c, "").startswith("COL_2-"):
             col2_columns.append(c) 
-        elif form_columns.get(c, "").startswith("col3-"):
+        elif form_columns.get(c, "").startswith("COL_3-"):
             col3_columns.append(c) 
 
     col1,col2,col3 = st.columns([6,5,4])
@@ -381,7 +387,12 @@ def _layout_form_inter(table_name,
     elif btn_delete and data.get("id"):
         _db_delete_by_id_inter(data)
 
-def _layout_form(table_name, selected_row, ref_tab="", ref_key="", ref_val="", entity_type=""):
+def _layout_form(table_name, 
+                 selected_row, 
+                 ref_tab="", 
+                 ref_key="", 
+                 ref_val="", 
+                 entity_type=""):
     """ layout form for a table and handles button actions 
     """
 
@@ -414,13 +425,13 @@ def _layout_form(table_name, selected_row, ref_tab="", ref_key="", ref_val="", e
     col3_columns = []
     for c in visible_columns:
         if form_name_suffix and c in ["ref_tab", "ref_key", "ref_val"]:
-            # no need to display ref_key, ref_val for parent/child view
+            # skip displaying ref_key, ref_val for parent/child view
             continue
-        if form_columns.get(c, "").startswith("col1-"):
+        if form_columns.get(c, "").startswith("COL_1-"):
             col1_columns.append(c)
-        elif form_columns.get(c, "").startswith("col2-"):
+        elif form_columns.get(c, "").startswith("COL_2-"):
             col2_columns.append(c)
-        elif form_columns.get(c, "").startswith("col3-"):
+        elif form_columns.get(c, "").startswith("COL_3-"):
             col3_columns.append(c) 
 
     col1,col2,col3 = st.columns([6,5,4])
@@ -1200,9 +1211,7 @@ def _crud_clear_form():
 
     for col in st.session_state.get("visible_columns", []):
         col_key = f"col_{form_name}_{col}"
-        if not col_key in st.session_state: 
-            continue
-        st.session_state[col_key] = ""
+        st.session_state.update({col_key: ""}) 
 
 
 ### quick add note

@@ -182,5 +182,9 @@ ALTER TABLE g_task add column due_date DATE;
 ALTER TABLE g_task drop alert_date;
 ALTER TABLE g_task add column alert_time TIMESTAMP;
 */
+
+ALTER TABLE g_person add column award VARCHAR;
+ALTER TABLE g_work add column award VARCHAR;
+
 select * from g_task;
 

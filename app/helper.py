@@ -1,8 +1,35 @@
 from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import re
-import hashlib
+# import hashlib
 import pandas as pd
+
+import sqlite3
+import duckdb
+
+from config import *
+
+#######################################################
+#  Helper functions  - database
+#######################################################
+class DBConn(object):
+    def __init__(self):
+        if FILE_DB.endswith("duckdb"):
+            self.conn = duckdb.connect(FILE_DB)
+        else:
+            self.conn = sqlite3.connect(FILE_DB)
+
+    def __enter__(self):
+        return self.conn
+
+    def __exit__(self, type, value, traceback):
+        self.conn.close()
+
+
+class DBUtils():
+    """SQLite database query utility """
+    def dummy(self):
+        pass
 
 #######################################################
 #  Helper functions  - Misc
