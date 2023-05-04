@@ -486,3 +486,7 @@ delete from g_person where id in (
 )
 ;
 
+select * from g_person where org is null;
+select org,count(*) from g_person group by org;
+select count(*) from g_person;
+

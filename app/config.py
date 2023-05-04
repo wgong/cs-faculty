@@ -1,14 +1,14 @@
 # duckdb file
-FILE_DB = f"./db/cs-faculty-20230429.duckdb"
+FILE_DB = f"./db/cs-faculty-20230502.duckdb"
 
-ORG_ALIAS = {
-    "Cornell": "Cornell Univ",
-    "MIT": "Massachusetts Institute Technology",
-    "CMU": "Carnegie Mellon Univ",
-    "Berkely": "Univ California Berkeley",
-    "Stanford": "Stanford Univ",
-    "UIUC": "Univ Illinois Urbana-Champaign",
-}
+# ORG_ALIAS = {
+#     "Cornell": "Cornell Univ",
+#     "MIT": "Massachusetts Institute Technology",
+#     "CMU": "Carnegie Mellon Univ",
+#     "Berkely": "Univ California Berkeley",
+#     "Stanford": "Stanford Univ",
+#     "UIUC": "Univ Illinois Urbana-Champaign",
+# }
 
 # generic object
 TABLE_ENTITY = "g_entity"

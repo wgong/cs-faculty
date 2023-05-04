@@ -24,6 +24,7 @@ DONE:
 - [2023-05-03]
     - Added award field to g_person, g_work to indicate its quality
     - merge db.py into helper.py
+    - Add filter by Org in "Person (All)" menu item
 
 - [2023-04-30]
     - Added g_task table and related UI
@@ -111,6 +112,8 @@ STR_DOWNLOAD_CSV    = "Download CSV"
 STR_IMPORT_EXPORT   = "Data Import/Export"
 STR_IMPORT          = "Data Import"
 STR_EXPORT          = "Data Export"
+STR_ALL_ORGS        = "All Orgs"
+STR_CORNELL_UNIV    = "Cornell Univ"
 
 ## menu
 _STR_MENU_HOME              = STR_WELCOME
@@ -806,7 +809,6 @@ def _push_selected_cols_to_front(cols, selected_cols=["name","url"]):
 # _STR_MENU_FACULTY
 def _crud_display_grid_parent_child(table_name,
                 person_type="faculty",
-                org_list=["Cornell Univ"],
                 form_name_suffix="",
                 orderby_cols=["name"], 
                 selection_mode="single"):
@@ -828,18 +830,26 @@ def _crud_display_grid_parent_child(table_name,
 
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
-        if org_list:
-            where_clause = f" where person_type = '{person_type}' and org in {list2sql_str(org_list)} "
-        else:
-            where_clause = " where 1=2 "
+        where_clause = f" where person_type = '{person_type}' "
+        # add org_filter
+        selected_org = st.session_state.get("selected_org", STR_ALL_ORGS)
+        if selected_org is None or selected_org == "" :
+            where_clause += f"""
+                and ( org = '' or org is NULL )
+            """
+        elif selected_org != STR_ALL_ORGS:
+            where_clause += f"""
+                and org = '{selected_org}'
+            """
             
         selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         sql_stmt = f"""
-            select {",".join(selected_cols)}
+            select 
+                {",".join(selected_cols)}
             from {table_name} 
-            {where_clause}
-            {orderby_clause};
+                {where_clause}
+                {orderby_clause};
         """
         df = pd.read_sql(sql_stmt, _conn).fillna("")
 
@@ -1096,18 +1106,35 @@ def _crud_display_grid_form_subject(table_name,
     # prepare dataframe
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
-        where_clause = f"""
-            where ref_tab = '{ref_tab}'
+
+        where_clause = " where 1=1 "
+        if all((ref_tab,ref_key,ref_val)):
+            where_clause += f"""
+                and ref_tab = '{ref_tab}'
                 and ref_key = '{ref_key}'
                 and ref_val = '{ref_val}'
-        """ if all((ref_tab,ref_key,ref_val)) else ""
+            """
+        if table_name == TABLE_PERSON:
+            # add org_filter
+            selected_org = st.session_state.get("selected_org", STR_ALL_ORGS)
+            if selected_org is None or selected_org == "" :
+                where_clause += f"""
+                    and ( org = '' or org is NULL )
+                """
+            elif selected_org != STR_ALL_ORGS:
+                where_clause += f"""
+                    and org = '{selected_org}'
+                """
+
+
         selected_cols = _push_selected_cols_to_end(visible_columns, selected_cols=["ref_key","ref_val"])
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         sql_stmt = f"""
-            select {",".join(selected_cols)}
+            select 
+                {",".join(selected_cols)}
             from {table_name} 
-            {where_clause}
-            {orderby_clause};
+                {where_clause}
+                {orderby_clause};
         """
         df = pd.read_sql(sql_stmt, _conn).fillna("")
 
@@ -1271,6 +1298,17 @@ def _sidebar_clear_faculty_form(form_name="new_faculty"):
     for col in DATA_COLS[TABLE_FACULTY]:
         st.session_state[f"{form_name}_{col}"] = ""
 
+# add org filter
+def _sidebar_display_org_filter(menu_iterm=_STR_MENU_PERSON):
+    with DBConn() as _conn:
+        sql_stmt = """select distinct org
+            from g_person
+            order by org;
+        """
+        df = pd.read_sql(sql_stmt, _conn)
+        org_list = [STR_ALL_ORGS] + df["org"].to_list()
+        idx_default = org_list.index(STR_ALL_ORGS) if menu_iterm==_STR_MENU_PERSON else org_list.index(STR_CORNELL_UNIV)
+        st.selectbox("Select Org:", org_list, index=idx_default, key="selected_org")
 
 #####################################################
 # Menu Handlers
@@ -1307,10 +1345,7 @@ def do_welcome():
 
 def do_faculty():
     st.subheader(f"{_STR_MENU_FACULTY}")
-    org_list = [ORG_ALIAS.get(k,"") for k,v in st.session_state.get("org_menu", {}).items() if v]
-    # if org_list: st.write(str(org_list))
-
-    _crud_display_grid_parent_child(TABLE_FACULTY, org_list=org_list)
+    _crud_display_grid_parent_child(TABLE_FACULTY)
 
 def do_research_group():
     st.subheader(f"{_STR_MENU_RESEARCH_GROUP}")
@@ -1449,11 +1484,7 @@ def do_sidebar():
         # keep menu item in the same order as i18n strings
 
         if menu_item == _STR_MENU_FACULTY:
-            org_menus = {}
-            for org in ORG_ALIAS.keys():
-                org_menus[org] = st.checkbox(org,value=False if org != "Cornell" else True)
-            st.session_state["org_menu"] = org_menus
-
+            _sidebar_display_org_filter(menu_item)
             _sidebar_display_add_faculty()
 
         elif menu_item == _STR_MENU_RESEARCH_GROUP:
@@ -1461,6 +1492,9 @@ def do_sidebar():
 
         elif menu_item == _STR_MENU_NOTE:
             _sidebar_display_add_note()
+
+        elif menu_item == _STR_MENU_PERSON:
+            _sidebar_display_org_filter()
 
         else:
             pass

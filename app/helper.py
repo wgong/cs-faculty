@@ -13,7 +13,7 @@ from config import *
 #  Helper functions  - database
 #######################################################
 class DBConn(object):
-    def __init__(self, file_db):
+    def __init__(self, file_db=FILE_DB):
         """Support only DuckDB and SQLite
         """
         if not Path(file_db).exists():
