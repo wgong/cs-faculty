@@ -1,7 +1,7 @@
 # CS Faculty Info
 
 *Important Note*: <br>
-In order to perserve your data, make sure to backup your local duckdb file before git-pull the latest code.
+In order to perserve your data, make sure to backup your local duckdb file before upgrading to the latest code.
 
 ## Get started
 ```
@@ -13,7 +13,6 @@ $ streamlit run app.py
 open browser at http://localhost:8501/
 ```
 
-
 ## Screenshots
 
 - List of Faculties
@@ -22,4 +21,20 @@ open browser at http://localhost:8501/
 ![Faculties](https://github.com/wgong/cs-faculty/blob/main/docs/Screenshots/1-faculty-1_work-edit.jpg "Work")
 - [... More screenshots are here](https://github.com/wgong/cs-faculty/tree/main/docs/Screenshots)
 
+## Configuration
+
+- If you rename DuckDB file, ensure to change `FILE_DB` variable in `config.py` accordingly
+
+## Release Notes
+
+- [2023-05-03]
+    - added `award` column to 2 tables: g_person, g_work
+    - if you have added data to `db/cs-faculty-20230429.duckdb`, please run `patch_db_20230503.py` which will alter those 2 tables by adding the `award` column
+
+- [2023-04-29] 
+    - first working version released
+
 ## Credits
+
+- This app is powered by the awesome `streamlit` framework. Thank you, the [Streamlit](https://streamlit.io/) creators and [community](https://streamlit.io/community) !
+- This app uses the awesome `streamlit-aggrid` to display tabular data. Thank you, [Pablo Fonseca](https://github.com/PablocFonseca/streamlit-aggrid) !
