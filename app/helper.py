@@ -131,6 +131,10 @@ def _dedup_list(tickers):
     return _lst
 
 def escape_single_quote(s):
+    if s is None or s == 'None':
+        return ''
+    if not "'" in s:
+        return s
     return s.replace("\'", "\'\'")
 
 def unescape_single_quote(s):

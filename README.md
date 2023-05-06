@@ -1,9 +1,40 @@
 # CS Faculty Info
 
-*Important Note*: <br>
-In order to perserve your data, make sure to backup your local duckdb file before upgrading to the latest code.
+**Important Note**: <br>
+In order to perserve your data, you should backup your local duckdb file before upgrading to the latest code.
 
 ## Get started
+### Setup for Windows 
+
+#### Install Anaconda python 
+follow tutorial at https://www.datacamp.com/tutorial/installing-anaconda-windows
+
+#### Download cs-faculty 
+visit https://github.com/wgong/cs-faculty
+
+#### (Optional) create virtual python env called cs and activate it
+```
+python -m venv cs 
+cs\Scripts\activate 
+```
+
+#### Install dependent python packages 
+```
+pip install -r requirements.txt 
+```
+
+#### Launch streamlit app
+```
+cd app
+streamlit run app.py
+```
+open browser at http://localhost:8501/
+
+**Note**: <br>
+Commands may differ for other OS, but the logical sequence remains the same.
+
+
+### Setup from GitHub source
 ```
 $ git clone git@github.com:wgong/cs-faculty.git
 $ cd cs-faculty
@@ -26,6 +57,9 @@ open browser at http://localhost:8501/
 - If you rename DuckDB file, ensure to change `FILE_DB` variable in `config.py` accordingly
 
 ## Release Notes
+
+- [2023-05-06]
+    - added setup instruction
 
 - [2023-05-03]
     - added `award` column to 2 tables: g_person, g_work

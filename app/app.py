@@ -11,7 +11,7 @@ TODO:
         - Internship
         - Org (School, Company, ...)
         - Google Scholar, Best Paper Award on work quality, CSRanking ?
-        - Awards: Sloan, Best Paper, NSF career
+        - Award: Sloan, Best Paper, NSF career (e.g. https://www.cs.cornell.edu/information/awards-by-recipient)
 
     - Import data from another user, ensure no duplicates
 
@@ -21,6 +21,9 @@ TODO:
       so that special-purpose tables become unnecessary.
 
 DONE:
+- [2023-05-06]
+    - replaced _db_insert() with _db_upsert() to avoid duplicates 
+
 - [2023-05-03]
     - Added award field to g_person, g_work to indicate its quality
     - merge db.py into helper.py
@@ -146,7 +149,7 @@ _GRID_OPTIONS = {
 #####################################################
 # Helpers (prefix with underscore)
 #####################################################
-def debug_print(msg, DEBUG=DEBUG_FLAG):
+def _debug_print(msg, DEBUG=DEBUG_FLAG):
     if DEBUG and msg:
         # st.write(f"[DEBUG] {str(msg)}")
         print(f"[DEBUG] {str(msg)}")
@@ -466,10 +469,12 @@ def _layout_form(table_name,
             _db_update_by_id(data)
         else:
             data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
-            _db_insert(data)
+            _db_upsert(data)
+        _crud_clear_form()
 
     elif btn_delete and data.get("id"):
         _db_delete_by_id(data)
+        _crud_clear_form()
 
     elif btn_refresh:
         _crud_clear_form()
@@ -554,6 +559,9 @@ def _db_delete_by_id_inter(data):
 
 def _db_insert_inter(data):
     """insert into both child and intersection tables
+
+    TODO:
+        enhance with upsert logic like _db_upsert()
     """
     if not data: 
         return None
@@ -611,7 +619,7 @@ def _db_insert_inter(data):
     """
     _db_execute(insert_sql)
 
-def _db_insert(data):
+def _db_upsert(data, user_key_cols=["name","url"]):
     if not data: 
         return None
     
@@ -621,29 +629,87 @@ def _db_insert(data):
 
     # build SQL
     visible_columns = _get_columns(table_name, prop_name="is_visible")
-    col_clause = []
-    val_clause = []
 
+    # query by user-key to avoid duplicates
+    uk_where_clause = []
     for col,val in data.items():
-        if col not in visible_columns:
-            continue
-        col_clause.append(col)
-        if col in ["due_date", "done_date", "alert_date", "alert_time"]:
-            col_val = val
-        else:
-            col_val = escape_single_quote(val)
-        val_clause.append(f"'{col_val}'")
+        if col in user_key_cols:
+            if val != "":
+                uk_where_clause.append(f" {col} = '{escape_single_quote(val)}' ")
 
-    insert_sql = f"""
-        insert into {table_name} (
-            {", ".join(col_clause)}
-        )
-        values (
-            {", ".join(val_clause)}
-        );
-    """
-    debug_print(insert_sql)
-    _db_execute(insert_sql)
+    if not uk_where_clause:
+        return None # skip if user key cols not populated
+
+    with DBConn() as _conn:
+        where_clause = " and ".join(uk_where_clause)
+        sql_stmt = f"""
+            select id
+            from {table_name} 
+            where {where_clause};
+        """
+        rows = pd.read_sql(sql_stmt, _conn).to_dict('records')
+
+    if not len(rows):
+        sql_type = "INSERT" 
+    else: 
+        sql_type = "UPDATE"  
+        old_row = rows[0]
+
+    
+    if sql_type == "INSERT":
+        col_clause = []
+        val_clause = []
+        for col,val in data.items():
+            if col not in visible_columns:
+                continue
+            col_clause.append(col)
+            if col in ["due_date", "done_date", "alert_date", "alert_time"]:
+                col_val = val
+            else:
+                col_val = escape_single_quote(val)
+            val_clause.append(f"'{col_val}'")
+
+        upsert_sql = f"""
+            insert into {table_name} (
+                {", ".join(col_clause)}
+            )
+            values (
+                {", ".join(val_clause)}
+            );
+        """
+
+    else:
+        set_clause = []
+        for col,val in data.items():
+            if col not in visible_columns or col in user_key_cols:
+                continue
+
+            # skip if no change
+            old_val = old_row.get(col, "")
+            if old_val is None:
+                old_val = ""
+            if val == old_val:
+                continue
+
+            if col in ["due_date", "done_date", "alert_date", "alert_time"]:
+                col_val = val
+            else:
+                col_val = escape_single_quote(val)
+
+            set_clause.append(f" {col} = '{col_val}'")
+
+        if set_clause:
+            id_ = old_row.get("id")
+            upsert_sql = f"""
+                update {table_name} 
+                set 
+                    {", ".join(set_clause)}
+                where id = '{id_}';
+            """
+
+    _debug_print(upsert_sql)
+    _db_execute(upsert_sql)
+
 
 def _db_update_by_id(data, update_changed=True):
     if not data: 
@@ -889,7 +955,7 @@ def _crud_display_grid_parent_child(table_name,
     idx_default = menu_options.index("Work")
 
     faculty_name = selected_row.get("name")
-    menu_item = st.selectbox(f"Pick from {menu_options} listed below for '{faculty_name}' ({primary_key}): ", 
+    menu_item = st.selectbox(f"Menu for '{faculty_name}' ({primary_key}): ", 
                                 menu_options, index=idx_default, key="faculty_menu_item")
 
     if menu_item == "Work":
@@ -1174,7 +1240,7 @@ def _crud_display_grid_form_entity(table_name,
     Fields below in columns: 1, 2, or 3 specified by 'form_column'
     """
     # validate table_name exists
-    # debug_print(COLUMN_PROPS.keys())
+    # _debug_print(COLUMN_PROPS.keys())
     if not table_name in COLUMN_PROPS or not table_name in COLUMN_DEFS:
         st.error(f"Invalid table name: {table_name}")
         return
