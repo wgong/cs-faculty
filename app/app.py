@@ -24,7 +24,8 @@ DONE:
 - [2023-05-03]
     - Added award field to g_person, g_work to indicate its quality
     - merge db.py into helper.py
-    - Add filter by Org in "Person (All)" menu item
+    - Add filter by Org in "Person (All)" and "Faculty" menu items
+    - added patch_db_20230503.py to add new column to g_person, g_work
 
 - [2023-04-30]
     - Added g_task table and related UI
@@ -147,7 +148,8 @@ _GRID_OPTIONS = {
 #####################################################
 def debug_print(msg, DEBUG=DEBUG_FLAG):
     if DEBUG and msg:
-        st.write(f"[DEBUG] {str(msg)}")
+        # st.write(f"[DEBUG] {str(msg)}")
+        print(f"[DEBUG] {str(msg)}")
 
 def _download_df(df, filename_csv):
     """Download input df to CSV
@@ -469,6 +471,8 @@ def _layout_form(table_name,
     elif btn_delete and data.get("id"):
         _db_delete_by_id(data)
 
+    elif btn_refresh:
+        _crud_clear_form()
 
 ###################################################################
 # handle Note
