@@ -22,7 +22,8 @@ TODO:
 
 DONE:
 - [2023-05-06]
-    - replaced _db_insert() with _db_upsert() to avoid duplicates 
+    - replaced _db_insert() with _db_upsert() to avoid duplicates
+    - populate uid column with OS login user 
 
 - [2023-05-03]
     - Added award field to g_person, g_work to indicate its quality
@@ -63,6 +64,7 @@ from datetime import datetime, date, timedelta
 from pathlib import Path
 import pandas as pd
 from uuid import uuid4
+
 # import glob
 # from io import StringIO
 # import yaml
@@ -79,7 +81,7 @@ from st_aggrid import (GridOptionsBuilder, AgGrid,
 
 from config import *
 from helper import (escape_single_quote, df_to_csv, 
-                    list2sql_str, DBConn)
+                    list2sql_str, DBConn, get_uid)
 
 DEBUG_FLAG = True # False
 ##====================================================
@@ -342,7 +344,7 @@ def _layout_form_inter(table_name,
         old_row[col] = selected_row.get(col) if selected_row is not None else ""
 
     # display buttons
-    btn_save, btn_refresh, btn_delete = _crud_display_buttons()
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons(form_name)
 
     # collect info for DB action
     data = {"table_name": table_name,   # ref_tab_sub
@@ -364,19 +366,25 @@ def _layout_form_inter(table_name,
         elif form_columns.get(c, "").startswith("COL_3-"):
             col3_columns.append(c) 
 
+    displayed_cols = []
     col1,col2,col3 = st.columns([6,5,4])
     with col1:
         for col in col1_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
     with col2:
         for col in col2_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
     with col3:
         for col in col3_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+
+    st.session_state[f"displayed_columns_{form_name}"] = displayed_cols
 
     # copy id if present
     id_val = old_row.get("id", "")
@@ -386,14 +394,20 @@ def _layout_form_inter(table_name,
     # handle buttons
     if btn_save:
         if data.get("id"):
-            data.update({"ts": str(datetime.now()),})
+            data.update({"ts": str(datetime.now()),
+                         "uid": get_uid(), })
             _db_update_by_id(data)
         else:
-            data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
+            data.update({"id": str(uuid4()), 
+                         "ts": str(datetime.now()),
+                         "uid": get_uid(), })
             _db_insert_inter(data)
 
     elif btn_delete and data.get("id"):
         _db_delete_by_id_inter(data)
+
+    elif btn_refresh:
+        _crud_clear_form()
 
 def _layout_form(table_name, 
                  selected_row, 
@@ -419,7 +433,7 @@ def _layout_form(table_name,
         old_row[col] = selected_row.get(col) if selected_row is not None else ""
 
     # display buttons
-    btn_save, btn_refresh, btn_delete = _crud_display_buttons()
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons(form_name)
 
     data = {"table_name": table_name}
     if all((ref_tab, ref_key, ref_val)):
@@ -442,19 +456,25 @@ def _layout_form(table_name,
         elif form_columns.get(c, "").startswith("COL_3-"):
             col3_columns.append(c) 
 
+    displayed_cols = []
     col1,col2,col3 = st.columns([6,5,4])
     with col1:
         for col in col1_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
     with col2:
         for col in col2_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
     with col3:
         for col in col3_columns:
             data = _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+
+    st.session_state[f"displayed_columns_{form_name}"] = displayed_cols
 
     # copy id if present
     id_val = old_row.get("id", "")
@@ -465,16 +485,17 @@ def _layout_form(table_name,
     # handle buttons
     if btn_save:
         if data.get("id"):
-            data.update({"ts": str(datetime.now()),})
+            data.update({"ts": str(datetime.now()),
+                        "uid": get_uid(), })
             _db_update_by_id(data)
         else:
-            data.update({"id": str(uuid4()), "ts": str(datetime.now()),})
+            data.update({"id": str(uuid4()), 
+                         "ts": str(datetime.now()),
+                         "uid": get_uid(), })
             _db_upsert(data)
-        _crud_clear_form()
 
     elif btn_delete and data.get("id"):
         _db_delete_by_id(data)
-        _crud_clear_form()
 
     elif btn_refresh:
         _crud_clear_form()
@@ -584,8 +605,8 @@ def _db_insert_inter(data):
     id = str(uuid4())
     ts = data.get("ts", str(datetime.now()))
 
-    inter_col_clause = ['id', 'ts', 'rel_type', 'ref_tab', 'ref_key', 'ref_val', 'ref_tab_sub', 'ref_key_sub', 'ref_val_sub']
-    inter_vals = [id, ts, rel_type, ref_tab, ref_key, ref_val, ref_tab_sub, ref_key_sub, ref_val_sub]
+    inter_col_clause = ['id', 'ts', 'uid', 'rel_type', 'ref_tab', 'ref_key', 'ref_val', 'ref_tab_sub', 'ref_key_sub', 'ref_val_sub']
+    inter_vals = [id, ts, get_uid(), rel_type, ref_tab, ref_key, ref_val, ref_tab_sub, ref_key_sub, ref_val_sub]
     inter_val_clause = []
     for val in inter_vals:
         inter_val_clause.append(f"'{escape_single_quote(val)}'")
@@ -595,7 +616,7 @@ def _db_insert_inter(data):
     col_clause = []
     val_clause = []
     for col,val in data.items():
-        if col not in visible_columns:
+        if col not in set(visible_columns + SYS_COLS):
             continue
         col_clause.append(col) 
         val_clause.append(f"'{escape_single_quote(val)}'")
@@ -792,9 +813,10 @@ def _db_upsert_group(data, table_name=TABLE_RESEARCH_GROUP):
     else:
         id = str(uuid4())
         ts = str(datetime.now())
+        uid = get_uid()
         sql_stmt = f"""
-            insert into {table_name} (id, ts, name, url)
-            values ('{id}', '{ts}', '{_research_group}', '{_url}');
+            insert into {table_name} (id, ts, uid, name, url)
+            values ('{id}', '{ts}', '{uid}', '{_research_group}', '{_url}');
         """
     _db_execute(sql_stmt)
 
@@ -807,10 +829,11 @@ def _db_quick_add(data, table_name):
     
     if len(rows) < 1:  # insert
         data.update({"id": str(uuid4()),
-                     "ts": str(datetime.now()),})        
+                     "ts": str(datetime.now()),
+                     "uid": get_uid(), })        
         col_names = []
         col_vals = []
-        for c in data_cols+["id","ts"]:
+        for c in data_cols + SYS_COLS:
             col_names.append(c)
             v = data.get(c, "")
             col_vals.append(f"'{v}'")        
@@ -844,7 +867,7 @@ def _db_quick_add(data, table_name):
 
 def _push_selected_cols_to_end(cols, selected_cols=SYS_COLS):
     """move selected column to the end,
-    e.g. id, ts system cols
+        e.g. id, ts, uid system cols
     """
     new_select_cols = []
     new_cols = []
@@ -1039,6 +1062,7 @@ def _layout_form_fields(data,form_name,old_row,col,
                     val = opts[0] if opts else "" # workaround for refresh error
             else:
                 val = st.text_input(col_labels.get(col), value=old_row[col], key=f"col_{form_name}_{col}")
+
         else:
             kwargs = {}
             if col in system_columns:
@@ -1047,6 +1071,7 @@ def _layout_form_fields(data,form_name,old_row,col,
 
         if val != old_row[col]:
             data.update({col : val})
+
 
     return data
 
@@ -1283,11 +1308,16 @@ def _crud_display_grid_form_entity(table_name,
     ## layout form
     _layout_form(table_name, selected_row, entity_type=entity_type)
 
-def _crud_display_buttons():
+def _crud_display_buttons(form_name):
     """button UI key: btn_<table_name>_action
         action: refresh, upsert, delete
     """
-    form_name = st.session_state.get("form_name", "")
+    # if form_name_child == "no_child":
+    #     form_name = st.session_state.get("form_name", "")
+    # else:
+    #     form_name = form_name_child
+    #     st.session_state["form_name"] = form_name
+
     if not form_name: 
         return
     c_save, c_refresh, _, c_delete, c_info = st.columns([3,3,3,3,7])
@@ -1306,9 +1336,18 @@ def _crud_clear_form():
     if not form_name: 
         return
 
-    for col in st.session_state.get("visible_columns", []):
-        col_key = f"col_{form_name}_{col}"
-        st.session_state.update({col_key: ""}) 
+    exist_displayed_cols = st.session_state[f"displayed_columns_{form_name}"]
+    # print(f"exist_displayed_cols = {exist_displayed_cols}")
+    # for col in st.session_state.get("visible_columns", []):
+    for col in exist_displayed_cols:
+        try:
+            col_key = f"col_{form_name}_{col}"
+            st.session_state.update({col_key: ""}) 
+        except Exception:
+            pass
+
+    st.session_state[f"displayed_columns_{form_name}"] = []
+
 
 
 ### quick add note

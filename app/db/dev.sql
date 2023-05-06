@@ -490,3 +490,9 @@ select * from g_person where org is null;
 select org,count(*) from g_person group by org;
 select count(*) from g_person;
 
+select * from g_entity where uid is null;
+select * from g_relation where uid is null;
+select * from g_person where uid is null;
+select * from g_work where uid is null;
+select * from g_note where uid is null;
+select * from g_task where uid is null;

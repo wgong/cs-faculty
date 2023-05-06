@@ -26,6 +26,15 @@ TABLE_WORK = "g_work"
 TABLE_NOTE = "g_note"
 TABLE_TASK = "g_task"
 
+TABLE_LIST = [
+    TABLE_ENTITY, 
+    TABLE_RELATION, 
+    TABLE_PERSON,
+    TABLE_WORK,
+    TABLE_NOTE,
+    TABLE_TASK,
+]
+
 # LOV
 SYS_COLS = ["id","ts","uid"]
 

@@ -3,6 +3,7 @@ from dateutil.relativedelta import relativedelta
 import re
 from pathlib import Path
 import pandas as pd
+import os
 
 import sqlite3
 import duckdb
@@ -62,6 +63,9 @@ def alter_table_drop_column(table_name, col_name, file_db=FILE_DB):
 #######################################################
 #  Helper functions  - Misc
 #######################################################
+
+def get_uid():
+    return os.getlogin()
 
 # Function sourced from
 # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
