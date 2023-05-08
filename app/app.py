@@ -21,6 +21,10 @@ TODO:
       so that special-purpose tables become unnecessary.
 
 DONE:
+- [2023-05-08]
+    - review http://www.cs.cornell.edu/~cdesa/
+    - continue cleanup and refactoring
+
 - [2023-05-06]
     - replaced _db_insert() with _db_upsert() to avoid duplicates
     - populate uid column with OS login user 
@@ -151,8 +155,8 @@ _GRID_OPTIONS = {
 #####################################################
 # Helpers (prefix with underscore)
 #####################################################
-def _debug_print(msg, DEBUG=DEBUG_FLAG):
-    if DEBUG and msg:
+def _debug_print(msg, debug=DEBUG_FLAG):
+    if debug and msg:
         # st.write(f"[DEBUG] {str(msg)}")
         print(f"[DEBUG] {str(msg)}")
 
@@ -280,13 +284,18 @@ COLUMN_DEFS = _parse_column_props()
 #             _conn.execute(create_table_note_sql)
 #             _conn.commit()
 
-def _display_grid_df(df, 
-                    selection_mode="multiple", 
-                    page_size=_GRID_OPTIONS["paginationPageSize"],
-                    grid_height=_GRID_OPTIONS["grid_height"],
-                    editable_columns=[],
-                    clickable_columns=[]):
+###################################################################
+# handle UI
+# ======================================
+def _layout_grid(df, 
+            selection_mode="multiple", 
+            page_size=_GRID_OPTIONS["paginationPageSize"],
+            grid_height=_GRID_OPTIONS["grid_height"],
+            editable_columns=[],
+            clickable_columns=[]):
     """show df in a grid and return selected row
+
+    Note: renamed from _display_grid_df() to be similar to layout_form()
     """
 
     gb = GridOptionsBuilder.from_dataframe(df)
@@ -299,11 +308,11 @@ def _display_grid_df(df,
         paginationPageSize=page_size)
     gb.configure_columns(editable_columns, editable=True)
 
-    cell_renderer =  JsCode("""
+    render_clickable =  JsCode("""
     function(params) {return `<a href=${params.value} target="_blank">${params.value}</a>`}
     """)
     for col_name in clickable_columns:
-        gb.configure_column(col_name, cellRenderer=cell_renderer)
+        gb.configure_column(col_name, cellRenderer=render_clickable)
 
     gb.configure_grid_options(domLayout='normal')
     grid_response = AgGrid(
@@ -319,15 +328,106 @@ def _display_grid_df(df,
     )
     return grid_response
 
-def _layout_form_inter(table_name, 
-                selected_row, 
-                ref_tab,
-                ref_key,  
-                ref_val,
-                inter_table_name,
-                rel_type):
+def _layout_form(table_name, 
+                 selected_row, 
+                 ref_tab="", 
+                 ref_key="", 
+                 ref_val="", 
+                 entity_type=""):
     """ layout form for a table and handles button actions 
-    which have intersection table dependency
+    """
+
+    form_name = st.session_state.get("form_name","")
+    form_name_suffix = form_name.split("#")[-1]
+
+    COL_DEFS = COLUMN_DEFS[table_name]
+    visible_columns = COL_DEFS["is_visible"]
+    system_columns = COL_DEFS["is_system_col"]
+    form_columns = COL_DEFS["form_column"]
+    col_labels = COL_DEFS["label_text"]
+    widget_types = COL_DEFS["widget_type"]
+
+    old_row = {}
+    for col in visible_columns:
+        old_row[col] = selected_row.get(col) if selected_row is not None else ""
+
+    # display buttons
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons(form_name)
+
+    data = {"table_name": table_name}
+    if all((ref_tab, ref_key, ref_val)):
+        data.update({"ref_tab":ref_tab, "ref_key":ref_key, "ref_val":ref_val})
+    if entity_type:
+        data.update({"entity_type":entity_type})
+        
+    # display form and populate data dict
+    col1_columns = []
+    col2_columns = []
+    col3_columns = []
+    for c in visible_columns:
+        if form_name_suffix and c in ["ref_tab", "ref_key", "ref_val"]:
+            # skip displaying ref_key, ref_val for parent/child view
+            continue
+        if form_columns.get(c, "").startswith("COL_1-"):
+            col1_columns.append(c)
+        elif form_columns.get(c, "").startswith("COL_2-"):
+            col2_columns.append(c)
+        elif form_columns.get(c, "").startswith("COL_3-"):
+            col3_columns.append(c) 
+
+    displayed_cols = []
+    col1,col2,col3 = st.columns([6,5,4])
+    with col1:
+        for col in col1_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+    with col2:
+        for col in col2_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+    with col3:
+        for col in col3_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+
+    st.session_state[f"displayed_columns_{form_name}"] = displayed_cols
+
+    # copy id if present
+    id_val = old_row.get("id", "")
+    if id_val:
+        data.update({"id" : id_val})
+
+    # handle buttons
+    if btn_save:
+        if data.get("id"):
+            data.update({"ts": str(datetime.now()),
+                        "uid": get_uid(), })
+            _db_update_by_id(data)
+        else:
+            data.update({"id": str(uuid4()), 
+                         "ts": str(datetime.now()),
+                         "uid": get_uid(), })
+            _db_upsert(data)
+
+    elif btn_delete and data.get("id"):
+        _db_delete_by_id(data)
+
+    elif btn_refresh:
+        _crud_clear_form()
+
+
+def _layout_form_inter(table_name, 
+            selected_row, 
+            ref_tab,
+            ref_key,  
+            ref_val,
+            inter_table_name,
+            rel_type):
+    """ layout form for a table with intersection table dependency
+    and handles button actions: Save (C/U), Delete (D)
     """
 
     form_name = st.session_state.get("form_name","")
@@ -409,129 +509,19 @@ def _layout_form_inter(table_name,
     elif btn_refresh:
         _crud_clear_form()
 
-def _layout_form(table_name, 
-                 selected_row, 
-                 ref_tab="", 
-                 ref_key="", 
-                 ref_val="", 
-                 entity_type=""):
-    """ layout form for a table and handles button actions 
-    """
-
-    form_name = st.session_state.get("form_name","")
-    form_name_suffix = form_name.split("#")[-1]
-
-    COL_DEFS = COLUMN_DEFS[table_name]
-    visible_columns = COL_DEFS["is_visible"]
-    system_columns = COL_DEFS["is_system_col"]
-    form_columns = COL_DEFS["form_column"]
-    col_labels = COL_DEFS["label_text"]
-    widget_types = COL_DEFS["widget_type"]
-
-    old_row = {}
-    for col in visible_columns:
-        old_row[col] = selected_row.get(col) if selected_row is not None else ""
-
-    # display buttons
-    btn_save, btn_refresh, btn_delete = _crud_display_buttons(form_name)
-
-    data = {"table_name": table_name}
-    if all((ref_tab, ref_key, ref_val)):
-        data.update({"ref_tab":ref_tab, "ref_key":ref_key, "ref_val":ref_val})
-    if entity_type:
-        data.update({"entity_type":entity_type})
-        
-    # display form and populate data dict
-    col1_columns = []
-    col2_columns = []
-    col3_columns = []
-    for c in visible_columns:
-        if form_name_suffix and c in ["ref_tab", "ref_key", "ref_val"]:
-            # skip displaying ref_key, ref_val for parent/child view
-            continue
-        if form_columns.get(c, "").startswith("COL_1-"):
-            col1_columns.append(c)
-        elif form_columns.get(c, "").startswith("COL_2-"):
-            col2_columns.append(c)
-        elif form_columns.get(c, "").startswith("COL_3-"):
-            col3_columns.append(c) 
-
-    displayed_cols = []
-    col1,col2,col3 = st.columns([6,5,4])
-    with col1:
-        for col in col1_columns:
-            data = _layout_form_fields(data,form_name,old_row,col,
-                        widget_types,col_labels,system_columns)
-            displayed_cols.append(col)
-    with col2:
-        for col in col2_columns:
-            data = _layout_form_fields(data,form_name,old_row,col,
-                        widget_types,col_labels,system_columns)
-            displayed_cols.append(col)
-    with col3:
-        for col in col3_columns:
-            data = _layout_form_fields(data,form_name,old_row,col,
-                        widget_types,col_labels,system_columns)
-            displayed_cols.append(col)
-
-    st.session_state[f"displayed_columns_{form_name}"] = displayed_cols
-
-    # copy id if present
-    id_val = old_row.get("id", "")
-    if id_val:
-        data.update({"id" : id_val})
-
-
-    # handle buttons
-    if btn_save:
-        if data.get("id"):
-            data.update({"ts": str(datetime.now()),
-                        "uid": get_uid(), })
-            _db_update_by_id(data)
-        else:
-            data.update({"id": str(uuid4()), 
-                         "ts": str(datetime.now()),
-                         "uid": get_uid(), })
-            _db_upsert(data)
-
-    elif btn_delete and data.get("id"):
-        _db_delete_by_id(data)
-
-    elif btn_refresh:
-        _crud_clear_form()
 
 ###################################################################
-# handle Note
+# handle DB Backend
 # ======================================
-def _db_execute(sql_statement, DEBUG=DEBUG_FLAG):
+def _db_execute(sql_statement, debug=DEBUG_FLAG):
     with DBConn() as _conn:
-        if DEBUG: print(sql_statement)
+        _debug_print(sql_statement, debug=debug)
         _conn.execute(sql_statement)
         _conn.commit()           
 
-def _db_select(table_name, orderby_cols=[]):
-    """Select whole table"""
-    with DBConn() as _conn:
-        orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ' '
-        sql_stmt = f"""
-            select *
-            from {table_name} 
-            {orderby_clause};
-        """
-        return pd.read_sql(sql_stmt, _conn).fillna("")
-
-def _db_select_by_name_url(table_name, name, url):
-    with DBConn() as _conn:
-        sql_stmt = f"""
-            select *
-            from {table_name} 
-            where name='{name}' 
-                and url='{url}';
-        """
-        return pd.read_sql(sql_stmt, _conn).fillna("").to_dict('records')
-    
 def _db_select_by_id(table_name, id_value=""):
-    """Select row by key"""
+    """Select row by primary key: id
+    """
     if not id_value: return []
 
     with DBConn() as _conn:
@@ -540,7 +530,175 @@ def _db_select_by_id(table_name, id_value=""):
             from {table_name} 
             where id = '{id_value}' ;
         """
-        return pd.read_sql(sql_stmt, _conn).fillna("")
+        return pd.read_sql(sql_stmt, _conn).fillna("").to_dict('records')
+
+def _db_select_by_name_url(table_name, name="", url=""):
+    """Select row by user key: (name, url)
+    """
+    if not any((name,url)):
+        return []
+    
+    with DBConn() as _conn:
+        sql_stmt = f"""
+            select *
+            from {table_name} 
+            where name='{name}' 
+                and url='{url}';
+        """
+        return pd.read_sql(sql_stmt, _conn).fillna("").to_dict('records')
+
+def _db_upsert(data, user_key_cols=["name","url"]):
+    if not data: 
+        return None
+    
+    table_name = data.get("table_name", "")
+    if not table_name:
+        raise Exception(f"[ERROR] Missing table_name: {data}")
+
+    # build SQL
+    visible_columns = _get_columns(table_name, prop_name="is_visible")
+
+    # query by user-key to avoid duplicates
+    uk_where_clause = []
+    for col,val in data.items():
+        if col in user_key_cols:
+            if val != "":
+                uk_where_clause.append(f" {col} = '{escape_single_quote(val)}' ")
+
+    if not uk_where_clause:
+        return None # skip if user key cols not populated
+
+    with DBConn() as _conn:
+        where_clause = " and ".join(uk_where_clause)
+        sql_stmt = f"""
+            select id
+            from {table_name} 
+            where {where_clause};
+        """
+        rows = pd.read_sql(sql_stmt, _conn).to_dict('records')
+
+    if not len(rows):
+        sql_type = "INSERT" 
+    else: 
+        sql_type = "UPDATE"  
+        old_row = rows[0]
+
+    
+    if sql_type == "INSERT":
+        col_clause = []
+        val_clause = []
+        for col,val in data.items():
+            if col not in visible_columns:
+                continue
+            col_clause.append(col)
+            if col in ["due_date", "done_date", "alert_date", "alert_time"]:
+                col_val = val
+            else:
+                col_val = escape_single_quote(val)
+            val_clause.append(f"'{col_val}'")
+
+        upsert_sql = f"""
+            insert into {table_name} (
+                {", ".join(col_clause)}
+            )
+            values (
+                {", ".join(val_clause)}
+            );
+        """
+
+    else:
+        set_clause = []
+        for col,val in data.items():
+            if col not in visible_columns or col in user_key_cols:
+                continue
+
+            # skip if no change
+            old_val = old_row.get(col, "")
+            if old_val is None:
+                old_val = ""
+            if val == old_val:
+                continue
+
+            if col in ["due_date", "done_date", "alert_date", "alert_time"]:
+                col_val = val
+            else:
+                col_val = escape_single_quote(val)
+
+            set_clause.append(f" {col} = '{col_val}'")
+
+        if set_clause:
+            id_ = old_row.get("id")
+            upsert_sql = f"""
+                update {table_name} 
+                set 
+                    {", ".join(set_clause)}
+                where id = '{id_}';
+            """
+
+    _db_execute(upsert_sql)
+
+
+def _db_update_by_id(data, update_changed=True):
+    if not data: 
+        return
+    
+    table_name = data.get("table_name", "")
+    if not table_name:
+        raise Exception(f"[ERROR] Missing table_name: {data}")
+
+    id_val = data.get("id", "")
+    if not id_val:
+        return
+
+    if update_changed:
+        rows = _db_select_by_id(table_name=table_name, id_value=id_val)
+        if len(rows) < 1:
+            return
+        old_row = rows[0]
+
+    editable_columns = _get_columns(table_name, prop_name="is_editable")
+
+    # build SQL
+    set_clause = []
+    for col,val in data.items():
+        if col not in editable_columns: 
+            continue
+        if col in ["due_date", "done_date", "alert_date", "alert_time"]:
+            set_clause.append(f"{col} = '{val}'")
+            continue
+
+        if update_changed:
+            if val != old_row.get(col):
+                set_clause.append(f"{col} = '{escape_single_quote(val)}'")
+        else:
+            set_clause.append(f"{col} = '{escape_single_quote(val)}'")
+
+    if set_clause:
+        update_sql = f"""
+            update {table_name}
+            set {', '.join(set_clause)}
+            where id = '{id_val}';
+        """
+        _db_execute(update_sql)   
+
+
+def _db_delete_by_id(data):
+    if not data: 
+        return None
+    
+    table_name = data.get("table_name", "")
+    if not table_name:
+        raise Exception(f"[ERROR] Missing table_name: {data}")
+
+    id_val = data.get("id", "")
+    if not id_val:
+        return None
+    
+    delete_sql = f"""
+        delete from {table_name}
+        where id = '{id_val}';
+    """
+    _db_execute(delete_sql)
 
 def _db_delete_by_id_inter(data):
     if not data: 
@@ -640,189 +798,15 @@ def _db_insert_inter(data):
     """
     _db_execute(insert_sql)
 
-def _db_upsert(data, user_key_cols=["name","url"]):
-    if not data: 
-        return None
-    
-    table_name = data.get("table_name", "")
-    if not table_name:
-        raise Exception(f"[ERROR] Missing table_name: {data}")
 
-    # build SQL
-    visible_columns = _get_columns(table_name, prop_name="is_visible")
+def _db_quick_add(data):
 
-    # query by user-key to avoid duplicates
-    uk_where_clause = []
-    for col,val in data.items():
-        if col in user_key_cols:
-            if val != "":
-                uk_where_clause.append(f" {col} = '{escape_single_quote(val)}' ")
+    table_name = data.get("table_name")
+    # data_cols = DATA_COLS[table_name]
 
-    if not uk_where_clause:
-        return None # skip if user key cols not populated
-
-    with DBConn() as _conn:
-        where_clause = " and ".join(uk_where_clause)
-        sql_stmt = f"""
-            select id
-            from {table_name} 
-            where {where_clause};
-        """
-        rows = pd.read_sql(sql_stmt, _conn).to_dict('records')
-
-    if not len(rows):
-        sql_type = "INSERT" 
-    else: 
-        sql_type = "UPDATE"  
-        old_row = rows[0]
-
-    
-    if sql_type == "INSERT":
-        col_clause = []
-        val_clause = []
-        for col,val in data.items():
-            if col not in visible_columns:
-                continue
-            col_clause.append(col)
-            if col in ["due_date", "done_date", "alert_date", "alert_time"]:
-                col_val = val
-            else:
-                col_val = escape_single_quote(val)
-            val_clause.append(f"'{col_val}'")
-
-        upsert_sql = f"""
-            insert into {table_name} (
-                {", ".join(col_clause)}
-            )
-            values (
-                {", ".join(val_clause)}
-            );
-        """
-
-    else:
-        set_clause = []
-        for col,val in data.items():
-            if col not in visible_columns or col in user_key_cols:
-                continue
-
-            # skip if no change
-            old_val = old_row.get(col, "")
-            if old_val is None:
-                old_val = ""
-            if val == old_val:
-                continue
-
-            if col in ["due_date", "done_date", "alert_date", "alert_time"]:
-                col_val = val
-            else:
-                col_val = escape_single_quote(val)
-
-            set_clause.append(f" {col} = '{col_val}'")
-
-        if set_clause:
-            id_ = old_row.get("id")
-            upsert_sql = f"""
-                update {table_name} 
-                set 
-                    {", ".join(set_clause)}
-                where id = '{id_}';
-            """
-
-    _debug_print(upsert_sql)
-    _db_execute(upsert_sql)
-
-
-def _db_update_by_id(data, update_changed=True):
-    if not data: 
-        return
-    
-    table_name = data.get("table_name", "")
-    if not table_name:
-        raise Exception(f"[ERROR] Missing table_name: {data}")
-
-    id_val = data.get("id", "")
-    if not id_val:
-        return
-
-    if update_changed:
-        rows = _db_select_by_id(table_name=table_name, id_value=id_val).to_dict('records')
-        if len(rows) < 1:
-            return
-        old_row = rows[0]
-
-    editable_columns = _get_columns(table_name, prop_name="is_editable")
-
-    # build SQL
-    set_clause = []
-    for col,val in data.items():
-        if col not in editable_columns: 
-            continue
-        if col in ["due_date", "done_date", "alert_date", "alert_time"]:
-            set_clause.append(f"{col} = '{val}'")
-            continue
-
-        if update_changed:
-            if val != old_row.get(col):
-                set_clause.append(f"{col} = '{escape_single_quote(val)}'")
-        else:
-            set_clause.append(f"{col} = '{escape_single_quote(val)}'")
-
-    if set_clause:
-        update_sql = f"""
-            update {table_name}
-            set {', '.join(set_clause)}
-            where id = '{id_val}';
-        """
-        _db_execute(update_sql)   
-
-def _db_delete_by_id(data):
-    if not data: 
-        return None
-    
-    table_name = data.get("table_name", "")
-    if not table_name:
-        raise Exception(f"[ERROR] Missing table_name: {data}")
-
-    id_val = data.get("id", "")
-    if not id_val:
-        return None
-    
-    delete_sql = f"""
-        delete from {table_name}
-        where id = '{id_val}';
-    """
-    _db_execute(delete_sql)
-
-def _db_upsert_group(data, table_name=TABLE_RESEARCH_GROUP):
-    _research_group = data.get("name", "")
-    if not _research_group: return None
-
-    with DBConn() as _conn:
-        df = pd.read_sql(f"""
-            select name from {table_name}
-            where name='{_research_group}';
-        """, _conn).fillna("")
-
-    _url = data.get("url", "")
-    if df.shape[0] > 0:  # update
-        sql_stmt = f"""
-            update {table_name}
-            set url = '{_url}'
-            where name='{_research_group}';
-        """
-    else:
-        id = str(uuid4())
-        ts = str(datetime.now())
-        uid = get_uid()
-        sql_stmt = f"""
-            insert into {table_name} (id, ts, uid, name, url)
-            values ('{id}', '{ts}', '{uid}', '{_research_group}', '{_url}');
-        """
-    _db_execute(sql_stmt)
-
-def _db_quick_add(data, table_name):
-
-    data_cols = DATA_COLS[table_name]
+    COL_DEFS = COLUMN_DEFS[table_name]
+    editable_columns = COL_DEFS["is_editable"]
+    data_cols = list(set(editable_columns).union(set(SYS_COLS)))
     name = data.get("name")
     url = data.get("url")
     rows = _db_select_by_name_url(table_name, name, url)
@@ -833,9 +817,10 @@ def _db_quick_add(data, table_name):
                      "uid": get_uid(), })        
         col_names = []
         col_vals = []
-        for c in data_cols + SYS_COLS:
-            col_names.append(c)
+        for c in data_cols:
             v = data.get(c, "")
+            if not v: continue
+            col_names.append(c)
             col_vals.append(f"'{v}'")        
 
         sql_stmt = f"""
@@ -946,13 +931,12 @@ def _crud_display_grid_parent_child(table_name,
         """
         df = pd.read_sql(sql_stmt, _conn).fillna("")
 
-    grid_resp = _display_grid_df(df, 
-                        selection_mode=selection_mode, 
-                        page_size=10, 
-                        grid_height=370,
-                        editable_columns=editable_columns,
-                        clickable_columns=clickable_columns
-                    )
+    grid_resp = _layout_grid(df, 
+            selection_mode=selection_mode, 
+            page_size=10, 
+            grid_height=370,
+            editable_columns=editable_columns,
+            clickable_columns=clickable_columns)
     
     selected_row = {}
     if grid_resp and grid_resp.get('selected_rows'):
@@ -1142,12 +1126,12 @@ def _crud_display_grid_form_inter(table_name,
         # print(f"sql_stmt = {sql_stmt}")
         df = pd.read_sql(sql_stmt, _conn)   
 
-    grid_resp = _display_grid_df(df, 
-                selection_mode="single", 
-                page_size=page_size, 
-                grid_height=grid_height,
-                editable_columns=editable_columns,
-                clickable_columns=clickable_columns)
+    grid_resp = _layout_grid(df, 
+            selection_mode="single", 
+            page_size=page_size, 
+            grid_height=grid_height,
+            editable_columns=editable_columns,
+            clickable_columns=clickable_columns)
     selected_row = None
     if grid_resp:
         selected_rows = grid_resp['selected_rows']
@@ -1234,12 +1218,12 @@ def _crud_display_grid_form_subject(table_name,
         df = pd.read_sql(sql_stmt, _conn).fillna("")
 
     ## show data grid
-    grid_resp = _display_grid_df(df, 
-                    selection_mode="single", 
-                    page_size=page_size, 
-                    grid_height=grid_height,
-                    editable_columns=editable_columns,
-                    clickable_columns=clickable_columns)
+    grid_resp = _layout_grid(df, 
+            selection_mode="single", 
+            page_size=page_size, 
+            grid_height=grid_height,
+            editable_columns=editable_columns,
+            clickable_columns=clickable_columns)
     selected_row = None
     if grid_resp:
         selected_rows = grid_resp['selected_rows']
@@ -1293,12 +1277,12 @@ def _crud_display_grid_form_entity(table_name,
         df = pd.read_sql(sql_stmt, _conn).fillna("")
 
     ## show data grid
-    grid_resp = _display_grid_df(df, 
-                    selection_mode="single", 
-                    page_size=page_size, 
-                    grid_height=grid_height,
-                    editable_columns=editable_columns,
-                    clickable_columns=clickable_columns)
+    grid_resp = _layout_grid(df, 
+            selection_mode="single", 
+            page_size=page_size, 
+            grid_height=grid_height,
+            editable_columns=editable_columns,
+            clickable_columns=clickable_columns)
     selected_row = None
     if grid_resp:
         selected_rows = grid_resp['selected_rows']
@@ -1348,63 +1332,35 @@ def _crud_clear_form():
 
     st.session_state[f"displayed_columns_{form_name}"] = []
 
-
-
-### quick add note
-def _sidebar_display_add_note(form_name="new_note"):
+### Quick Add
+def _sidebar_quick_add_form(form_name):
+    table_name = form_name.split("-")[-1]
+    st.session_state["quick_add_form_name"] = form_name
     with st.expander(f"{STR_QUICK_ADD}", expanded=False):
         with st.form(key=form_name):
-            for col in DATA_COLS[TABLE_NOTE]:
+            for col in DATA_COLS[table_name]:
                 st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
-            st.form_submit_button(STR_ADD, on_click=_sidebar_add_note)
+            st.form_submit_button(STR_ADD, on_click=_sidebar_quick_add)
 
-def _sidebar_add_note(form_name="new_note"):
-    data = {"table_name": TABLE_NOTE}
-    for col in DATA_COLS[TABLE_NOTE]:
+def _sidebar_quick_add():
+    form_name = st.session_state.get("quick_add_form_name", "")
+    table_name = form_name.split("-")[-1]
+    data = {"table_name": table_name}
+
+    if table_name == TABLE_FACULTY:
+        data.update({"person_type": "faculty"})
+    elif table_name == TABLE_RESEARCH_GROUP:
+        data.update({"entity_type": "research_group"})
+
+    for col in DATA_COLS[table_name]:
         data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_quick_add(data, TABLE_NOTE)
-    _sidebar_clear_note_form()
+    _db_quick_add(data)
+    _sidebar_quick_clear_form()
 
-def _sidebar_clear_note_form(form_name="new_note"):
-    for col in DATA_COLS[TABLE_NOTE]:
-        st.session_state[f"{form_name}_{col}"] = ""
-
-### quick add group
-def _sidebar_display_add_group(form_name="new_group"):
-    with st.expander(f"{STR_QUICK_ADD}", expanded=False):
-        with st.form(key=form_name):
-            for col in DATA_COLS[TABLE_RESEARCH_GROUP]:
-                st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
-            st.form_submit_button(STR_ADD, on_click=_sidebar_add_group)
-
-def _sidebar_add_group(form_name="new_group"):
-    data = {"table_name": TABLE_RESEARCH_GROUP}
-    for col in DATA_COLS[TABLE_RESEARCH_GROUP]:
-        data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_quick_add(data, TABLE_RESEARCH_GROUP)
-    _sidebar_clear_group_form()
-
-def _sidebar_clear_group_form(form_name="new_group"):
-    for col in DATA_COLS[TABLE_RESEARCH_GROUP]:
-        st.session_state[f"{form_name}_{col}"] = ""
-
-### quick add faculty
-def _sidebar_display_add_faculty(form_name="new_faculty"):
-    with st.expander(f"{STR_QUICK_ADD}", expanded=False):
-        with st.form(key=form_name):
-            for col in DATA_COLS[TABLE_FACULTY]:
-                st.text_input(_gen_label(col), value="", key=f"{form_name}_{col}")
-            st.form_submit_button(STR_ADD, on_click=_sidebar_add_faculty)
-
-def _sidebar_add_faculty(form_name="new_faculty"):
-    data = {"table_name": TABLE_FACULTY}
-    for col in DATA_COLS[TABLE_FACULTY]:
-        data.update({col: st.session_state.get(f"{form_name}_{col}","")})
-    _db_quick_add(data, TABLE_FACULTY)
-    _sidebar_clear_faculty_form()
-
-def _sidebar_clear_faculty_form(form_name="new_faculty"):
-    for col in DATA_COLS[TABLE_FACULTY]:
+def _sidebar_quick_clear_form():
+    form_name = st.session_state.get("quick_add_form_name", "")
+    table_name = form_name.split("-")[-1]
+    for col in DATA_COLS[table_name]:
         st.session_state[f"{form_name}_{col}"] = ""
 
 # add org filter
@@ -1594,13 +1550,13 @@ def do_sidebar():
 
         if menu_item == _STR_MENU_FACULTY:
             _sidebar_display_org_filter(menu_item)
-            _sidebar_display_add_faculty()
+            _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_FACULTY}")
 
         elif menu_item == _STR_MENU_RESEARCH_GROUP:
-            _sidebar_display_add_group()
+            _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_RESEARCH_GROUP}")
 
         elif menu_item == _STR_MENU_NOTE:
-            _sidebar_display_add_note()
+            _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_NOTE}")
 
         elif menu_item == _STR_MENU_PERSON:
             _sidebar_display_org_filter()
