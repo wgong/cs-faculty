@@ -61,6 +61,7 @@ WORK_TYPES = (
     'publication', 
     'paper', 
     'preprint', 
+    'thesis', 
     'conference', 
     'talk', 
     'poster',
@@ -77,10 +78,10 @@ WORK_TYPES = (
 PERSON_TYPES = (
     '',
     'faculty', 
-    'student', 
-    'postdoc', 
     'researcher', 
+    'postdoc', 
     'staff', 
+    'student', 
     'other',
 )
 
