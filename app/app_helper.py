@@ -8,7 +8,7 @@ import os
 import sqlite3
 import duckdb
 
-from config import *
+from app_config import *
 
 #######################################################
 #  Helper functions  - database

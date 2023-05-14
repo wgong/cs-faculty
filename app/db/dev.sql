@@ -165,6 +165,9 @@ create table if not exists t_note (
                 
 describe t_person_work;
 
+
+
+
 -- https://duckdb.org/docs/sql/information_schema
 select  current_schema();
 
@@ -496,3 +499,43 @@ select * from g_person where uid is null;
 select * from g_work where uid is null;
 select * from g_note where uid is null;
 select * from g_task where uid is null;
+
+select * from g_person where name = 'Wen Sun';
+
+alter table g_note 
+	add note_type text;
+
+drop table g_org;
+drop table g_project;
+
+create table if not exists 
+g_org (
+		name text not null
+		,url   text
+		,note  text 
+		,tags  text
+		,org_type text
+        ,ref_tab text
+        ,ref_key text
+        ,ref_val text
+		,uid   text
+		,ts    text
+		,id    text);
+				
+create table if not exists 
+g_project (
+		name text not null
+		,url   text
+		,note  text 
+		,tags  text
+		,project_type text
+        ,ref_tab text
+        ,ref_key text
+        ,ref_val text
+		,uid   text
+		,ts    text
+		,id    text);
+		
+
+select * from g_org;
+select * from g_project;

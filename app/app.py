@@ -2,16 +2,26 @@
 Streamlit app to manage CS Faculty data stored in DuckDB 
 
 TODO:
+- [2023-05-14]
+    - Add/Revise schema
+        - Add note_type to Note: journal, resource, idea, information, reminder, other
+        - Org (School, Company, ...)
+        - Award: Sloan, Best Paper, NSF career (e.g. https://www.cs.cornell.edu/information/awards-by-recipient)
+        - Project: work, task, person related to project
+
+    - Task: todo list with email/text msg alert
+
+    - Resolve refresh button
+        - https://discuss.streamlit.io/t/aggrid-unselect-all-rows/21367/2
+        - Experiment: replace form with st.form(key, clear_on_submit=True)
+            - still need button to refresh parent grid
+
 - [2023-04-30]
     - Add menus: 
-        - Task: todo list with email/text msg alert
-        - Project: work, task, person related to project
         - Event: seminar, conference, vacation, ...
         - Collaborator
         - Internship
-        - Org (School, Company, ...)
         - Google Scholar, Best Paper Award on work quality, CSRanking ?
-        - Award: Sloan, Best Paper, NSF career (e.g. https://www.cs.cornell.edu/information/awards-by-recipient)
 
     - Import data from another user, ensure no duplicates
 
@@ -21,6 +31,9 @@ TODO:
       so that special-purpose tables become unnecessary.
 
 DONE:
+- [2023-05-12]
+    - Rename "Save" button to "Update" and persist to DB
+
 - [2023-05-08]
     - review http://www.cs.cornell.edu/~cdesa/
     - continue cleanup and refactoring
@@ -80,21 +93,29 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import streamlit as st
-from st_aggrid import (GridOptionsBuilder, AgGrid, 
-                       GridUpdateMode, DataReturnMode, JsCode)
+from st_aggrid import (
+        GridOptionsBuilder, 
+        AgGrid, 
+        GridUpdateMode, 
+        DataReturnMode, 
+        JsCode)
 
-from config import *
-from helper import (escape_single_quote, df_to_csv, 
-                    list2sql_str, DBConn, get_uid)
+from app_config import *
+from app_helper import (
+        escape_single_quote, 
+        df_to_csv, 
+        list2sql_str, 
+        DBConn, 
+        get_uid)
 
 DEBUG_FLAG = True # False
 ##====================================================
 _STR_APP_NAME        = "CS Faculty"
 
 st.set_page_config(
-     page_title=f'{_STR_APP_NAME}',
-     layout="wide",
-     initial_sidebar_state="expanded",
+    page_title=f'{_STR_APP_NAME}',
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 # string constants (for i18n purpose)
@@ -116,6 +137,8 @@ STR_TASK            = "Task"
 STR_NOTE_ALL        = "Note (All)"
 STR_WORK_ALL        = "Work (All)"
 STR_PERSON_ALL      = "Person (All)"
+STR_ORG_ALL         = "Org (All)"
+STR_PROJECT_ALL     = "Project (All)"
 STR_TASK_ALL        = "Task (All)"
 STR_REFRESH_HINT    = "Click 'Refresh' button to clear form"
 STR_DOWNLOAD_CSV    = "Download CSV"
@@ -130,6 +153,8 @@ _STR_MENU_HOME              = STR_WELCOME
 _STR_MENU_FACULTY           = STR_FACULTY
 _STR_MENU_RESEARCH_GROUP    = STR_RESEARCH_GROUP
 _STR_MENU_NOTE              = STR_NOTE_ALL
+_STR_MENU_ORG               = STR_ORG_ALL
+_STR_MENU_PROJECT           = STR_PROJECT_ALL
 _STR_MENU_WORK              = STR_WORK_ALL
 _STR_MENU_PERSON            = STR_PERSON_ALL
 _STR_MENU_TASK              = STR_TASK_ALL
@@ -400,24 +425,118 @@ def _layout_form(table_name,
     if id_val:
         data.update({"id" : id_val})
 
-    # handle buttons
-    if btn_save:
-        if data.get("id"):
-            data.update({"ts": str(datetime.now()),
-                        "uid": get_uid(), })
-            _db_update_by_id(data)
-        else:
-            data.update({"id": str(uuid4()), 
-                         "ts": str(datetime.now()),
-                         "uid": get_uid(), })
-            _db_upsert(data)
+    try:
+        # handle buttons
+        if btn_save:
+            if data.get("id"):
+                data.update({"ts": str(datetime.now()),
+                            "uid": get_uid(), })
+                _db_update_by_id(data)
+            else:
+                data.update({"id": str(uuid4()), 
+                            "ts": str(datetime.now()),
+                            "uid": get_uid(), })
+                _db_upsert(data)
 
-    elif btn_delete and data.get("id"):
-        _db_delete_by_id(data)
+        elif btn_delete and data.get("id"):
+            _db_delete_by_id(data)
 
-    elif btn_refresh:
-        _crud_clear_form()
+        elif btn_refresh:
+            _crud_clear_form()
+    except Exception as ex:
+        st.error(f"{str(ex)}")
 
+def _layout_form_st(table_name, 
+                 selected_row, 
+                 ref_tab="", 
+                 ref_key="", 
+                 ref_val="", 
+                 entity_type=""):
+    """ use st.form to layout form for a table and handles button actions 
+    
+        Don't work as expected:
+    """
+
+    form_name = st.session_state.get("form_name","")
+    form_name_suffix = form_name.split("#")[-1]
+
+    COL_DEFS = COLUMN_DEFS[table_name]
+    visible_columns = COL_DEFS["is_visible"]
+    system_columns = COL_DEFS["is_system_col"]
+    form_columns = COL_DEFS["form_column"]
+    col_labels = COL_DEFS["label_text"]
+    widget_types = COL_DEFS["widget_type"]
+
+    old_row = {}
+    for col in visible_columns:
+        old_row[col] = selected_row.get(col) if selected_row is not None else ""
+
+    data = {"table_name": table_name}
+    if all((ref_tab, ref_key, ref_val)):
+        data.update({"ref_tab":ref_tab, "ref_key":ref_key, "ref_val":ref_val})
+    if entity_type:
+        data.update({"entity_type":entity_type})
+
+    # copy id if present
+    id_val = old_row.get("id", "")
+    if id_val:
+        data.update({"id" : id_val})
+
+    # display form and populate data dict
+    col1_columns = []
+    col2_columns = []
+    col3_columns = []
+    for c in visible_columns:
+        if form_name_suffix and c in ["ref_tab", "ref_key", "ref_val"]:
+            # skip displaying ref_key, ref_val for parent/child view
+            continue
+        if form_columns.get(c, "").startswith("COL_1-"):
+            col1_columns.append(c)
+        elif form_columns.get(c, "").startswith("COL_2-"):
+            col2_columns.append(c)
+        elif form_columns.get(c, "").startswith("COL_3-"):
+            col3_columns.append(c) 
+
+    with st.form(form_name, clear_on_submit=True):
+        col1,col2,col3 = st.columns([6,5,4])
+        with col1:
+            for col in col1_columns:
+                data = _layout_form_fields(data,form_name,old_row,col,
+                            widget_types,col_labels,system_columns)
+        with col2:
+            for col in col2_columns:
+                data = _layout_form_fields(data,form_name,old_row,col,
+                            widget_types,col_labels,system_columns)
+        with col3:
+            for col in col3_columns:
+                data = _layout_form_fields(data,form_name,old_row,col,
+                            widget_types,col_labels,system_columns)
+
+            # add checkbox for deleting this record
+            col = "delelte_record"
+            delete_flag = st.checkbox("Delelte Record?", value=False)
+            data.update({col: delete_flag})
+
+        save_btn = st.form_submit_button("Save")
+        if save_btn:
+            try:
+                delete_flag = data.get("delelte_record", False)
+                if delete_flag:
+                    if data.get("id"):
+                        _db_delete_by_id(data)
+                else:
+                    if data.get("id"):
+                        data.update({"ts": str(datetime.now()),
+                                    "uid": get_uid(), })
+                        _db_update_by_id(data)
+                    else:
+                        data.update({"id": str(uuid4()), 
+                                    "ts": str(datetime.now()),
+                                    "uid": get_uid(), })
+                        _db_upsert(data)
+
+            except Exception as ex:
+                st.error(f"{str(ex)}")
 
 def _layout_form_inter(table_name, 
             selected_row, 
@@ -427,7 +546,7 @@ def _layout_form_inter(table_name,
             inter_table_name,
             rel_type):
     """ layout form for a table with intersection table dependency
-    and handles button actions: Save (C/U), Delete (D)
+    and handles button actions: Save (I/U), Delete (D)
     """
 
     form_name = st.session_state.get("form_name","")
@@ -491,23 +610,27 @@ def _layout_form_inter(table_name,
     if id_val:
         data.update({"id" : id_val})
 
-    # handle buttons
-    if btn_save:
-        if data.get("id"):
-            data.update({"ts": str(datetime.now()),
-                         "uid": get_uid(), })
-            _db_update_by_id(data)
-        else:
-            data.update({"id": str(uuid4()), 
-                         "ts": str(datetime.now()),
-                         "uid": get_uid(), })
-            _db_insert_inter(data)
+    try:
+        # handle buttons
+        if btn_save:
+            if data.get("id"):
+                data.update({"ts": str(datetime.now()),
+                            "uid": get_uid(), })
+                _db_update_by_id(data)
+            else:
+                data.update({"id": str(uuid4()), 
+                            "ts": str(datetime.now()),
+                            "uid": get_uid(), })
+                _db_insert_inter(data)
 
-    elif btn_delete and data.get("id"):
-        _db_delete_by_id_inter(data)
+        elif btn_delete and data.get("id"):
+            _db_delete_by_id_inter(data)
 
-    elif btn_refresh:
-        _crud_clear_form()
+        elif btn_refresh:
+            _crud_clear_form()
+
+    except Exception as ex:
+        st.error(f"{str(ex)}")
 
 
 ###################################################################
@@ -547,6 +670,18 @@ def _db_select_by_name_url(table_name, name="", url=""):
         """
         return pd.read_sql(sql_stmt, _conn).fillna("").to_dict('records')
 
+def _validate_name_url(data):
+    """ since all entities have (name,url) as required User-key
+    validate them here
+    """
+    name_ = data.get("name", "")
+    if not name_:
+        raise Exception(f"Missing required field 'name'")
+    # url_ = data.get("url", "")
+    # if not url_:
+    #     data.update({"url": "TBD"})
+    return data
+
 def _db_upsert(data, user_key_cols=["name","url"]):
     if not data: 
         return None
@@ -554,6 +689,7 @@ def _db_upsert(data, user_key_cols=["name","url"]):
     table_name = data.get("table_name", "")
     if not table_name:
         raise Exception(f"[ERROR] Missing table_name: {data}")
+
 
     # build SQL
     visible_columns = _get_columns(table_name, prop_name="is_visible")
@@ -636,7 +772,6 @@ def _db_upsert(data, user_key_cols=["name","url"]):
             """
 
     _db_execute(upsert_sql)
-
 
 def _db_update_by_id(data, update_changed=True):
     if not data: 
@@ -753,6 +888,8 @@ def _db_insert_inter(data):
     if not inter_table_name:
         raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
     
+    data = _validate_name_url(data)
+
     rel_type = data.get("rel_type", "")
     ref_tab = data.get("ref_tab", "")
     ref_key = data.get("ref_key", "")
@@ -867,7 +1004,7 @@ def _push_selected_cols_to_end(cols, selected_cols=SYS_COLS):
         return new_cols + new_select_cols
 
 
-def _push_selected_cols_to_front(cols, selected_cols=["name","url"]):
+def _push_selected_cols_to_front(cols, selected_cols=["name","url","note"]):
     """move selected column to the front,
     e.g. name, url
     """
@@ -920,7 +1057,7 @@ def _crud_display_grid_parent_child(table_name,
                 and org = '{selected_org}'
             """
             
-        selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
+        selected_cols = _push_selected_cols_to_front(visible_columns)
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         sql_stmt = f"""
             select 
@@ -945,7 +1082,7 @@ def _crud_display_grid_parent_child(table_name,
     if not selected_row:
         return
 
-    if st.button("Save", key=f"{form_name}_save"):
+    if st.button("Update", key=f"{form_name}_save"):
         data = selected_row
         data.update({"table_name": table_name})
         _db_update_by_id(data=data)
@@ -958,14 +1095,23 @@ def _crud_display_grid_parent_child(table_name,
     # NOTE:
     # when using st.tab, grid not displayed correctly
     # use st.selectbox instead
-    menu_options = ["Work", "Team", "Note", "Task"]
-    idx_default = menu_options.index("Work")
+    menu_options = ["Note", "Work", "Team", "Task"]
+    idx_default = menu_options.index("Note")
 
     faculty_name = selected_row.get("name")
     menu_item = st.selectbox(f"Menu for '{faculty_name}' ({primary_key}): ", 
                                 menu_options, index=idx_default, key="faculty_menu_item")
 
-    if menu_item == "Work":
+    if menu_item == "Note":
+        table_name = TABLE_NOTE
+        _crud_display_grid_form_subject(table_name,
+                        ref_tab=TABLE_PERSON, 
+                        ref_key="url", 
+                        ref_val=primary_key,
+                        form_name_suffix="faculty", 
+                        page_size=5, grid_height=220)
+
+    elif menu_item == "Work":
         try:
             table_name = TABLE_WORK
             _crud_display_grid_form_inter(table_name, 
@@ -992,15 +1138,6 @@ def _crud_display_grid_parent_child(table_name,
                         page_size=5, grid_height=220)
         except:
             pass  # workaround to fix an streamlit issue
-
-    elif menu_item == "Note":
-        table_name = TABLE_NOTE
-        _crud_display_grid_form_subject(table_name,
-                        ref_tab=TABLE_PERSON, 
-                        ref_key="url", 
-                        ref_val=primary_key,
-                        form_name_suffix="faculty", 
-                        page_size=5, grid_height=220)
 
     elif menu_item == "Task":
         table_name = TABLE_TASK
@@ -1115,7 +1252,7 @@ def _crud_display_grid_form_inter(table_name,
             where_clause.append(f" {k} in {list2sql_str(v)}")
 
         # fetch child table rows
-        selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["name","url"])
+        selected_cols = _push_selected_cols_to_front(visible_columns)
         selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
         where_clause_str = " or ".join(where_clause) if where_clause else " 1=2 "
         sql_stmt = f"""
@@ -1232,6 +1369,7 @@ def _crud_display_grid_form_subject(table_name,
 
     ## layout form
     _layout_form(table_name, selected_row, ref_tab=ref_tab, ref_key=ref_key, ref_val=ref_val)
+    # _layout_form_st(table_name, selected_row, ref_tab=ref_tab, ref_key=ref_key, ref_val=ref_val)
 
 # _STR_MENU_RESEARCH_GROUP
 def _crud_display_grid_form_entity(table_name, 
@@ -1420,6 +1558,10 @@ def do_person():
     st.subheader(f"{_STR_MENU_PERSON}")
     _crud_display_grid_form_subject(TABLE_PERSON)
 
+def do_org():
+    st.subheader(f"{_STR_MENU_ORG}")
+    _crud_display_grid_form_subject(TABLE_ORG)
+
 def do_work():
     st.subheader(f"{_STR_MENU_WORK}")
     _crud_display_grid_form_subject(TABLE_WORK)
@@ -1427,6 +1569,10 @@ def do_work():
 def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
     _crud_display_grid_form_subject(TABLE_NOTE)
+
+def do_project():
+    st.subheader(f"{_STR_MENU_PROJECT}")
+    _crud_display_grid_form_subject(TABLE_PROJECT)
 
 def do_task():
     st.subheader(f"{_STR_MENU_TASK}")
@@ -1530,8 +1676,10 @@ menu_dict = {
     _STR_MENU_FACULTY:              {"fn": do_faculty},
     _STR_MENU_RESEARCH_GROUP:       {"fn": do_research_group},
     _STR_MENU_PERSON:               {"fn": do_person},
-    _STR_MENU_WORK:                 {"fn": do_work},
+    _STR_MENU_ORG:                  {"fn": do_org},
     _STR_MENU_NOTE:                 {"fn": do_note},
+    _STR_MENU_WORK:                 {"fn": do_work},
+    _STR_MENU_PROJECT:              {"fn": do_project},
     _STR_MENU_TASK:                 {"fn": do_task},
     _STR_MENU_IMP_EXP:              {"fn": do_import_export},
 
@@ -1557,6 +1705,12 @@ def do_sidebar():
 
         elif menu_item == _STR_MENU_NOTE:
             _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_NOTE}")
+
+        elif menu_item == _STR_MENU_ORG:
+            _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_ORG}")
+
+        elif menu_item == _STR_MENU_PROJECT:
+            _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_PROJECT}")
 
         elif menu_item == _STR_MENU_PERSON:
             _sidebar_display_org_filter()
