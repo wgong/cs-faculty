@@ -222,6 +222,7 @@ alter table t_note add ref_key text;
 describe t_note;
 
 
+
 alter table t_faculty add note text;
 alter table t_research_group add note text;
 describe t_faculty;
@@ -539,3 +540,18 @@ g_project (
 
 select * from g_org;
 select * from g_project;
+
+select name,url, research_area,department from g_person 
+where person_type='faculty' and org like 'Cornell%' and job_title not like '%Emeritus%'
+order by research_area
+;
+
+update g_project set ref_key = 'name' where ref_key = 'Name';
+
+select * from g_entity;
+
+alter table g_entity add column ref_tab text;
+alter table g_entity add column ref_key text;
+alter table g_entity add column ref_val text;
+
+select * from g_note;

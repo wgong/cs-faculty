@@ -2,19 +2,11 @@
 Streamlit app to manage CS Faculty data stored in DuckDB 
 
 TODO:
+- [2023-05-18]
+    - Enhance Ref Tab/Key/Val UI via selectbox
+
 - [2023-05-14]
-    - Add/Revise schema
-        - Add note_type to Note: journal, resource, idea, information, reminder, other
-        - Org (School, Company, ...)
-        - Award: Sloan, Best Paper, NSF career (e.g. https://www.cs.cornell.edu/information/awards-by-recipient)
-        - Project: work, task, person related to project
-
     - Task: todo list with email/text msg alert
-
-    - Resolve refresh button
-        - https://discuss.streamlit.io/t/aggrid-unselect-all-rows/21367/2
-        - Experiment: replace form with st.form(key, clear_on_submit=True)
-            - still need button to refresh parent grid
 
 - [2023-04-30]
     - Add menus: 
@@ -22,6 +14,7 @@ TODO:
         - Collaborator
         - Internship
         - Google Scholar, Best Paper Award on work quality, CSRanking ?
+        - Award: Sloan, Best Paper, NSF career (e.g. https://www.cs.cornell.edu/information/awards-by-recipient)
 
     - Import data from another user, ensure no duplicates
 
@@ -31,6 +24,17 @@ TODO:
       so that special-purpose tables become unnecessary.
 
 DONE:
+- [2023-05-14]
+    - Add/Revise schema
+        - Add note_type to Note: journal, resource, idea, information, reminder, other
+        - Org (School, Company, ...)
+        - Project: work, task, person related to project
+
+    - Resolve refresh button
+        - https://discuss.streamlit.io/t/aggrid-unselect-all-rows/21367/2
+        - Experiment: replace form with st.form(key, clear_on_submit=True)
+            - still need button to refresh parent grid
+
 - [2023-05-12]
     - Rename "Save" button to "Update" and persist to DB
 
@@ -130,10 +134,11 @@ STR_REFRESH         = "Refresh"
 STR_WELCOME         = "Welcome"
 STR_FACULTY         = "Faculty"
 STR_RESEARCH_GROUP  = "Research Group"
+STR_TEAM            = "Team"
 STR_NOTE            = "Note"
 STR_WORK            = "Work"
-STR_PERSON          = "Person"
 STR_TASK            = "Task"
+STR_PERSON          = "Person"
 STR_NOTE_ALL        = "Note (All)"
 STR_WORK_ALL        = "Work (All)"
 STR_PERSON_ALL      = "Person (All)"
@@ -355,10 +360,11 @@ def _layout_grid(df,
 
 def _layout_form(table_name, 
                  selected_row, 
+                 entity_type="",
                  ref_tab="", 
                  ref_key="", 
-                 ref_val="", 
-                 entity_type=""):
+                 ref_val=""
+        ):
     """ layout form for a table and handles button actions 
     """
 
@@ -380,8 +386,8 @@ def _layout_form(table_name,
     btn_save, btn_refresh, btn_delete = _crud_display_buttons(form_name)
 
     data = {"table_name": table_name}
-    if all((ref_tab, ref_key, ref_val)):
-        data.update({"ref_tab":ref_tab, "ref_key":ref_key, "ref_val":ref_val})
+    # if all((ref_tab, ref_key, ref_val)):
+    data.update({"ref_tab":ref_tab, "ref_key":ref_key, "ref_val":ref_val})
     if entity_type:
         data.update({"entity_type":entity_type})
         
@@ -803,7 +809,9 @@ def _db_update_by_id(data, update_changed=True):
             continue
 
         if update_changed:
-            if val != old_row.get(col):
+            # skip if no change
+            old_val = old_row.get(col, "")
+            if val != old_val:
                 set_clause.append(f"{col} = '{escape_single_quote(val)}'")
         else:
             set_clause.append(f"{col} = '{escape_single_quote(val)}'")
@@ -987,7 +995,7 @@ def _db_quick_add(data):
         #     sql_stmt = ""
 
 
-def _push_selected_cols_to_end(cols, selected_cols=SYS_COLS):
+def _push_selected_cols_to_end(cols, selected_cols=["entity_type", "ref_tab", "ref_key", "ref_val"] + SYS_COLS):
     """move selected column to the end,
         e.g. id, ts, uid system cols
     """
@@ -1020,6 +1028,8 @@ def _push_selected_cols_to_front(cols, selected_cols=["name","url","note"]):
     else:
         return new_select_cols + new_cols
 
+def _reorder_selected_cols(cols):
+    return _push_selected_cols_to_front(_push_selected_cols_to_end(cols))
 
 # _STR_MENU_FACULTY
 def _crud_display_grid_parent_child(table_name,
@@ -1057,8 +1067,7 @@ def _crud_display_grid_parent_child(table_name,
                 and org = '{selected_org}'
             """
             
-        selected_cols = _push_selected_cols_to_front(visible_columns)
-        selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
+        selected_cols = _reorder_selected_cols(visible_columns)
         sql_stmt = f"""
             select 
                 {",".join(selected_cols)}
@@ -1095,14 +1104,14 @@ def _crud_display_grid_parent_child(table_name,
     # NOTE:
     # when using st.tab, grid not displayed correctly
     # use st.selectbox instead
-    menu_options = ["Note", "Work", "Team", "Task"]
-    idx_default = menu_options.index("Note")
+    menu_options = [STR_WORK, STR_TEAM, STR_NOTE, STR_TASK]
+    idx_default = menu_options.index(STR_WORK)
 
     faculty_name = selected_row.get("name")
     menu_item = st.selectbox(f"Menu for '{faculty_name}' ({primary_key}): ", 
                                 menu_options, index=idx_default, key="faculty_menu_item")
 
-    if menu_item == "Note":
+    if menu_item == STR_NOTE:
         table_name = TABLE_NOTE
         _crud_display_grid_form_subject(table_name,
                         ref_tab=TABLE_PERSON, 
@@ -1111,7 +1120,7 @@ def _crud_display_grid_parent_child(table_name,
                         form_name_suffix="faculty", 
                         page_size=5, grid_height=220)
 
-    elif menu_item == "Work":
+    elif menu_item == STR_WORK:
         try:
             table_name = TABLE_WORK
             _crud_display_grid_form_inter(table_name, 
@@ -1125,7 +1134,7 @@ def _crud_display_grid_parent_child(table_name,
         except:
             pass  # workaround to fix an streamlit issue
 
-    elif menu_item == "Team":
+    elif menu_item == STR_TEAM:
         try:
             table_name = TABLE_PERSON 
             _crud_display_grid_form_inter(table_name, 
@@ -1139,7 +1148,7 @@ def _crud_display_grid_parent_child(table_name,
         except:
             pass  # workaround to fix an streamlit issue
 
-    elif menu_item == "Task":
+    elif menu_item == STR_TASK:
         table_name = TABLE_TASK
         _crud_display_grid_form_subject(table_name,
                         ref_tab=TABLE_PERSON, 
@@ -1151,12 +1160,13 @@ def _crud_display_grid_parent_child(table_name,
 def _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns):
     if old_row:
+        old_val = old_row.get(col, "")
         widget_type = widget_types.get(col, "text_input")
         if widget_type == "text_area":
             kwargs = {"height":125}
-            val = st.text_area(col_labels.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+            val = st.text_area(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}", kwargs=kwargs)
         elif widget_type == "date_input":
-            old_date_input = old_row[col].split("T")[0]
+            old_date_input = old_val.split("T")[0]
             if old_date_input:
                 val_date = datetime.strptime(old_date_input, "%Y-%m-%d")
             else:
@@ -1164,7 +1174,7 @@ def _layout_form_fields(data,form_name,old_row,col,
             val = st.date_input(col_labels.get(col), value=val_date, key=f"col_{form_name}_{col}")
             val = datetime.strftime(val, "%Y-%m-%d")
         elif widget_type == "time_input":
-            old_time_input = old_row[col]
+            old_time_input = old_val
             if old_time_input:
                 val_time = datetime.strptime(old_time_input.split(".")[0], "%H:%M:%S").time()
             else:
@@ -1175,22 +1185,22 @@ def _layout_form_fields(data,form_name,old_row,col,
             if col in SELECTBOX_OPTIONS:
                 try:
                     _options = SELECTBOX_OPTIONS.get(col,[])
-                    _old_opt = old_row.get(col, "")
-                    _idx = _options.index(_old_opt)
+                    old_val = old_row.get(col, "")
+                    _idx = _options.index(old_val)
                     val = st.selectbox(col_labels.get(col), _options, index=_idx, key=f"col_{form_name}_{col}")
                 except ValueError:
                     opts = SELECTBOX_OPTIONS.get(col,[])
                     val = opts[0] if opts else "" # workaround for refresh error
             else:
-                val = st.text_input(col_labels.get(col), value=old_row[col], key=f"col_{form_name}_{col}")
+                val = st.text_input(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}")
 
         else:
             kwargs = {}
             if col in system_columns:
                 kwargs.update({"disabled":True})
-            val = st.text_input(col_labels.get(col), value=old_row[col], key=f"col_{form_name}_{col}", kwargs=kwargs)
+            val = st.text_input(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}", kwargs=kwargs)
 
-        if val != old_row[col]:
+        if val != old_val:
             data.update({col : val})
 
 
@@ -1252,8 +1262,7 @@ def _crud_display_grid_form_inter(table_name,
             where_clause.append(f" {k} in {list2sql_str(v)}")
 
         # fetch child table rows
-        selected_cols = _push_selected_cols_to_front(visible_columns)
-        selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
+        selected_cols = _reorder_selected_cols(visible_columns)
         where_clause_str = " or ".join(where_clause) if where_clause else " 1=2 "
         sql_stmt = f"""
             select {", ".join(selected_cols)}
@@ -1342,9 +1351,7 @@ def _crud_display_grid_form_subject(table_name,
                     and org = '{selected_org}'
                 """
 
-
-        selected_cols = _push_selected_cols_to_end(visible_columns, selected_cols=["ref_key","ref_val"])
-        selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
+        selected_cols = _reorder_selected_cols(visible_columns)
         sql_stmt = f"""
             select 
                 {",".join(selected_cols)}
@@ -1368,14 +1375,15 @@ def _crud_display_grid_form_subject(table_name,
             selected_row = selected_rows[0]
 
     ## layout form
-    _layout_form(table_name, selected_row, ref_tab=ref_tab, ref_key=ref_key, ref_val=ref_val)
+    _layout_form(table_name, selected_row, entity_type="", 
+                 ref_tab=ref_tab, ref_key=ref_key, ref_val=ref_val)
     # _layout_form_st(table_name, selected_row, ref_tab=ref_tab, ref_key=ref_key, ref_val=ref_val)
 
 # _STR_MENU_RESEARCH_GROUP
 def _crud_display_grid_form_entity(table_name, 
-                            entity_type="research_group",
-                            orderby_cols=["name"],
-                            page_size=10, grid_height=370):
+            entity_type="research_group",
+            orderby_cols=["name"],
+            page_size=10, grid_height=370):
     """Render grid according to column properties, 
     used to display a database table, or child table when ref_type/_key are given
 
@@ -1403,8 +1411,7 @@ def _crud_display_grid_form_entity(table_name,
     with DBConn() as _conn:
         orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ' '
         where_clause = f" where entity_type = '{entity_type}' " if entity_type else ""
-        selected_cols = _push_selected_cols_to_end(visible_columns, selected_cols=["entity_type"])
-        selected_cols = _push_selected_cols_to_end(selected_cols, selected_cols=SYS_COLS)
+        selected_cols = _reorder_selected_cols(visible_columns)
         sql_stmt = f"""
             select {", ".join(selected_cols)}
             from {table_name} 
@@ -1428,7 +1435,8 @@ def _crud_display_grid_form_entity(table_name,
             selected_row = selected_rows[0]
 
     ## layout form
-    _layout_form(table_name, selected_row, entity_type=entity_type)
+    _layout_form(table_name, selected_row, entity_type=entity_type, 
+                 ref_tab="", ref_key="", ref_val="")
 
 def _crud_display_buttons(form_name):
     """button UI key: btn_<table_name>_action
@@ -1586,9 +1594,9 @@ def do_import_export():
             from information_schema.tables t where t.table_name like 'g_%';
         """
         df1 = pd.read_sql(sql_stmt, _conn)
-        table_list = df1["table_name"].to_list()
-        idx_default = table_list.index("g_work")
-        selected_table = st.selectbox("Select table:", table_list, index=idx_default, key="export_table")
+        tables = df1["table_name"].to_list()
+        idx_default = tables.index("g_work")
+        selected_table = st.selectbox("Select table:", tables, index=idx_default, key="export_table")
 
         export_btn = st.button("Export Data ...")
         if export_btn:
