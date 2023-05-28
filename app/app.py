@@ -2,9 +2,6 @@
 Streamlit app to manage CS Faculty data stored in DuckDB 
 
 TODO:
-- [2023-05-18]
-    - Enhance Ref Tab/Key/Val UI via selectbox
-
 - [2023-05-14]
     - Task: todo list with email/text msg alert
 
@@ -24,6 +21,10 @@ TODO:
       so that special-purpose tables become unnecessary.
 
 DONE:
+- [2023-05-18]
+    - Enhanced Ref Tab/Key/Val UI via selectbox
+    - populate uid
+
 - [2023-05-14]
     - Add/Revise schema
         - Add note_type to Note: journal, resource, idea, information, reminder, other
@@ -85,6 +86,7 @@ from datetime import datetime, date, timedelta
 from pathlib import Path
 import pandas as pd
 from uuid import uuid4
+import os
 
 # import glob
 # from io import StringIO
@@ -109,8 +111,7 @@ from app_helper import (
         escape_single_quote, 
         df_to_csv, 
         list2sql_str, 
-        DBConn, 
-        get_uid)
+        DBConn, )
 
 DEBUG_FLAG = True # False
 ##====================================================
@@ -181,6 +182,48 @@ _GRID_OPTIONS = {
     "paginationPageSize": 10,
 }
 
+BLANK_LIST = [""]
+
+
+# @st.cache
+def get_uid():
+    return os.getlogin()
+
+def _query_ref_tab_key():
+    ref_tab = st.session_state.get("ref_tab", "")
+    ref_key = st.session_state.get("ref_key", "")
+    # uid = get_uid()
+    if all((ref_tab, ref_key)):
+        with DBConn() as _conn:
+            sql_stmt = f"""
+                select distinct {ref_key}
+                from {ref_tab} 
+                where {ref_key} is not NULL
+                order by {ref_key};
+            """
+            df = pd.read_sql(sql_stmt, _conn)
+            # print(df)
+            return BLANK_LIST + df[ref_key].to_list()
+    else:
+        return BLANK_LIST
+
+## Important Note:
+# for a LOV typed filed to be displayed as selectbox properly
+# on UI-form when no row is selected,
+# ensure the LOV type has empty string value as a default type
+SELECTBOX_OPTIONS = {
+    "entity_type": ENTITY_TYPES,
+    "work_type": WORK_TYPES,
+    "person_type": PERSON_TYPES,
+    "org_type": ORG_TYPES,
+    "project_type": PROJECT_TYPES,
+    "note_type": NOTE_TYPES,
+    "priority": PRIORITY,
+    "task_status": TASK_STATUS,
+    "ref_tab": BLANK_LIST + sorted([t for t in TABLE_LIST if t not in ["g_relation"]]),
+    "ref_key": BLANK_LIST + ["id", "name", "url"],
+    "ref_val": _query_ref_tab_key,
+}
 
 #####################################################
 # Helpers (prefix with underscore)
@@ -200,7 +243,9 @@ def _download_df(df, filename_csv):
             data=df_to_csv(df, index=False),
             file_name=filename_csv,
             mime='text/csv',
-        )  
+        )
+
+
 
 # @st.cache
 def _gen_label(col):
@@ -696,6 +741,8 @@ def _db_upsert(data, user_key_cols=["name","url"]):
     if not table_name:
         raise Exception(f"[ERROR] Missing table_name: {data}")
 
+    if not "uid" in data or not data.get("uid", ""):
+        data.update({"uid":get_uid()})
 
     # build SQL
     visible_columns = _get_columns(table_name, prop_name="is_visible")
@@ -791,6 +838,9 @@ def _db_update_by_id(data, update_changed=True):
     if not id_val:
         return
 
+    if not "uid" in data or not data.get("uid", ""):
+        data.update({"uid":get_uid()})
+
     if update_changed:
         rows = _db_select_by_id(table_name=table_name, id_value=id_val)
         if len(rows) < 1:
@@ -880,7 +930,7 @@ def _db_delete_by_id_inter(data):
     _db_execute(delete_sql)
 
 def _db_insert_inter(data):
-    """insert into both child and intersection tables
+    """populate both child and intersection tables
 
     TODO:
         enhance with upsert logic like _db_upsert()
@@ -896,6 +946,9 @@ def _db_insert_inter(data):
     if not inter_table_name:
         raise Exception(f"[ERROR] Missing key: inter_table_name: {data}")
     
+    if not "uid" in data or not data.get("uid", ""):
+        data.update({"uid":get_uid()})
+
     data = _validate_name_url(data)
 
     rel_type = data.get("rel_type", "")
@@ -905,11 +958,13 @@ def _db_insert_inter(data):
     ref_tab_sub = table_name
     ref_key_sub = "id"
     ref_val_sub = data.get(ref_key_sub, "")
-    id = str(uuid4())
-    ts = data.get("ts", str(datetime.now()))
+
+    _id = str(uuid4())
+    _ts = data.get("ts", str(datetime.now()))
+    _uid = get_uid()
 
     inter_col_clause = ['id', 'ts', 'uid', 'rel_type', 'ref_tab', 'ref_key', 'ref_val', 'ref_tab_sub', 'ref_key_sub', 'ref_val_sub']
-    inter_vals = [id, ts, get_uid(), rel_type, ref_tab, ref_key, ref_val, ref_tab_sub, ref_key_sub, ref_val_sub]
+    inter_vals = [_id, _ts, _uid, rel_type, ref_tab, ref_key, ref_val, ref_tab_sub, ref_key_sub, ref_val_sub]
     inter_val_clause = []
     for val in inter_vals:
         inter_val_clause.append(f"'{escape_single_quote(val)}'")
@@ -925,7 +980,7 @@ def _db_insert_inter(data):
         val_clause.append(f"'{escape_single_quote(val)}'")
 
     insert_sql = f"""
-        -- insert child table
+        -- populate child table
         insert into {table_name} (
             {", ".join(col_clause)}
         )
@@ -933,7 +988,7 @@ def _db_insert_inter(data):
             {", ".join(val_clause)}
         );
 
-        -- insert intersection table
+        -- populate intersection table
         insert into {inter_table_name} (
             {", ".join(inter_col_clause)}
         )
@@ -975,24 +1030,6 @@ def _db_quick_add(data):
             (  {", ".join(col_vals)} );
         """
         _db_execute(sql_stmt)
-
-        # old_row = rows[0]
-        # id = old_row.get("id")
-        # set_clause = []
-        # for c in data_cols:
-        #     if c in ["name", "url"]: continue
-        #     v = data.get(c, "")
-        #     if v == old_row.get(c,""): continue
-        #     set_clause.append(f"{c} = '{v}'")
-
-        # if set_clause:
-        #     sql_stmt = f"""
-        #         update {table_name}
-        #         set {", ".join(set_clause)}
-        #         where id = '{id}';
-        #     """
-        # else:
-        #     sql_stmt = ""
 
 
 def _push_selected_cols_to_end(cols, selected_cols=["entity_type", "ref_tab", "ref_key", "ref_val"] + SYS_COLS):
@@ -1184,13 +1221,21 @@ def _layout_form_fields(data,form_name,old_row,col,
             # check if options is avail, otherwise display as text_input
             if col in SELECTBOX_OPTIONS:
                 try:
-                    _options = SELECTBOX_OPTIONS.get(col,[])
+                    if col == "ref_val":
+                        _options = SELECTBOX_OPTIONS[col]()
+                    else:
+                        _options = SELECTBOX_OPTIONS.get(col,[])
+
                     old_val = old_row.get(col, "")
                     _idx = _options.index(old_val)
                     val = st.selectbox(col_labels.get(col), _options, index=_idx, key=f"col_{form_name}_{col}")
                 except ValueError:
-                    opts = SELECTBOX_OPTIONS.get(col,[])
-                    val = opts[0] if opts else "" # workaround for refresh error
+                    # if col != "ref_val":
+                    #     opts = SELECTBOX_OPTIONS.get(col,[])
+                    #     val = opts[0] if opts else "" # workaround for refresh error
+                    # else:
+                    #     val = old_row.get(col, "")
+                    val = old_row.get(col, "")
             else:
                 val = st.text_input(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}")
 
@@ -1200,8 +1245,13 @@ def _layout_form_fields(data,form_name,old_row,col,
                 kwargs.update({"disabled":True})
             val = st.text_input(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}", kwargs=kwargs)
 
-        if val != old_val:
+        if val != old_val or col in ["ref_tab", "ref_key"]:
             data.update({col : val})
+
+        if col in ["ref_tab", "ref_key"]:
+            # store ref_tab/ref_key selection in session_state
+            # used by _query_ref_tab_key()
+            st.session_state[col] = val
 
 
     return data
@@ -1543,6 +1593,7 @@ def do_welcome():
     - [Berkeley-CS](https://www2.eecs.berkeley.edu/Faculty/Lists/CS/faculty.html)
     - [Stanford-CS](https://cs.stanford.edu/directory/faculty)
     - [UIUC-CS](https://cs.illinois.edu/about/people/department-faculty)
+    - [Yale-CS](https://cpsc.yale.edu/people/faculty)
     
     #### Additional Resources
     - [CS Faculty Composition and Hiring Trends (Blog)](https://jeffhuang.com/computer-science-open-data/#cs-faculty-composition-and-hiring-trends)
@@ -1647,18 +1698,23 @@ def do_import_export():
                 st.write(f"columns = {df.columns}")
                 _conn.register(f"{view_name}", df)
 
+                _id = uuid()
+                _uid = get_uid()
+                _ts = str(datetime.now())
                 if key == "faculty":
                     sql_stmt = f"""insert into g_person (
-                            id, person_type, name, job_title, phd_univ, phd_year, 
+                            id, uid, ts, 
+                            person_type, name, job_title, phd_univ, phd_year, 
                             research_area, research_concentration, 
                             research_focus, url, img_url, phone, email, cell_phone, 
                             office_address, department, org
                         )
                         select 
-                            uuid() as id, 'faculty', name, job_title, phd_univ, phd_year, 
+                            '{_id}', '{_uid}', '{_ts}', 
+                            'faculty', name, job_title, phd_univ, phd_year, 
                             research_area, research_concentration, 
                             research_focus, url, img_url, phone, email, cell_phone, 
-                            office_address, department, org 
+                            office_address, department, org
                         from {view_name}
                     """
                     st.write(f"sql_stmt =\n {sql_stmt}")
@@ -1666,10 +1722,12 @@ def do_import_export():
                     st.dataframe(res)
                 elif key == "research_groups":
                     sql_stmt = f"""insert into g_entity (
-                            id, entity_type, name, url
+                            id, uid, ts, 
+                            entity_type, name, url
                         )
                         select 
-                            uuid() as id, 'research_group', research_group, url 
+                            '{_id}', '{_uid}', '{_ts}', 
+                            'research_group', research_group, url
                         from {view_name}
                     """
                     st.write(f"sql_stmt =\n {sql_stmt}")

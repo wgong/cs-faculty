@@ -1,6 +1,19 @@
 # since streamlit and duckdb are actively developed
 # we ping down versions
+# duckdb
+# streamlit
+duckdb==0.7.1
 streamlit==1.17.0
 streamlit-aggrid==0.3.3
-duckdb==0.7.1
 pandas>=1.4.0,<2.0.0
+
+# python -m pip install --upgrade pip
+# python -m venv venv
+# venv\Scripts\activate
+# pip install -r requirements.txt
+# duckdb==0.8.0
+# streamlit==1.22.0
+# streamlit_aggrid==0.3.3
+# pandas==1.5.3
+
+# IOException: IO Error: Trying to read a database file with version number 43, but we can only read version 51. The database file was created with DuckDB version v0.7.0 or v0.7.1. The storage of DuckDB is not yet stable; newer versions of DuckDB cannot read old database files and vice versa. The storage will be stabilized when version 1.0 releases. For now, we recommend that you load the database file in a supported version of DuckDB, and use the EXPORT DATABASE command followed by IMPORT DATABASE on the current version of DuckDB. See the storage page for more information: https://duckdb.org/internals/storage

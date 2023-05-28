@@ -555,3 +555,10 @@ alter table g_entity add column ref_key text;
 alter table g_entity add column ref_val text;
 
 select * from g_note;
+
+select *
+from g_project
+--where uid = 'p2p2l'
+order by name;
+                
+update g_project set uid = 'p2p2l' where name = 'Customer Reviews';

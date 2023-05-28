@@ -215,9 +215,21 @@ COLUMN_PROPS = {
             "is_editable": True,
             "is_clickable": False,
             "form_column": "COL_3-3",
-            "widget_type": "text_input",
+            "widget_type": "selectbox",  # "text_input",
             "label_text": "Ref Value",              
             },
+
+        "uid": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-99",
+            "widget_type": "text_input",
+            "label_text": "UID",              
+        },
 
 
     },
@@ -390,6 +402,19 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
         },
 
+        "uid": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-99",
+            "widget_type": "text_input",
+            "label_text": "UID",              
+        },
+
+
     },
 
     "g_note" : {
@@ -485,16 +510,24 @@ COLUMN_PROPS = {
             'is_editable': True,
             'is_clickable': False,
             'form_column': 'COL_3-3',
-            'widget_type': 'text_input',
+            'widget_type': "selectbox",  # 'text_input',
+            "label_text": "Ref Value",              
         },
-        "ts": {
+
+
+        "uid": {
             'is_system_col': True,
             'is_user_key': False,
             'is_required': False,
-            'is_visible': False,
+            'is_visible': True,
             'is_editable': False,
             'is_clickable': False,
+            "form_column": "COL_3-99",
+            "widget_type": "text_input",
+            "label_text": "UID",              
         },
+
+
     },
 
     "g_org" : {
@@ -590,16 +623,23 @@ COLUMN_PROPS = {
             'is_editable': True,
             'is_clickable': False,
             'form_column': 'COL_3-3',
-            'widget_type': 'text_input',
+            'widget_type': "selectbox",  # 'text_input',
+            "label_text": "Ref Value",              
         },
-        "ts": {
+
+        "uid": {
             'is_system_col': True,
             'is_user_key': False,
             'is_required': False,
-            'is_visible': False,
+            'is_visible': True,
             'is_editable': False,
             'is_clickable': False,
+            "form_column": "COL_3-99",
+            "widget_type": "text_input",
+            "label_text": "UID",              
         },
+
+
     },
 
     "g_project" : {
@@ -695,16 +735,23 @@ COLUMN_PROPS = {
             'is_editable': True,
             'is_clickable': False,
             'form_column': 'COL_3-3',
-            'widget_type': 'text_input',
+            'widget_type': "selectbox",  # 'text_input',
+            "label_text": "Ref Value",              
         },
-        "ts": {
+
+        "uid": {
             'is_system_col': True,
             'is_user_key': False,
             'is_required': False,
-            'is_visible': False,
+            'is_visible': True,
             'is_editable': False,
             'is_clickable': False,
+            "form_column": "COL_3-99",
+            "widget_type": "text_input",
+            "label_text": "UID",              
         },
+
+
     },
 
 
@@ -801,16 +848,20 @@ COLUMN_PROPS = {
             "form_column": "COL_3-3",
             "widget_type": "text_input",
             },
-        "ts": {
-            "is_system_col": True,
-            "is_user_key": False,
-            "is_required": False,
-            "is_visible": False,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_3-4",
+
+        "uid": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-99",
             "widget_type": "text_input",
-            }
+            "label_text": "UID",              
+        },
+
+
     },
 
     "g_task": {
@@ -969,7 +1020,7 @@ COLUMN_PROPS = {
             "is_editable": True,
             "is_clickable": False,
             "form_column": "COL_3-4",
-            "widget_type": "text_input",
+            "widget_type": "selectbox",  # "text_input",
             "label_text": "Ref Value",              
             },
         "done_date": {
@@ -985,16 +1036,20 @@ COLUMN_PROPS = {
             },
 
 
-        "ts": {
-            "is_system_col": True,
-            "is_user_key": False,
-            "is_required": False,
-            "is_visible": False,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_3-3",
+
+        "uid": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-99",
             "widget_type": "text_input",
-            }
+            "label_text": "UID",              
+        },
+
+
     },
 
 
@@ -1028,7 +1083,8 @@ COLUMN_PROPS = {
             "is_editable": False,
             "is_clickable": False,
             "form_column": "COL_1-3",
-            "widget_type": "text_input",
+            "widget_type": "selectbox",  # "text_input",
+            "label_text": "Ref Value",              
             },
 
         "id": {
@@ -1067,19 +1123,3 @@ COLUMN_PROPS = {
 
 TABLE_LIST = COLUMN_PROPS.keys()
 
-## Important Note:
-# for a LOV typed filed to be displayed as selectbox properly
-# on UI-form when no row is selected,
-# ensure the LOV type has empty string value as a default type
-SELECTBOX_OPTIONS = {
-    "entity_type": ENTITY_TYPES,
-    "work_type": WORK_TYPES,
-    "person_type": PERSON_TYPES,
-    "org_type": ORG_TYPES,
-    "project_type": PROJECT_TYPES,
-    "note_type": NOTE_TYPES,
-    "priority": PRIORITY,
-    "task_status": TASK_STATUS,
-    "ref_tab": [""] + sorted([t for t in TABLE_LIST if t not in ["g_relation"]]),
-    "ref_key": ["", "id", "name", "url"],
-}
