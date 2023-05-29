@@ -1196,19 +1196,20 @@ def _crud_display_grid_parent_child(table_name,
 
 def _layout_form_fields(data,form_name,old_row,col,
                         widget_types,col_labels,system_columns):
+    DISABLED = col in system_columns
     if old_row:
         old_val = old_row.get(col, "")
         widget_type = widget_types.get(col, "text_input")
         if widget_type == "text_area":
             kwargs = {"height":125}
-            val = st.text_area(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}", kwargs=kwargs)
+            val = st.text_area(col_labels.get(col), value=old_val, disabled=DISABLED, key=f"col_{form_name}_{col}", kwargs=kwargs)
         elif widget_type == "date_input":
             old_date_input = old_val.split("T")[0]
             if old_date_input:
                 val_date = datetime.strptime(old_date_input, "%Y-%m-%d")
             else:
                 val_date = datetime.now().date()
-            val = st.date_input(col_labels.get(col), value=val_date, key=f"col_{form_name}_{col}")
+            val = st.date_input(col_labels.get(col), value=val_date, disabled=DISABLED, key=f"col_{form_name}_{col}")
             val = datetime.strftime(val, "%Y-%m-%d")
         elif widget_type == "time_input":
             old_time_input = old_val
@@ -1216,7 +1217,7 @@ def _layout_form_fields(data,form_name,old_row,col,
                 val_time = datetime.strptime(old_time_input.split(".")[0], "%H:%M:%S").time()
             else:
                 val_time = datetime.now().time()
-            val = st.time_input(col_labels.get(col), value=val_time, key=f"col_{form_name}_{col}")
+            val = st.time_input(col_labels.get(col), value=val_time, disabled=DISABLED, key=f"col_{form_name}_{col}")
         elif widget_type == "selectbox":
             # check if options is avail, otherwise display as text_input
             if col in SELECTBOX_OPTIONS:
@@ -1237,13 +1238,10 @@ def _layout_form_fields(data,form_name,old_row,col,
                     #     val = old_row.get(col, "")
                     val = old_row.get(col, "")
             else:
-                val = st.text_input(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}")
+                val = st.text_input(col_labels.get(col), value=old_val, disabled=DISABLED, key=f"col_{form_name}_{col}")
 
         else:
-            kwargs = {}
-            if col in system_columns:
-                kwargs.update({"disabled":True})
-            val = st.text_input(col_labels.get(col), value=old_val, key=f"col_{form_name}_{col}", kwargs=kwargs)
+            val = st.text_input(col_labels.get(col), value=old_val, disabled=DISABLED, key=f"col_{form_name}_{col}")
 
         if val != old_val or col in ["ref_tab", "ref_key"]:
             data.update({col : val})

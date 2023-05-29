@@ -152,17 +152,6 @@ COLUMN_PROPS = {
             "label_text": "URL"
         },
 
-        "id": {
-            "is_system_col": True,
-            "is_user_key": False,
-            "is_required": True,
-            "is_visible": True,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_2-1",
-            "widget_type": "text_input",
-            "label_text": "ID"
-        },
         "entity_type": {
             "is_system_col": False,
             "is_user_key": False,
@@ -219,6 +208,28 @@ COLUMN_PROPS = {
             "label_text": "Ref Value",              
             },
 
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
         "uid": {
             'is_system_col': True,
             'is_user_key': False,
@@ -230,6 +241,7 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
             "label_text": "UID",              
         },
+
 
 
     },
@@ -335,18 +347,6 @@ COLUMN_PROPS = {
         },
 
 
-
-        "id": {
-            "is_system_col": True,
-            "is_user_key": False,
-            "is_required": True,
-            "is_visible": True,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_3-1",
-            "widget_type": "text_input",
-            "label_text": "ID"
-        },
         "person_type": {
             "is_system_col": False,
             "is_user_key": False,
@@ -402,6 +402,29 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
         },
 
+
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
         "uid": {
             'is_system_col': True,
             'is_user_key': False,
@@ -413,7 +436,6 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
             "label_text": "UID",              
         },
-
 
     },
 
@@ -449,17 +471,7 @@ COLUMN_PROPS = {
             'form_column': 'COL_1-3',
             'widget_type': 'text_input',
         },
-        "id": {
-            'is_system_col': True,
-            'is_user_key': False,
-            'is_required': True,
-            'is_visible': True,
-            'is_editable': False,
-            'is_clickable': False,
-            'form_column': 'COL_2-1',
-            'widget_type': 'text_input',
-            'label_text': 'ID'                  
-        },
+
         "note_type": {
             'is_system_col': False,
             'is_user_key': False,
@@ -514,7 +526,28 @@ COLUMN_PROPS = {
             "label_text": "Ref Value",              
         },
 
-
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
         "uid": {
             'is_system_col': True,
             'is_user_key': False,
@@ -526,7 +559,6 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
             "label_text": "UID",              
         },
-
 
     },
 
@@ -562,17 +594,7 @@ COLUMN_PROPS = {
             'form_column': 'COL_1-3',
             'widget_type': 'text_input',
         },
-        "id": {
-            'is_system_col': True,
-            'is_user_key': False,
-            'is_required': True,
-            'is_visible': True,
-            'is_editable': False,
-            'is_clickable': False,
-            'form_column': 'COL_2-1',
-            'widget_type': 'text_input',
-            'label_text': 'ID'                  
-        },
+
         "org_type": {
             'is_system_col': False,
             'is_user_key': False,
@@ -627,6 +649,28 @@ COLUMN_PROPS = {
             "label_text": "Ref Value",              
         },
 
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
         "uid": {
             'is_system_col': True,
             'is_user_key': False,
@@ -674,17 +718,7 @@ COLUMN_PROPS = {
             'form_column': 'COL_1-3',
             'widget_type': 'text_input',
         },
-        "id": {
-            'is_system_col': True,
-            'is_user_key': False,
-            'is_required': True,
-            'is_visible': True,
-            'is_editable': False,
-            'is_clickable': False,
-            'form_column': 'COL_2-1',
-            'widget_type': 'text_input',
-            'label_text': 'ID'                  
-        },
+
         "project_type": {
             'is_system_col': False,
             'is_user_key': False,
@@ -739,6 +773,28 @@ COLUMN_PROPS = {
             "label_text": "Ref Value",              
         },
 
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
         "uid": {
             'is_system_col': True,
             'is_user_key': False,
@@ -750,7 +806,6 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
             "label_text": "UID",              
         },
-
 
     },
 
@@ -817,16 +872,7 @@ COLUMN_PROPS = {
             "widget_type": "text_area",
             },
 
-        "id": {
-            "is_system_col": True,
-            "is_user_key": False,
-            "is_required": True,
-            "is_visible": True,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_3-1",
-            "widget_type": "text_input",
-            },
+
         "work_type": {
             "is_system_col": False,
             "is_user_key": False,
@@ -849,6 +895,28 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
             },
 
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
         "uid": {
             'is_system_col': True,
             'is_user_key': False,
@@ -980,16 +1048,7 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
             },
 
-        "id": {
-            "is_system_col": True,
-            "is_user_key": False,
-            "is_required": True,
-            "is_visible": True,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_3-1",
-            "widget_type": "text_input",
-            },
+
         "ref_tab": {
             "is_system_col": False,
             "is_user_key": False,
@@ -1037,6 +1096,28 @@ COLUMN_PROPS = {
 
 
 
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
         "uid": {
             'is_system_col': True,
             'is_user_key': False,
@@ -1087,16 +1168,6 @@ COLUMN_PROPS = {
             "label_text": "Ref Value",              
             },
 
-        "id": {
-            "is_system_col": True,
-            "is_user_key": False,
-            "is_required": True,
-            "is_visible": False,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_2-1",
-            "widget_type": "text_input",
-            },
 
         "ref_key_sub": {
             "is_system_col": False,
