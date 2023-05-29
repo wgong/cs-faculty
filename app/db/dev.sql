@@ -562,3 +562,13 @@ from g_project
 order by name;
                 
 update g_project set uid = 'p2p2l' where name = 'Customer Reviews';
+
+select * from g_relation;
+
+update g_task  --g_project -- g_work --g_person --  g_entity --g_note --g_org --
+set uid='p2p2l' --ts = '2023-04-25 23:07:14.000-04' 
+where uid --ts 
+is NULL
+;
+
+select * from g_note where ts is null;
