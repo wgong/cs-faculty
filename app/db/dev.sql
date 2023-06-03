@@ -305,21 +305,6 @@ and c.table_name in (
 order by c.table_name, c.ordinal_position
 ;
 
-CREATE TYPE field_ui_type AS ENUM ('text_input', 'text_area', 'select_box', 'check_box');
-create table t_column_props (
-table_name VARCHAR,
-col_name VARCHAR,
-is_system_col BOOLEAN,
-is_user_key BOOLEAN,
-is_required BOOLEAN,
-is_visible BOOLEAN,
-is_editable BOOLEAN,
-is_clickable BOOLEAN,
-form_column VARCHAR,
-widget_type field_ui_type,
-label_text VARCHAR 
-);
-
 
 select  c.table_name, c.column_name, c.data_type --, c.*
 from information_schema.columns c
@@ -548,11 +533,18 @@ order by research_area
 
 update g_project set ref_key = 'name' where ref_key = 'Name';
 
+
+
+select * from g_column_props;
 select * from g_entity;
 
+alter table g_entity add column tags text;
 alter table g_entity add column ref_tab text;
 alter table g_entity add column ref_key text;
 alter table g_entity add column ref_val text;
+
+select * from g_person;
+alter table g_person add column tags text;
 
 select * from g_note;
 
@@ -572,3 +564,35 @@ is NULL
 ;
 
 select * from g_note where ts is null;
+
+CREATE TYPE field_ui_type AS ENUM ('text_input', 'text_area', 'select_box', 'check_box');
+--drop table g_column_props;
+create table if not exists 
+g_column_props (id VARCHAR not null,
+ts VARCHAR,
+uid VARCHAR,
+table_name VARCHAR,
+col_name VARCHAR,
+is_system_col BOOLEAN,
+is_user_key BOOLEAN,
+is_required BOOLEAN,
+is_visible BOOLEAN,
+is_editable BOOLEAN,
+is_clickable BOOLEAN,
+form_column VARCHAR,
+widget_type VARCHAR,
+label_text VARCHAR,
+kwargs VARCHAR
+);
+
+select * from g_column_props;
+
+insert into g_column_props (id, ts, uid, table_name, col_name, is_system_col, is_user_key, is_required, is_visible, is_editable, is_clickable, form_column, widget_type, label_text, kwargs)
+values ('29aeab4c-eef3-4598-9fa2-a01383205887', '2023-05-29 23:50:11.056294', '0', 'g_entity', 'name', False, True, True, True, True, False, 'COL_1-1', 'text_input', 'Name', '')
+
+--delete from g_column_props;
+
+CREATE TABLE t1(id text);
+select * from t1;
+insert into t1(id) 
+values ('2023-05-29 23:50:11.056294');

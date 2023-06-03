@@ -110,14 +110,12 @@ PRIORITY = [
 ]
 
 # columns for Quick Add
-COMMON_DATA_COLS = ['name', 'url', "tags", 'note']
+COMMON_DATA_COLS = ['name', 'url', 'note', "tags"]
 DATA_COLS = {
-    TABLE_FACULTY : [
-        'name', 'url', 'job_title',
-        'research_area', 'award', 'email','department', 'org',
-        'phd_univ','phd_year','note',],
-    TABLE_RESEARCH_GROUP: [
-        'name', 'url', 'note',],
+    TABLE_FACULTY : COMMON_DATA_COLS + ['job_title',
+        'research_area', 'email', 'award', 'department', 'org',
+        'phd_univ','phd_year',],
+    TABLE_RESEARCH_GROUP: COMMON_DATA_COLS,
     TABLE_NOTE: COMMON_DATA_COLS + ['note_type'],
     TABLE_ORG: COMMON_DATA_COLS + ['org_type'],
     TABLE_PROJECT: COMMON_DATA_COLS + ['project_type'],
@@ -150,6 +148,17 @@ COLUMN_PROPS = {
             "form_column": "COL_1-2",
             "widget_type": "text_input",
             "label_text": "URL"
+        },
+
+        "tags": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_1-3",
+            "widget_type": "text_input",
         },
 
         "entity_type": {
@@ -204,7 +213,7 @@ COLUMN_PROPS = {
             "is_editable": True,
             "is_clickable": False,
             "form_column": "COL_3-3",
-            "widget_type": "selectbox",  # "text_input",
+            "widget_type": "selectbox",  
             "label_text": "Ref Value",              
             },
 
@@ -290,7 +299,7 @@ COLUMN_PROPS = {
             "form_column": "COL_1-4",
             "widget_type": "text_input",
         },
-        "department": {
+        "tags": {
             "is_system_col": False,
             "is_user_key": False,
             "is_required": False,
@@ -298,6 +307,16 @@ COLUMN_PROPS = {
             "is_editable": True,
             "is_clickable": False,
             "form_column": "COL_1-5",
+            "widget_type": "text_input",
+        },
+        "department": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_1-6",
             "widget_type": "text_input",
         },
 
@@ -1079,7 +1098,7 @@ COLUMN_PROPS = {
             "is_editable": True,
             "is_clickable": False,
             "form_column": "COL_3-4",
-            "widget_type": "selectbox",  # "text_input",
+            "widget_type": "selectbox",  
             "label_text": "Ref Value",              
             },
         "done_date": {
@@ -1164,7 +1183,7 @@ COLUMN_PROPS = {
             "is_editable": False,
             "is_clickable": False,
             "form_column": "COL_1-3",
-            "widget_type": "selectbox",  # "text_input",
+            "widget_type": "selectbox",  
             "label_text": "Ref Value",              
             },
 
