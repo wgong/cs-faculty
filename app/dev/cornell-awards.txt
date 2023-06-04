@@ -1,0 +1,1167 @@
+Jayadev Acharya
+2014: MIT Energy Initiative Award
+2017: NSF Computer and Information Science and Engineering (CISE) Research Initiation Initiative (CRII) Award
+2017: NSF Community Instruments and Facilities Small Award
+2018: NSF Faculty Early Career Development Award
+2019: Google Research Award
+Rachit Agarwal
+2017: Google Research Award
+2020: USENIX Security Symposium Distinguished Paper Award
+2021: NSF Faculty Early Career Development Award
+2021: Google Research Award
+2021: Sloan Research Fellowship
+David Albonesi
+2011: Michael Tien '72 Excellence in Teaching Award
+2011: IEEE Computer Society Golden Core Award
+2011: IEEE Fellow
+2015: NSF Faculty Early Career Development Award
+2015: Ralph S. Watts '72 Excellence in Teaching Award
+2016: Ruth and Joel Spira Award for Excellence in Teaching
+2018: Kenneth A. Goldman '71 Excellence in Teaching Award
+Lorenzo Alvisi
+1998: International Symposium on Reliable Distributed Systems Best Paper Award
+1998: NSF Faculty Early Career Development Award
+2000: IBM Faculty Partnership Award
+2001: IBM Faculty Partnership Award
+2001: International World Wide Web (WWW) Conference Best Paper Award
+2001: Sloan Research Fellowship
+2002: IBM Faculty Partnership Award
+2005: International Conference on Dependable Systems and Networks Best Paper Award
+2007: ACM Symposium on Operating Systems Principles Best Paper Award
+2007: USENIX Annual Technical Conference Best Paper Award
+2008: Texas Exes Teaching Award for Outstanding Professor
+2009: UT College of Natural Sciences Teaching Excellence Award
+2010: ACM Fellow
+2010: UT Austin Outstanding Graduate Adviser Award
+2012: Humboldt Research Award, Alexander von Humboldt Foundation
+2012: Visiting Chair Professor, Shanghai Jiao Tong University
+2014: ACM International Systems and Storage Conference Best Paper Award
+2014: Google Research Award
+2014: UT System Regents Outstanding Award
+2016: Google Research Award
+2016: IEEE Fellow
+2016: UT Austin Academy of Distinguished Teachers Award
+2017: Google Research Award
+2020: USENIX Symposium on Operating Systems Design (SOSP) and Implementation Best Paper Award
+Yoav Artzi
+2015: Best Conference Papers
+2015: Conference on Empirical Methods in Natural Language Processing (EMNLP) Best Paper Award
+2016: Google Research Award
+2017: ACL Best Resource Paper Award
+2017: Facebook ParlAI Research Award
+2018: Google Research Award
+2018: NAACL Outstanding Paper Award
+2018: NSF Faculty Early Career Development Award
+2019: Google Research Award
+Shiri Azenkot
+2012: ACM ASSETS Best Paper Award
+2013: ACM ASSETS Best Paper Award
+Graeme Bailey
+2000: ACSU Faculty of the Year
+2002: Kendall S. Carpenter Memorial Advising Award
+2004: ACSU Faculty of the Year
+2006: Merrill Presidential Scholar Outstanding Educator Award
+2007: Stephen H. Weiss Presidential Fellow
+Kavita Bala
+1995: MIT EECS Masters Award
+2000: Cornell College of Engineering Teaching Award
+2005: PCCW Affinito-Stewart Award
+2006: Cornell College of Engineering Teaching Award
+2007: NSF Faculty Early Career Development Award
+2009: CACM Research Highlight
+2009: Cornell College of Engineering Teaching Award
+2014: Best Conference Papers
+2014: CACM Research Highlight
+2014: Computational Aesthetics Best Paper Award
+2015: Cornell College of Engineering Teaching Award
+2016: Atkinson Center Academic Venture Fund (AVF) Grant
+2016: Google Research Award
+2016: LDV Vision Summit: Entrepreneurial Computer Vision Challenge Winner
+2019: ACM Fellow
+2020: ACM SIGGRAPH Academy
+2020: ACM SIGGRAPH Computer Graphics Achievement Award
+2021: IIT Bombay Distinguished Alumnus Award
+Siddhartha Banerjee
+2019: NSF Faculty Early Career Development Award
+Christopher Batten
+2012: DARPA Young Faculty Award
+2012: NSF Faculty Early Career Development Award
+2013: Michael Tien '72 Excellence in Teaching Award
+2015: AFOSR Young Investigator Award
+2015: Cornell Engineering Research Excellence Award
+2017: Michael Tien '72 Excellence in Teaching Award
+Serge Belongie
+2005: Sloan Research Fellowship
+2005: NSF Faculty Early Career Development Award
+2015: ICCV Helmholtz Prize
+2015: IEEE Winter Conference on Applications of Computer Vision Best Paper Award
+2015: Best Conference Papers
+2015: Amazon Web Services Research Award
+2016: Adobe Research Award: Adobe Systems Incorporated Award
+2016: Facebook Research Award
+2017: ACM Symposium on User Interface Software and Technology (UIST) Best Paper Honorable Mention
+2018: eBay Research Award
+Austin Benson
+2019: WSDM Outstanding program committee member
+2019: ACM SIGKDD Best Paper Award
+2020: NSF Kavli Frontiers of Science Kavli Scholar
+2020: JPMorgan Chase Faculty AI Research Award
+2021: NSF Faculty Early Career Development Award
+Tapomayukh Bhattacharjee
+2019: ACM/IEEE International Conference on Human Robot Interaction Best Paper Award
+2023: NSF Faculty Early Career Development Award
+David Bindel
+2008: Alston S. Householder Award
+2010: Sloan Research Fellowship
+2014: Cornell College of Engineering Teaching Award
+2014: Douglas Whitney Award for Teaching Excellence
+2014: SIAG/LA Prize
+2015: Middleware Best Student Paper Award
+2015: SIGEST Paper for SIAM Review Selection
+2015: SIGKDD Best Student Paper
+2017: INFORMS Data Mining and Decision Analytics Best Student Paper Award
+2018: ASPLOS Most Influential Paper Award
+2018: Cornell College of Engineering Research Excellence Award
+2019: ACM SIGKDD Best Paper Award
+2020: James and Mary Tien Excellence in Teaching Award
+Ken Birman
+1998: ACM Fellow
+1999: ACM Fellow
+2000: Cornell College of Engineering Teaching Award
+2000: Stephen '57 and Marilyn Miles Excellence in Teaching Award
+2007: Cisco "Technology Visionary" Award
+2009: IEEE Technical Committee on Distributed Processing Outstanding Achievment Award
+2009: IEEE Tsutomu Kanai Award
+2013: SIGOPS Hall of Fame Award
+2014: IEEE Fellow
+Anne Bracy
+2001: NSF Fellowship
+2016: ACSU Faculty of the Year
+2017: Cornell College of Engineering Teaching Award
+2017: Fiona Ip Li '78 and Donald Li '75 Excellence in Teaching Award
+2019: Tau Beta Pi Professor of the Year
+Mark Campbell
+2004: AIAA Best Paper
+2004: Lockheed University Research Award
+2006: Associate Fellow of the AIAA
+2007: ASEE award for Teaching Excellence
+2010: Douglas Whitney Award for Teaching Excellence
+2011: Guidance Navigation and Control Conference Best Paper Award
+2012: Int’l Symposium on Distributed Autonomous Robotic Systems Best Paper Award
+Claire Cardie
+1996: Cornell College of Engineering Teaching Award
+1996: NSF Faculty Early Career Development Award
+1996: Ralph S. Watts '72 Excellence in Teaching Award
+1997: Lilly Foundation Fellow
+2008: Elected to the Executive Council of the AAAI
+2010: CRA-W Distinguished Professor
+2010: Leading Practices Award, White House Open Government Initiative
+2012: Google Research Award
+2012: Outstanding Achievement in Education from UMass, Amherst
+2015: ACL Fellow
+2016: Cornell Discovery and Innovation Research Seed Grant
+2018: Workday Faculty Award
+2019: ACM Fellow
+2019: Google Research Award
+2022: AAAS Fellow
+Rich Caruana
+2004: Cornell College of Engineering Teaching Award
+2004: NSF Faculty Early Career Development Award
+2005: Merrill Presidential Scholar Outstanding Educator Award
+Eshan Chattopadhyay
+2016: Bert Kay Dissertation Award
+2016: ACM Symposium on Theory of Computing (STOC) Best Paper Award
+2017: Simons-Berkeley Research Fellowship
+2019: NSF Computer and Information Science and Engineering (CISE) Research Initiation Initiative (CRII) Award
+2021: NSF Faculty Early Career Development Award
+2023: Sloan Research Fellowship
+Michael Clarkson
+2005: IEEE Computer Security Foundations Workshop Best Paper Award
+2008: IEEE Computer Security Foundations Symposium Best Paper Award
+2012: AFOSR Young Investigator Award
+2015: Cornell College of Engineering Teaching Award
+2015: Programming Languages and Analysis for Security (PLAS)
+2016: New England Security Day, Cybersecurity Education Chair
+2020: Kenneth A. Goldman '71 Excellence in Teaching Award
+2022: Stephen H. Weiss Provost’s Teaching Fellow
+Robert Constable
+1987: Merrill Presidential Scholar Outstanding Educator Award
+1990: Guggenheim Fellowship
+1995: ACM Fellow
+2014: Herbrand Award for Distinguished Contributions to Automated Reasoning
+R. Conway
+1992: National Academy of Engineering Member
+Anil Damle
+2015: Gerald J. Lieberman Fellowship
+2016: Gene Golub Doctoral Dissertation Award
+2016: NSF Fellowship
+Cristian Danescu-Niculescu-Mizil
+2012: International World Wide Web (WWW) Conference Best Paper Award
+2017: ACM Conference on Computer Supported Cooperative Work and Social Computing (CSCW) Best Paper Award
+2018: Google Research Award
+2018: NSF Faculty Early Career Development Award
+Abe Davis
+2017: IWSHM Structural Health Monitoring in Action Award
+Christopher De Sa
+2016: International Conference on Machine Learning (ICML) Best Paper Award
+2020: Mr. & Mrs. Richard F. Tucker Teaching Excellence Award
+2021: NSF Faculty Early Career Development Award
+Christina Delimitrou
+2015: HiPEAC Best Paper Award
+2016: John and Norma Balen Sesquicentennial Faculty FellowshipJohn and Norma Balen Sesquicentennial Faculty Fellowship
+2017: HiPEAC Best Paper Award
+2018: VMWare Research Faculty Award
+2018: HiPEAC Best Paper Award
+2018: Facebook Research Award
+2019: ASPLOS Hall Of Fame
+2019: Google Research Award
+Nicola Dell
+2018: ACM CHI Best Paper Award
+2018: Google Research Award
+2018: NSF Faculty Early Career Development Award
+2019: ACM CSCW Diversity and Inclusion Award
+2019: USENIX Security Symposium Distinguished Paper Award
+2020: ACM Conference on Computer Supported Cooperative Work and Social Computing (CSCW) Best Paper Award
+2020: Google Research Award
+2020: USENIX Security Symposium Distinguished Paper Award
+Alan Demers
+2015: SIGOPS Hall of Fame Award
+B.R. Donald
+1994: NSF Presidential Young Investigator Award
+Kevin Ellis
+2017: Angus McDonald Award for Excellence in Undergraduate Teaching
+Deborah Estrin
+2000: ACM Fellow
+2004: IEEE Fellow
+2007: American Academy of Arts and Sciences Member
+2007: Anita Borg Institute's Women of Vision Award for Innovation
+2007: UC Berkeley MacKay Fellow
+2008: Distinguished Alumnus Award in Computer Sciences & Engineering, UC Berkeley
+2008: Women in Technology International Hall of Fame Award
+2009: ACM Sigmobile Outstanding Contribution Award
+2009: National Academy of Engineering Member
+2016: NSF Cybersecurity Innovation for Cyberinfrastructure (CICI) Grant
+2017: IEEE Internet Award
+2018: Google Research Award
+2018: MacArthur Fellows Award
+2019: National Academy of Medicine
+2021: IEEE Von Neumann Medal
+K-Y. Daisy Fan
+2004: Cornell Society of Engineers Achievement Award
+2007: Faculty Innovation in Teaching Grant (Cornell)
+2008: Zellman Warhaft Commitment to Diversity
+2011: Cornell College of Engineering Teaching Award
+2016: Kendall S. Carpenter Memorial Advising Award
+2019: Cornell College of Engineering Teaching Award
+Silvia Ferrari
+2004: ONR Young Investigator Award
+2005: NSF Faculty Early Career Development Award
+2020: AAAI Fellow
+2020: ASME Fellow
+2020: Cornell College of Engineering Research Excellence Award
+Nate Foster
+2012: Sloan Research Fellowship
+2013: Cornell College of Engineering Teaching Award
+2013: NSF Faculty Early Career Development Award
+2013: USENIX NSDI Community Award
+2015: ACM SIGPLAN Most Influential Paper Award
+2015: Most Influential Paper, Principles of Programming Languages (POPL)
+2016: Cornell College of Engineering Research Excellence Award
+2016: NSF Algorithms in the Field (AitF) Grant
+2016: NSF Cybersecurity Innovation for Cyberinfrastructure (CICI) Grant
+2016: SIGPLAN Research Highlight
+2018: ACM SIGCOMM Rising Star Award
+2018: Cornell College of Engineering Teaching Award
+2018: USENIX NSDI Best Paper Award
+2020: ACM SIGCOMM CoNEXT Best Paper Award
+2020: ACM SIGPLAN POPL Distinguished Paper Award
+2020: Google Research Award
+Nir Friedman
+1998: Dissertation Awards
+Johannes Gehrke
+2000: IBM Faculty Development Award
+2000: IBM Faculty Partnership Award
+2001: Cornell College of Engineering Teaching Award
+2002: NSF Faculty Early Career Development Award
+2003: Sloan Research Fellowship
+2004: Cornell Provost's Award for Distinguished Scholarship
+2007: NYSTAR Faculty Development Award
+2010: Humboldt Research Award, Alexander von Humboldt Foundation
+2010: NEC Labs Data Management University Award
+2011: Best Conference Papers
+2011: Blavatnik Award for Young Scientists
+2011: IEEE Technical Achievement Award
+2011: Yahoo! Faculty Research and Engagement Program Award
+2014: ACM Fellow
+2015: ACM Fellow
+Adem Gencer
+2015: Middleware Best Student Paper Award
+Ziv Goldfeld
+2017: The Rothschild Postdoctoral Fellowship
+2017: The Ben Gurion University Postdoctoral Fellowship
+2020: IBM University Award
+2020: NSF Computer and Information Science and Engineering (CISE) Research Initiation Initiative (CRII) Award
+2021: NSF Faculty Early Career Development Award
+Carla Gomes
+1996: Nominated for the General Ronald Yates Award for Excellence in Technology Transfer (AFRL/RL)
+1999: Special Recognition Award, Information Directorate, Air Force Research Laboratory
+2000: Member, Advisory Committee, International Scientists, for the Research Council President of the European Union
+2001: Elected to the Executive Council of the AAAI
+2004: Best Conference Papers
+2006: Best Conference Papers
+2007: AAAI Fellow
+2011: Best Conference Papers
+2011: Radcliffe Institute Fellow
+2013: AAAS Fellow
+2015: Future of Life Institute Grant
+2015: NSF Expeditions in Computing Grant
+2016: AAAI Classic Paper Award
+2016: American Association for the Advancement of Science, Chair
+2016: Atkinson Center Academic Venture Fund (AVF) Grant
+2017: ACM Fellow
+2017: Department of Defense Multidisciplinary University Research Initiative (MURI)
+2017: Innovative Applications of Artificial Intelligence Conference (IAAI)
+2019: Cornell College of Engineering Research Excellence Award
+2021: AAAI Feigenbaum Prize
+2021: Innovative Applications of Artificial Intelligence Conference (IAAI)
+2021: Merrill Presidential Scholar Outstanding Educator Award
+2022: ACM/AAAI Newell Award
+Donald Greenberg
+1988: ACM SIGGRAPH Steven Coons Award
+1989: National Computer Graphics Association Academic Award
+1991: National Academy of Engineering Member
+1992: American Institute of Medical and Biological Engineering
+1997: ASCA Creative Research Award in Architecture
+2002: AAAS Fellow
+David Gries
+1961: Superior Accomplishment Award, U.S. Naval Weapons Laboratory
+1977: ACM Programming Systems and Languages Paper Award
+1983: Guggenheim Fellowship
+1986: AFIPS Education Award
+1987: John M. and Emily B. Clark Distinguished Teaching Awards
+1990: AAAS Fellow
+1990: Merrill Presidential Scholar Outstanding Educator Award
+1991: Computing Research Association Distinguished Service Award
+1991: SIGCSE Award for Outstanding Contribution to Computer Science Education
+1994: ACM Fellow
+1995: IEEE Taylor L. Booth Education Award
+1995: Stephen H. Weiss Presidential Fellow
+1996: ACM Karl V. Karlstrom Outstanding Educator Award
+1996: ACSU Faculty of the Year
+1999: ACSU Faculty of the Year
+2015: Amity Book's Prize
+2017: ACSU Faculty of the Year
+2017: Class of 2019
+2017: Merrill Presidential Scholar Outstanding Educator Award
+2019: SIGCSE “Top Ten CS Education Research Paper”
+Francois Guimbretiere
+2004: ACM Symposium on User Interface Software and Technology (UIST) Best Paper Award
+2014: ACM Symposium on User Interface Software and Technology (UIST) Best Paper Award
+Joseph Halpern
+1985: Best Conference Papers
+1985: IBM First Plateau Invention Achievement Award
+1985: International Joint Conference on Artificial Intelligence Best Paper Award
+1987: IBM Outstanding Innovation Award
+1989: Best Conference Papers
+1989: International Joint Conference on Artificial Intelligence Best Paper Award
+1993: AAAI Fellow
+1997: Gödel Prize
+1998: IBM Outstanding Innovation Award
+2001: Guggenheim Fellowship
+2002: ACM Fellow
+2002: Fulbright Scholar
+2005: AAAS Fellow
+2005: Cornell College of Engineering Teaching Award
+2006: Best Conference Papers
+2007: ACSU Faculty of the Year
+2007: Invited to join the Center for Analytic Economics, Cornell
+2009: ACM/AAAI Newell Award
+2009: Edsger W. Dijkstra Prize in Distributed Computing
+2009: Fulbright Distinguished Chair in Natural Sciences and Engineering, Hebrew University
+2010: Cornell College of Engineering Teaching Award
+2011: ACM SIGART Autonomous Agents Research Award
+2011: Economic Theory Fellow, Society for the Advancement of Economic Theory
+2012: Best Conference Papers
+2012: IEEE Fellow
+2012: International Conference on Knowledge Representation and Reasoning Best Paper Award
+2012: Ray Reiter Prize
+2015: American Academy of Arts and Sciences Member
+2016: Kampé de Fériet Award
+2017: Game Theory Society Fellow
+2018: American Association for the Advancement of Science, Chair
+2018: Hebrew University Lady Davis Fellowship
+2019: National Academy of Engineering Member
+Bharath Hariharan
+2013: Microsoft Research Faculty Fellowship
+2014: ECCV Outstanding Reviewer Award
+2015: CVPR Outstanding Reviewer Award
+2018: CVPR Outstanding Reviewer Award
+2020: Sonny Yau ‘72 Excellence in Teaching Award
+2022: NSF Faculty Early Career Development Award
+2022: PAMI Young Researcher Award
+Juris Hartmanis
+1981: AAAS Fellow
+1989: John M. and Emily B. Clark Distinguished Teaching Awards
+1989: National Academy of Engineering Member
+1990: Merrill Presidential Scholar Outstanding Educator Award
+1991: Merrill Presidential Scholar Outstanding Educator Award
+1992: American Academy of Arts and Sciences Member
+1993: ACM Turing Award
+1994: ACM Fellow
+1994: Senior Distinguished Scientist Award, Alexander von Humboldt Foundation, Germany
+1995: Bolzano Gold Medal of the Academy of Sciences, Czech Republic
+2000: Computing Research Association Distinguished Service Award
+2001: Cornell College of Engineering Teaching Award
+2001: Grand Medal of the Latvian Academy of Sciences (Lielo Medalu)
+2012: AMS Fellow
+2013: Caltech's Distinguished Alumni Award
+2014: Computing Research Association Distinguished Service Award
+Haym Hirsh
+1994: IEEE Conference on Artificial Intelligence for Applications Best Paper Award
+2023: AAAS Fellow
+Guy Hoffman
+2008: IEEE RO-MAN Best Paper Award
+2010: IEEE ICRA Best Paper Award
+2015: ACM/IEEE International Conference on Human Robot Interaction Best Paper Award
+2019: Dennis G. Shepherd Teaching Award
+2020: IEEE Andrew P. Sage Best Transactions Paper Award
+John Hopcroft
+1986: ACM Turing Award
+1987: AAAS Fellow
+1987: American Academy of Arts and Sciences Member
+1987: IEEE Fellow
+1989: National Academy of Engineering Member
+1990: IBM Faculty Partnership Award
+1994: ACM Fellow
+2004: Cornell College of Engineering Teaching Award
+2005: IEEE Harry H. Goode Memorial Award
+2006: ACSU Faculty of the Year
+2007: CRA Distinguished Service Award
+2007: Computing Research Association Distinguished Service Award
+2008: ACM Karl V. Karlstrom Outstanding Educator Award
+2008: Honorary Professorship, Beijing Institute of Technology
+2008: Merrill Presidential Scholar Outstanding Educator Award
+2009: National Academy of Sciences Member
+2009: Society for Industrial and Applied Math (SIAM) Fellow
+2010: Einstein Professor Chinese Academy of Science
+2010: IEEE Von Neumann Medal
+2010: Merrill Presidential Scholar Outstanding Educator Award
+2010: Ralph S. Watts '72 Excellence in Teaching Award
+2011: Cornell College of Engineering Teaching Award
+2013: Outstanding Reserach Award of Web Intelligence Consortium
+2013: WI-IAT Excellence in Research Award
+2016: Friendship Award - China
+2016: Microsoft Research Outstanding Collaborator Award
+2017: Honorary Professorship, Harbin Institute of Technology
+2017: NEC C&C Foundation Award
+2017: National Academy of Engineering Founder's Award
+2018: Foreign Member - Chinese Academy of Science
+Justin Hsu
+2022: NSF Faculty Early Career Development Award
+Daniel Huttenlocher
+1994: Tau Beta Pi Professor of the Year
+1994: Merrill Presidential Scholar Outstanding Educator Award
+1994: New York State Professor of the Year
+1995: Merrill Presidential Scholar Outstanding Educator Award
+1996: Merrill Presidential Scholar Outstanding Educator Award
+1996: Stephen H. Weiss Presidential Fellow
+2007: Phi Beta Kappa Visiting Scholar
+2007: ACM Fellow
+2010: Most Influential Paper, Computer Vision and Pattern Recognition (CVPR)
+Doug James
+2004: NSF Faculty Early Career Development Award
+2005: Popular Science's Annual Brilliant Ten
+2006: Sloan Research Fellowship
+2007: Best Conference Papers
+2008: Cornell College of Engineering Teaching Award
+2009: ACSU Faculty of the Year
+2011: Best Conference Papers
+2011: Guggenheim Fellowship
+2013: Academy of Motion Picture Arts and Sciences
+2013: Katayanagi Emerging Leadership Prize
+Thorsten Joachims
+2003: NSF Faculty Early Career Development Award
+2005: Best Conference Papers
+2005: International Conference on Machine Learning (ICML) Best Paper Award
+2005: International Conference on Machine Learning (ICML) Best Student Paper Award
+2005: SIGKDD Best Student Paper
+2006: ACM SIGKDD Best Paper Award
+2006: Best Conference Papers
+2007: Cornell College of Engineering Teaching Award
+2007: Merrill Presidential Scholar Outstanding Educator Award
+2007: Michael Tien '72 Excellence in Teaching Award
+2009: Best Conference Papers
+2009: ECML Best Paper Award
+2009: Fraunhofer-Bessel Award of the Humboldt Foundation
+2009: International Conference on Machine Learning (ICML) Best 10-Year Paper Award
+2009: Most Influential Paper, International Conference on Machine Learning (ICML)
+2010: ACSU Faculty of the Year
+2012: Cornell College of Engineering Teaching Award
+2014: ACM Fellow
+2014: ISMIR Best Student Paper Award
+2015: AAAI Fellow
+2015: ACM Fellow
+2015: SIGKDD Test of Time Award
+2016: SIGIR Test of Time Award
+2016: SIGKDD Best Student Paper
+2017: SIGKDD Test of Time Award
+2017: WSDM Best Paper Award
+2019: Google Research Award
+2020: ACM SIGIR Conference Best Paper Award
+2020: ACM SIGKDD Innovation Award
+2020: SIGKDD Lifetime Achievement Award
+2021: SIGIR Academy Inaugural Member
+Wendy Ju
+2015: Google Research Award
+2015: Surface Transportation Track, Human Factors and Ergonomics Society Best Student Paper
+2015: ACM/IEEE Human-Robot Interactions Conference Best Demonstration Award
+2017: ACM Computer Supported Cooperative Work Best Demonstration Award
+2017: Mozilla Research Grant
+2020: Amazon Research Award
+Ari Juels
+2005: IEEE Communications Society Best Tutorial Paper Award
+2005: USENIX Security Best Student Paper
+2007: PET Award for Outstanding Research in Privacy Enhancing Technologies
+2007: ComputerWorld 40 Innovative IT People Under 40
+2015: IEEE Symposium on Security and Privacy Distinguished Student Paper Award
+2015: Google Research Award
+2016: IEEE Symposium on Security and Privacy Distinguished Student Paper Award
+2016: IBM Faculty Research Award
+2018: Cornell Tech Faculty Teaching Award
+2019: NDSS Test of Time Award
+Nathan Kallus
+2015: INFORMS Social Media Analytics Section Best Student Paper
+2016: INFORMS Data Mining and Decision Analytics Best Paper
+Uri Keich
+2007: NSF Faculty Early Career Development Award
+Alon Keinan
+2011: Sloan Research Fellowship
+2012: Ellison Medical Foundation New Scholar Award
+2013: Research and Extension Award for Early Achievement
+Srinivasan Keshav
+1998: Cornell College of Engineering Teaching Award
+Jon Kleinberg
+1996: IEEE Symposium on Computer Security Foundations Machtey Best Student Paper Award
+1996: MIT George M. Sprowls Ph.D. Dissertation Prize
+1997: NSF Faculty Early Career Development Award
+1997: Sloan Research Fellowship
+1999: Merrill Presidential Scholar Outstanding Educator Award
+1999: ONR Young Investigator Award
+1999: Packard Fellowship in Science and Engineering
+2000: ACM Symposium on Principles of Database Systems (PODS) Best Paper Award
+2000: Cornell College of Engineering Teaching Award
+2000: Fiona Ip Li '78 and Donald Li '75 Excellence in Teaching Award
+2001: National Academy of Sciences Award for Initiatives in Research
+2001: National Academy of Sciences Award for Initiatives in Research
+2002: ACSU Faculty of the Year
+2002: IBM Outstanding Innovation Award
+2003: ACM SIGKDD Best Paper Award
+2003: Best Conference Papers
+2005: ACM SIGKDD Best Paper Award
+2005: Best Conference Papers
+2005: MacArthur Fellows Award
+2006: Best Conference Papers
+2006: Intl Conference on Info. Processing in Sensor Networks (IPSN) Best Paper Award
+2006: Rolf Nevanlinna Prize
+2007: American Academy of Arts and Sciences Member
+2007: Best Conference Papers
+2007: Cornell College of Engineering Teaching Award
+2007: International World Wide Web (WWW) Conference Best Paper Award
+2007: Kenneth A. Goldman '71 Excellence in Teaching Award
+2007: Smithsonian Magazine's America's Young Innovator's Award
+2008: Discover's 50 Most Important, Influential and Promising People in Science
+2008: National Academy of Engineering Member
+2009: ACM Infosys Foundation Award
+2009: ACM Prize in Computing Award
+2010: Association of American Publishers PROSE Award
+2010: Katayanagi Emerging Leadership Prize
+2011: INFORMS Frederick W. Lanchester Prize
+2011: National Academy of Sciences Member
+2011: Yahoo! Faculty Research and Engagement Program Award
+2012: Simons Investigators Award
+2013: ACM Fellow
+2013: ACM SIGKDD Innovation Award
+2013: Cornell College of Engineering Teaching Award
+2013: Douglas Whitney Award for Teaching Excellence
+2013: Harvey Prize
+2014: ACM Conference on Computer Supported Cooperative Work and Social Computing (CSCW) Best Paper Award
+2014: ACM Conference on Economics and Computation (EC) Best Paper Award
+2014: ACM/AAAI Newell Award
+2014: Best Conference Papers
+2014: SIGKDD Test of Time Award
+2015: ECML / PKDD Test of Time Award
+2016: International World Wide Web (WWW) Conference Best Paper Award
+2016: PAKDD Test of Time Award
+2016: SIGKDD Test of Time Award
+2019: Vannevar Bush Award
+2021: ACM Conference on Fairness, Accountability, and Transparency (FAccT) Best Paper Award
+Robert Kleinberg
+2007: NSF Faculty Early Career Development Award
+2008: ACSU Faculty of the Year
+2008: COLT Best Student Paper Award
+2008: Microsoft Research Faculty Fellowship
+2008: Sloan Research Fellowship
+2009: Cornell College of Engineering Teaching Award
+2009: Kenneth A. Goldman '71 Excellence in Teaching Award
+2010: ACM Conference on Electronic Commerce
+2010: Best Conference Papers
+2011: ACSU Faculty of the Year
+2012: Tau Beta Pi Professor of the Year
+2014: ACM Conference on Electronic Commerce
+2014: Best Conference Papers
+2016: COLT Outstanding PC service award
+2016: NSF Algorithms in the Field (AitF) Grant
+2017: NIPS Best Reviewer Award
+2018: Marill Presidential Scholar
+2018: SIGCOMM Networking Systems Award
+2019: Cornell College of Engineering Teaching Award
+2021: ACM Fellow
+Christopher Koch
+2009: Google Research Award
+2011: Best Conference Papers
+Dexter Kozen
+1974: John G. Kemeny Prize in Computing, Dartmouth College
+1980: IBM Outstanding Innovation Award
+1991: Guggenheim Fellowship
+1994: ACSU Faculty of the Year
+2001: Stephen & Margery Russell Distinguished Teaching Award
+2003: ACM Fellow
+2008: AAAS Fellow
+2008: Cornell College of Engineering Teaching Award
+2008: Michael Tien '72 Excellence in Teaching Award
+2011: LICS Test of Time Award
+2013: ACSU Faculty of the Year
+2013: Cornell College of Engineering Teaching Award
+2013: Daniel M. Lazar '29 Excellence in Teaching Award
+2015: European Association of Theorerical Computer Science (EATCS) Fellow
+2015: European Association of Theorerical Computer Science (EATCS) Fellow
+2016: EATCS Distingushed Achievements Award
+2016: IEEE W. Wallace McDowell Award
+2016: NSF Algorithms in the Field (AitF) Grant
+2018: Stephen H. Weiss Presidential Fellow
+2020: ACM SIGPLAN POPL Distinguished Paper Award
+2022: Alonzo Church Award for Outstanding Contributions to Logic and Computation
+Hadas Kress-Gazit
+2012: DARPA Young Faculty Award
+2013: Fiona Ip Li '78 and Donald Li '75 Excellence in Teaching Award
+2019: Kenneth A. Goldman '71 Excellence in Teaching Award
+2020: Cornell College of Engineering Research Excellence Award
+2020: Named to Women in Robotics “30 women in robotics you need to know about”
+2020: IEEE Fellow
+Volodymyr Kuleshov
+2022: NSF Faculty Early Career Development Award
+Bruce Land
+1993: ACSU Faculty of the Year
+Lillian Lee
+1999: Cornell College of Engineering Teaching Award
+1999: Stephen '57 and Marilyn Miles Excellence in Teaching Award
+2002: Cornell College of Engineering Teaching Award
+2002: James and Mary Tien Excellence in Teaching Award
+2002: Sloan Research Fellowship
+2004: Best Conference Papers
+2004: HLT-NAACL Conference Best Paper Award
+2007: Cornell Provost's Award for Distinguished Scholarship
+2008: Cornell Institute for Social Sciences ISS Faculty Fellow
+2009: Kendall S. Carpenter Memorial Advising Award
+2011: Yahoo! Faculty Research and Engagement Program Award
+2013: AAAI Fellow
+2014: Cornell College of Engineering Teaching Award
+2014: James and Mary Tien Excellence in Teaching Award
+2016: Cornell Discovery and Innovation Research Seed Grant
+2016: IJCAI "NLP Meets Journalism" Workshop Best Paper Award
+2017: ACL Fellow
+2018: ACM Fellow
+2021: ACL Distinguished Service Award
+Daniel Lee
+2019: Google Research Award
+Owolabi Legunsen
+2016: ACM SIGSOFT Distinguished Paper Award
+2017: UIUC Feng Chen Memorial Award in Software Engineering
+2021: NSF Faculty Early Career Development Award
+Steve Marschner
+2004: Academy of Motion Picture Arts and Sciences
+2004: NSF Faculty Early Career Development Award
+2006: Sloan Research Fellowship
+2014: Cornell College of Engineering Teaching Award
+2015: ACM SIGGRAPH Computer Graphics Achievement Award
+2016: Best Conference Papers
+2016: Merrill Presidential Scholar Outstanding Educator Award
+2018: ACM SIGGRAPH Academy
+2019: Eurographics Symposium on Rendering (ESGR) Test of Time Award
+2019: IEEE VIS Test of Time Award
+2021: ACM Fellow
+Jose Martinez
+2011: Distinguished Educator Award in the inaugural class of alumni awards
+2011: Tau Beta Pi Professor of the Year
+2014: Kenneth A. Goldman '71 Excellence in Teaching Award
+2021: IEEE Fellow
+David Mimno
+2011: CRA Computing Innovation Fellow
+2016: Sloan Research Fellowship
+2017: NSF Faculty Early Career Development Award
+Greg Morrisett
+1996: ACM Conf. on Programming Language Design and Implementation Most Influential Paper
+1997: ACSU Faculty of the Year
+1998: Cornell College of Engineering Teaching Award
+1998: Most Influential Paper, Principles of Programming Languages (POPL)
+1998: Sloan Research Fellowship
+1999: ACM International Conference on Functional Programming Best Paper
+1999: NSF Faculty Early Career Development Award
+2000: Ralph S. Watts '72 Excellence in Teaching Award
+2001: Allen Newell Medal for Research Excellence
+2001: Cornell College of Engineering Teaching Award
+2006: Usenix Security Symposium Best Paper
+2010: IBM Faculty Fellow
+2013: ACM Fellow
+2016: European Association for Programming Languages and Systems Best Paper
+2017: NSF Grant in Cybersecurity
+Andrew Myers
+1999: ACM SIGPLAN Most Influential Paper Award
+1999: MIT George M. Sprowls Ph.D. Dissertation Prize
+2001: ACM Symposium on Operating Systems Principles Best Paper Award
+2001: Best Conference Papers
+2002: Abraham T. C. Wong '72 Excellence in Teaching Award
+2002: Cornell College of Engineering Teaching Award
+2002: NSF Faculty Early Career Development Award
+2002: Sloan Research Fellowship
+2005: IEEE Computer Security Foundations Workshop Best Paper Award
+2007: ACM Symposium on Operating Systems Principles Best Paper Award
+2007: Best Conference Papers
+2009: Merrill Presidential Scholar Outstanding Educator Award
+2009: Most Influential Paper, Principles of Programming Languages (POPL)
+2010: Cornell College of Engineering Teaching Award
+2010: Cornell Provost's Award for Distinguished Scholarship
+2010: James and Mary Tien Excellence in Teaching Award
+2013: ACM Fellow
+2013: ACM SIGPLAN PLDI Distinguished Paper Award
+2013: Best Conference Papers
+2013: Best Conference Papers
+2013: CIDR Best Paper Award
+2015: ACM SIGPLAN PLDI Distinguished Paper Award
+2015: Cornell College of Engineering Teaching Award
+2015: Dorothy and Fred Chau MS '74 Teaching Award
+2017: NSF Grant in Cybersecurity
+Rajalakshmi Nandakumar
+2018: SenSys Best Paper Award
+Tapan Parikh
+2008: WAGS Innovation in Technology
+2010: ACM CHI Best Paper Award
+2010: IEEE International Conference on Data Engineering Best Student Paper
+2010: UW Diamond Early Career Achievement
+2011: NSF Faculty Early Career Development Award
+2012: ACM CHI Best Paper Award
+2013: Hellman Fellowship
+2014: Sloan Research Fellowship
+2018: Kaplan Faculty Fellowship
+Rafael Pass
+2008: NSF Faculty Early Career Development Award
+2009: Microsoft Research Faculty Fellowship
+2009: Microsoft Research Faculty Fellowship
+2010: AFOSR Young Investigator Award
+2011: Sloan Research Fellowship
+2012: Cornell College of Engineering Teaching Award
+2012: Fiona Ip Li '78 and Donald Li '75 Excellence in Teaching Award
+2013: Wallenberg Academy Fellow
+2015: Google Research Award
+2017: NSF Grant in Cybersecurity
+2023: International Association for Cryptologic Research Fellow
+Hal Perkins
+1998: ACSU Faculty of the Year
+Kirstin Petersen
+2016: Elisabeth Schiemann Kolleg Fellow with the Max Planck Society
+2019: Packard Fellowship in Science and Engineering
+Emma Pierson
+2020: NeurIPS ML4H Workshop Best On Theme Paper Award
+2022: NSF Faculty Early Career Development Award
+Keshav K. Pingali
+1989: NSF Presidential Young Investigator Award
+1997: Cornell College of Engineering Teaching Award
+1998: Cornell College of Engineering Teaching Award
+1998: Stephen & Margery Russell Distinguished Teaching Award
+2005: IBM Faculty Development Award
+2005: IBM Faculty Partnership Award
+T.V. Raman
+1995: Dissertation Awards
+Thomas Reps
+1983: Dissertation Awards
+Tom Ristenpart
+2011: UCSD Computer Science and Engineering Department Dissertation Award
+2013: NSF Faculty Early Career Development Award
+2014: USENIX Annual Technical Conference Best Paper Award
+2015: Sloan Research Fellowship
+2016: IEEE Symposium on Security and Privacy Distinguished Student Paper Award
+2018: ACM CHI Best Paper Award
+2018: Google Research Award
+2020: ACM on Human-Computer Interaction Best Paper Award
+2020: Google Research Award
+2020: USENIX Security Symposium Distinguished Paper Award
+Timothy Roughgarden
+2002: Dissertation Awards
+Ronitt Rubinfeld
+1995: ACSU Faculty of the Year
+1996: Cornell College of Engineering Teaching Award
+Alexander "Sasha" Rush
+2010: Conference on Empirical Methods in Natural Language Processing (EMNLP) Best Paper Award
+2012: HLT-NAACL Conference Best Paper Award
+2015: Google Research Award
+2016: Microsoft Azure and Samsung AI Award
+2017: Bloomberg Faculty Award
+2017: Intel AI Collaboration Faculty Award
+2018: Amazon Web Services Research Award
+2018: Google Research Award
+2018: Facebook Research Award
+2019: NSF Faculty Early Career Development Award
+2019: Sony Faculty Award
+2020: EMNLP Best Demo Award
+2020: ACM Design Automation Conference (DAC) Best Paper Award
+2021: Sloan Research Fellowship
+Mert Sabuncu
+2007: MICCAI Young Scientist Award
+2011: NIH CAREER DEVELOPMENT Award (K25)
+2018: NSF Faculty Early Career Development Award
+2019: Cornell College of Engineering Research Excellence Award
+Gerald Salton
+1962: Guggenheim Fellowship
+1983: SIGIR Gerard Salton Award
+1988: Senior Distinguished Scientist Award, Alexander von Humboldt Foundation, Germany
+1989: ASIS Award of Merit
+1995: ACM Fellow
+Adrian Sampson
+2015: University of Washington CSE William Chan Memorial Dissertation Award
+2016: Google Research Award
+2017: OOPSLA Distinguished Artifact Award
+2018: Cornell College of Engineering Teaching Award
+2019: NSF Faculty Early Career Development Award
+Ashutosh Saxena
+2007: Best Conference Papers
+2011: Sloan Research Fellowship
+2012: Google Research Award
+2012: Microsoft Research Faculty Fellowship
+2013: NSF Faculty Early Career Development Award
+Fred Schneider
+1983: IBM Faculty Development Award
+1992: AAAS Fellow
+1995: ACM Fellow
+1996: Professor-at-Large, University of Tromsoe
+2000: Cornell College of Engineering Teaching Award
+2003: Honorary Doctor of Science, University of Newcastle
+2005: IEEE Computer Security Foundations Workshop Best Paper Award
+2007: Most Influential Paper, Special Interest Group on Operating Systems (SIGOPS)
+2007: SIGOPS Hall of Fame Award
+2008: IEEE Computer Security Foundations Symposium Best Paper Award
+2008: IEEE Fellow
+2010: Cornell College of Engineering Teaching Award
+2010: Norges Tekniske Vitenskapsakademi (NTVA) Member
+2011: National Academy of Engineering Member
+2012: IEEE Emanuel R. Piore Award
+2016: CRA Distinguished Service Award
+2016: NSF Cybersecurity Innovation for Cyberinfrastructure (CICI) Grant
+2017: American Academy of Arts and Sciences Member
+2017: Jean-Claude Laprie Award
+2018: Edsger W. Dijkstra Prize in Distributed Computing
+Bart Selman
+1988: Best Conference Papers
+1989: Best Conference Papers
+1992: Best Conference Papers
+1996: Best Conference Papers
+1998: NSF Faculty Early Career Development Award
+1999: Elected to the Executive Council of the AAAI
+1999: Sloan Research Fellowship
+2001: AAAI Fellow
+2001: Merrill Presidential Scholar Outstanding Educator Award
+2002: Cornell College of Engineering Teaching Award
+2003: AAAS Fellow
+2004: Best Conference Papers
+2006: Best Conference Papers
+2009: American Association for the Advancement of Science, Chair
+2012: ACM Fellow
+2015: Future of Life Institute Grant
+2016: AAAI Classic Paper Award
+2016: Cornell College of Engineering Research Excellence Award
+2017: Department of Defense Multidisciplinary University Research Initiative (MURI)
+Phoebe Sengers
+2003: NSF Faculty Early Career Development Award
+2008: ACM CHI Best Paper Award
+2010: ACM CHI Best Paper Award
+2018: ACM CHI Best Paper Award
+2018: NSF Human-Centered Computing (HCC) Award
+Praveen Seshadri
+1999: Cornell College of Engineering Teaching Award
+Jayavel Shanmugasundaram
+2002: IBM Faculty Partnership Award
+2003: IBM Faculty Partnership Award
+2003: NSF Faculty Early Career Development Award
+2005: Cornell College of Engineering Teaching Award
+Elaine Shi
+2011: IJCNN/Kaggle Social Network Challenge, First Place
+2013: ACM CCS Best Student Paper
+2013: Google Research Award
+2013: NSA Best Scientific Cybersecurity Paper
+2013: UMD Invention of the Year Award
+2014: Google Research Award
+2014: Sloan Research Fellowship
+2015: ASPLOS Best Paper Award
+2015: HLI Award for Secure Multiparty Computing
+2015: NSF Large Collaborative Grant
+2015: Packard Fellowship in Science and Engineering
+2015: VMWare Research Faculty Award
+2016: CSAW Applied Cybersecurity Research Competition, First Place
+2016: ONR Young Investigator Award
+2017: NSF Grant in Cybersecurity
+2020: Cylab Distinguished Alumni Award
+Vitaly Shmatikov
+2008: PET Award for Outstanding Research in Privacy Enhancing Technologies
+2011: ACM Conference on Computer and Communications Security Test of Time Award
+2012: NYU-Poly AT&T Best Applied Security Paper Award
+2012: IEEE Symposium on Security and Privacy Best Student Paper Award
+2013: IEEE Symposiums on Security and Privacy Best Practical Paper Award
+2013: Network and Distributed System Security Symposium Best Student Paper Award
+2014: IEEE Symposiums on Security and Privacy Best Practical Paper Award
+2014: PET Award for Outstanding Research in Privacy Enhancing Technologies
+2019: Google Research Award
+David Shmoys
+1987: NSF Presidential Young Investigator Award
+1991: Cornell AIIE Teaching Award
+1994: NSF Presidential Young Investigator Award
+1995: Cornell College of Engineering Teaching Award
+1998: Cornell College of Engineering Teaching Award
+2001: ACM Fellow
+2003: Cornell College of Engineering Teaching Award
+2012: SIAM Fellow
+2012: Sonny Yau ‘72 Excellence in Teaching Award
+2013: INFORMS Fellow
+2013: INFORMS Frederick W. Lanchester Prize
+2016: NSF Cybersecurity Innovation for Cyberinfrastructure (CICI) Grant
+2018: INFORMS Daniel H. Wagner Prize for Excellence in Operations Research Practice
+Adam Siepel
+2007: Packard Fellowship in Science and Engineering
+Alexandra Silva
+2011: IBM Portugal Scientific Award
+2015: 26th International Conference on Rewriting Techniques and Applications Best Paper Award
+2016: Philip Leverhulme Prize
+2017: Presburger Award
+2018: Needham Award
+2019: Royal Society Wolfson Award
+2020: ACM SIGPLAN POPL Distinguished Paper Award
+Emin Gün Sirer
+2003: Cornell College of Engineering Teaching Award
+2007: Popular Science's Annual Brilliant Ten
+2011: Cornell College of Engineering Teaching Award
+2015: Middleware Best Student Paper Award
+2015: NSF Large Collaborative Grant
+Noah Snavely
+2009: Dissertation Awards
+2009: University of Washington CSE William Chan Memorial Dissertation Award
+2011: Microsoft Research Faculty Fellowship
+2012: Cornell College of Engineering Teaching Award
+2012: Mr. & Mrs. Richard F. Tucker Teaching Excellence Award
+2012: NSF Faculty Early Career Development Award
+2012: Sloan Research Fellowship
+2013: NSF Presidential Early Career Award for Scientists and Engineers (PECASE)
+2014: ACM SIGGRAPH Significant New Researcher Award
+2014: Best Conference Papers
+2014: ECCV Best Paper Award
+2019: ICCV Helmholtz Prize
+Karthik Sridharan
+2010: Conference On Learning Theory Best Paper Award
+2011: Conference On Learning Theory Best Paper Award
+2017: Simons-Berkeley Research Fellowship
+2018: COLT Best Student Paper Award
+2018: NSF Faculty Early Career Development Award
+2018: Sloan Research Fellowship
+2019: ACT Best Paper Award
+2019: COLT Best Student Paper Award
+David Steurer
+2014: Microsoft Research Faculty Fellowship
+2018: Sloan Research Fellowship
+G. Edward Suh
+2001: IASTED International Conference on Parallel and Distributed Computing Systems Best Paper Award
+2008: NSF Faculty Early Career Development Award
+2008: AFOSR Young Investigator Award
+2011: Army Young Investigator Research Program Award
+2014: ASPLOS Most Influential Paper Award
+2020: IEEE Fellow
+Eva Tardos
+1988: Fulkerson Prize
+1991: NSF Presidential Young Investigator Award
+1991: Sloan Research Fellowship
+1995: Packard Fellowship in Science and Engineering
+1998: ACM Fellow
+1999: Guggenheim Fellowship
+2001: ACSU Faculty of the Year
+2001: American Academy of Arts and Sciences Member
+2003: ACM SIGKDD Best Paper Award
+2003: Best Conference Papers
+2003: Cornell College of Engineering Teaching Award
+2003: Fiona Ip Li '78 and Donald Li '75 Excellence in Teaching Award
+2004: INFORMS Fellow
+2005: ACSU Faculty of the Year
+2006: Dantzig Prize
+2007: National Academy of Engineering Member
+2009: Society for Industrial and Applied Math (SIAM) Fellow
+2010: Glover-Klingman Prize
+2011: Fields Institute Fellow
+2011: Van Wijngaarden Award
+2012: AMS Fellow
+2012: Gödel Prize
+2013: IEEE Technical Achievement Award
+2013: National Academy of Sciences Member
+2014: SIGKDD Test of Time Award
+2015: ACM Conference on Economics and Computation (EC) Best Paper Award
+2016: Google Research Award
+2017: Cook Award
+2017: EATCS Distingushed Achievements Award
+2017: Philip McCord Morse Lectureship Award
+2018: Sonia Kovalevsky Lecture at SIAM Annual Meeting, Portland OR
+2019: Cornell College of Engineering Teaching Award
+2019: IEEE Von Neumann Medal
+2020: American Philosophical Society
+2020: FOCS Test of Time Award
+2023: Brouwer Medal Award
+Ross Tate
+2017: AITO Junior Dahl-Nygaard Prize
+2017: OOPSLA Distinguished Paper Award
+2017: Mozilla Research Grant
+2017: OOPSLA Distinguished Artifact Award
+Tim Teitelbaum
+1987: Dean's Prize for Innovation in Undergraduate Teaching
+1996: Cornell College of Engineering Teaching Award
+Sam Toeug
+1989: Amoco Foundation Award for Excellence in Teaching
+1998: Cornell College of Engineering Teaching Award
+Nick Trefethen
+1996: NSF Presidential Young Investigator Award
+1997: Dean's Prize for Innovation in Undergraduate Teaching
+Immanuel Trummer
+2016: CACM Research Highlight
+2017: Google Research Award
+2017: Huawei Research Grant
+2017: Jim Gray Doctoral Dissertation Award, Honorable Mention
+2019: Google Research Award
+2023: NSF Faculty Early Career Development Award
+Madeleine Udell
+2018: Douglas Whitney Award for Teaching Excellence
+2018: INFORMS Undergraduate Operations Research Prize
+2019: INFORMS Optimization Society Student Research Prize
+2020: Cornell College of Engineering Research Excellence Award
+2021: Sloan Research Fellowship
+Charles Van Loan
+1998: Merrill Presidential Scholar Outstanding Educator Award
+1998: Robert A. and Donna B. Paul Award for Excellence in Advising
+2003: James and Martha D. McCormick Advising Award
+2009: Cornell College of Engineering Teaching Award
+2009: Merrill Presidential Scholar Outstanding Educator Award
+2009: Society for Industrial and Applied Math (SIAM) Fellow
+Robbert van Renesse
+2009: ACM Fellow
+2015: Middleware Best Student Paper Award
+2016: Google Research Award
+Marten van Schijndel
+2020: ACL 2020 Outstanding Reviewer
+Anke van Zuylen
+2010: Lise Meitner Award Fellowship
+2018: William & Mary Alumni Faculty Award
+Stephen Vavasis
+1990: NSF Presidential Young Investigator Award
+1990: NSF Presidential Young Investigator Award
+1996: Guggenheim Fellowship
+1999: Cornell College of Engineering Teaching Award
+Thorsten von Eiken
+1996: Dean's Prize for Innovation in Undergraduate Teaching
+1999: Cornell College of Engineering Teaching Award
+Aaron Wagner
+2006: U.C Berkeley David J. Sakrison Memorial Prize
+2007: NSF Faculty Early Career Development Award
+2009: Michael Tien '72 Excellence in Teaching Award
+2017: James L. Massey Research & Teaching Award for Young Scholars
+Hakim Weatherspoon
+2003: ACM Tapia Best Poster Award
+2005: Intel PhD Foundation Fellowship
+2009: Black Engineer of the Year, Modern Day Technology Leader
+2009: IBM Faculty Development Award
+2010: NetApp Faculty Fellowship Award
+2011: DARPA Department of Defense Young Investigator Award
+2011: NSF Faculty Early Career Development Award
+2011: Sloan Research Fellowship
+2012: Intel Early Career Faculty Honor Program
+2013: Rising Star Award, SOSP Diversity Workshop
+2014: Kavli Frontiers Fellow, National Academy of Science
+2014: Zellman Warhaft Commitment to Diversity
+2015: University of Cambridge, Visiting Scholar
+2017: Cornell Diversity Programs in Engineering (DPE) Persons of the Month
+2017: University of Washington CSE Alumni Achievement Award
+2018: ASPLOS Most Influential Paper Award
+2018: Cornell College of Engineering Teaching Award
+2020: Microsoft Investigator Research Award
+2020: NSF Division of Information and Intelligent Systems Grant
+2022: Faculty Award for Excellence in Research, Teaching, and Service through Diversity
+Kilian Weinberger
+2004: CVPR Best Student Paper Award
+2004: International Conference on Machine Learning (ICML) Best Student Paper Award
+2005: AISTATS Best Student Paper Award
+2010: Yahoo! Faculty Research and Engagement Program Award
+2011: AAAI Outstanding Senior Program Chair Award
+2012: NSF Faculty Early Career Development Award
+2012: Yahoo! Faculty Research and Engagement Program Award
+2016: Cornell College of Engineering Teaching Award
+2016: Daniel M. Lazar '29 Excellence in Teaching Award
+2017: Best Conference Papers
+2017: CVPR Best Paper Award
+2018: Association for the Advancement of Artifical Intelligence (AAAI), Chair
+Walker White
+2012: Cornell College of Engineering Teaching Award
+2012: James and Marsha McCormick Advising Award
+2012: James and Mary Tien Excellence in Teaching Award
+2014: Tau Beta Pi Professor of the Year
+2015: Cornell Engineering Alumni Association (CEAA) Academic Achievement Award
+2016: Cornell College of Engineering Teaching Award
+2016: Fiona Ip Li '78 and Donald Li '75 Excellence in Teaching Award
+2016: Stephen H. Weiss Presidential Fellow
+2020: Tau Beta Pi Professor of the Year
+Stephen Wicker
+1994: SAIC Best Paper Award
+1998: Cornell College of Engineering Teaching Award
+2000: Cornell School of ECE Teaching Award
+2009: Cornell College of Engineering Teaching Award
+2011: IEEE Fellow
+David Williamson
+1996: Society of Industrial and Applied Mathematics (SIAM) Richard C. DiPrima Prize
+1999: SIAM Group on Optimization Prize
+2000: American Mathematical Society-Mathematical Programming Society Fulkerson Prize for outstanding paper in discrete mathematic
+2007: Cornell College of Engineering Teaching Award
+2009: Glover-Klingman Prize
+2010: Humboldt Research Award, Alexander von Humboldt Foundation
+2013: ACM Fellow
+2013: Cornell College of Engineering Teaching Award
+2013: INFORMS Frederick W. Lanchester Prize
+2016: Cornell College of Engineering Teaching Award
+2016: SIAM Fellow
+2020: James and Martha D. McCormick Advising Award
+Golan Yona
+2000: Burroughs-Wellcome Fund from the Program in Mathematics and Molecular Biology
+2002: NSF Faculty Early Career Development Award
+Ramin Zabih
+1987: AAAI Best Paper Award
+1995: Cornell College of Engineering Teaching Award
+2002: Best Conference Papers
+2002: ECCV Best Paper Award
+2008: Cornell College of Engineering Teaching Award
+2011: Most Influential Paper, International Conference on Computer Vision (ICCV)
+2012: ACM Fellow
+2012: IEEE Fellow
+2012: Koenderink Prize for Fundamental Contributions in Computer Vision
+2013: ICCV Helmholtz Prize
+2016: PAMI Everingham Prize
+Zhiru Zhang
+2012: ACM Transactions on Design Automation of Electronic Systems Best Paper Award
+2012: Ross Freeman Award for Technical Innovation
+2015: IEEE CEDA Ernest S. Kuh Early Career Award
+2015: DARPA Young Faculty Award
+2015: NSF Faculty Early Career Development Award
+2016: James and Mary Tien Excellence in Teaching Award
+2018: Google Research Award
+2018: Ruth and Joel Spira Award for Excellence in Teaching
+2018: International Symposium on FieldProgrammable Custom Computing Machines Best Paper Award
+2018: Rising Professional Achievement Award, UCLA Henry Samueli School of Engineering and Applied Science
+2019: ACM/SIGDA International Symposium on Field-​Programmable Gate Arrays (FPGA) Best Paper Award
+2020: Facebook Research Award

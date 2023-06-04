@@ -10,7 +10,6 @@ TABLE_RELATION = "g_relation"
 # M:M relationship between 2 entities: (object-subject) object as parent, subject as child
 
 # simple entity
-TABLE_RESEARCH_GROUP = "g_entity" # (entity_type=research_group)
 # subject entity (related to object entity as parent)
 TABLE_FACULTY = "g_person"  # (person_type=faculty)
 TABLE_PERSON = "g_person"
@@ -19,6 +18,9 @@ TABLE_ORG = "g_org"
 TABLE_PROJECT = "g_project"
 TABLE_WORK = "g_work"
 TABLE_TASK = "g_task"
+## views
+TABLE_AWARD = "g_entity" # (entity_type=award, view=g_award)
+TABLE_RESEARCH_GROUP = "g_entity" # (entity_type=research_group, view=g_research_group)
 
 # LOV
 SYS_COLS = ["id","ts","uid"]
@@ -79,6 +81,7 @@ NOTE_TYPES = (
     'resource', 
     'idea', 
     'information', 
+    'news', 
     'reminder', 
     'other',
 )
@@ -111,8 +114,9 @@ PRIORITY = [
 
 # columns for Quick Add
 COMMON_DATA_COLS = ['name', 'url', 'note', "tags"]
+
 DATA_COLS = {
-    TABLE_FACULTY : COMMON_DATA_COLS + ['job_title',
+    TABLE_FACULTY: COMMON_DATA_COLS + ['job_title',
         'research_area', 'email', 'award', 'department', 'org',
         'phd_univ','phd_year',],
     TABLE_RESEARCH_GROUP: COMMON_DATA_COLS,

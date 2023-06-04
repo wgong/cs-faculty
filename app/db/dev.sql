@@ -596,3 +596,22 @@ CREATE TABLE t1(id text);
 select * from t1;
 insert into t1(id) 
 values ('2023-05-29 23:50:11.056294');
+
+select * from g_relation;
+alter table g_relation add column props text;
+
+select count(*) from g_entity where entity_type='award';
+
+
+select * from g_relation where rel_type='person-award';
+
+select count(*) from g_relation where rel_type='person-award';
+--delete from g_relation where rel_type='person-award';
+
+update g_relation set ref_tab_sub='g_award' where rel_type='person-award' and ref_tab_sub='g_entity';
+
+create or replace view g_award as select * from g_entity where entity_type = 'award';
+create or replace view g_research_group as select * from g_entity where entity_type = 'research_group';
+select * from g_award;
+
+select * from g_research_group;

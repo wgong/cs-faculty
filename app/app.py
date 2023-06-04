@@ -140,12 +140,14 @@ STR_NOTE            = "Note"
 STR_WORK            = "Work"
 STR_TASK            = "Task"
 STR_PERSON          = "Person"
+STR_AWARD           = "Award"
 STR_NOTE_ALL        = "Note (All)"
 STR_WORK_ALL        = "Work (All)"
 STR_PERSON_ALL      = "Person (All)"
 STR_ORG_ALL         = "Org (All)"
 STR_PROJECT_ALL     = "Project (All)"
 STR_TASK_ALL        = "Task (All)"
+STR_AWARD_ALL       = "Award (All)"
 STR_REFRESH_HINT    = "Click 'Refresh' button to clear form"
 STR_DOWNLOAD_CSV    = "Download CSV"
 STR_IMPORT_EXPORT   = "Data Import/Export"
@@ -164,6 +166,7 @@ _STR_MENU_PROJECT           = STR_PROJECT_ALL
 _STR_MENU_WORK              = STR_WORK_ALL
 _STR_MENU_PERSON            = STR_PERSON_ALL
 _STR_MENU_TASK              = STR_TASK_ALL
+_STR_MENU_AWARD             = STR_AWARD_ALL
 _STR_MENU_IMP_EXP           = STR_IMPORT_EXPORT
 
 # Aggrid options
@@ -1346,7 +1349,8 @@ def _crud_display_grid_form_subject(table_name,
                 ref_key="", 
                 ref_val="", 
                 form_name_suffix="", 
-                orderby_cols=["name"], 
+                # orderby_cols=["name"], 
+                orderby_clause="name",
                 page_size=10, grid_height=400):
     """Render data grid defined by column properties, 
     for table, or child table when (ref_key,ref_val) are given
@@ -1373,12 +1377,12 @@ def _crud_display_grid_form_subject(table_name,
     editable_columns = COL_DEFS["is_editable"]
     clickable_columns = COL_DEFS["is_clickable"]
 
-    # make sure orderby_cols exists
-    orderby_cols = list(set(orderby_cols).intersection(set(visible_columns)))
+    # # make sure orderby_cols exists
+    # orderby_cols = list(set(orderby_cols).intersection(set(visible_columns)))
 
     # prepare dataframe
     with DBConn() as _conn:
-        orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
+        # orderby_clause = f' order by {",".join(orderby_cols)}' if orderby_cols else ""
 
         where_clause = " where 1=1 "
         if all((ref_tab,ref_key,ref_val)):
@@ -1405,7 +1409,7 @@ def _crud_display_grid_form_subject(table_name,
                 {",".join(selected_cols)}
             from {table_name} 
                 {where_clause}
-                {orderby_clause};
+                order by {orderby_clause};
         """
         df = pd.read_sql(sql_stmt, _conn).fillna("")
 
@@ -1611,6 +1615,10 @@ def do_research_group():
     st.subheader(f"{_STR_MENU_RESEARCH_GROUP}")
     _crud_display_grid_form_entity(TABLE_ENTITY, entity_type="research_group")
 
+def do_award():
+    st.subheader(f"{_STR_MENU_AWARD}")
+    _crud_display_grid_form_entity(TABLE_ENTITY, entity_type="award")
+
 def do_person():
     st.subheader(f"{_STR_MENU_PERSON}")
     _crud_display_grid_form_subject(TABLE_PERSON)
@@ -1625,7 +1633,7 @@ def do_work():
 
 def do_note():
     st.subheader(f"{_STR_MENU_NOTE}")
-    _crud_display_grid_form_subject(TABLE_NOTE)
+    _crud_display_grid_form_subject(TABLE_NOTE, orderby_clause="ts desc")
 
 def do_project():
     st.subheader(f"{_STR_MENU_PROJECT}")
@@ -1745,6 +1753,7 @@ menu_dict = {
     _STR_MENU_WORK:                 {"fn": do_work},
     _STR_MENU_PROJECT:              {"fn": do_project},
     _STR_MENU_TASK:                 {"fn": do_task},
+    _STR_MENU_AWARD:                {"fn": do_award},
     _STR_MENU_IMP_EXP:              {"fn": do_import_export},
 
 }
@@ -1778,6 +1787,9 @@ def do_sidebar():
 
         elif menu_item == _STR_MENU_PERSON:
             _sidebar_display_org_filter()
+
+        elif menu_item == _STR_MENU_AWARD:
+            _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_AWARD}")
 
         else:
             pass
