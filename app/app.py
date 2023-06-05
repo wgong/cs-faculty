@@ -1267,7 +1267,7 @@ def _crud_display_grid_parent_child(table_name,
                         ref_val=primary_key,
                         form_name_suffix="faculty",
                         inter_table_name=TABLE_RELATION,
-                        rel_type='team-person',
+                        rel_type='person-team',
                         page_size=5, grid_height=220)
         except:
             pass  # workaround to fix an streamlit issue
@@ -1793,6 +1793,8 @@ def do_relation():
 def do_import_export():
     # Export
     st.subheader(f"{STR_EXPORT}")
+    st.write(f"FILE_DB: {FILE_DB}, exists: {Path(FILE_DB).exists()}")
+
     with DBConn() as _conn:
         sql_stmt = """select t.table_name
             from information_schema.tables t where t.table_name like 'g_%';

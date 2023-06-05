@@ -1,6 +1,6 @@
 # duckdb file
-FILE_DB = f"./db/cs-faculty-20230502.duckdb"
-
+# FILE_DB = f"./db/cs-faculty-20230502.duckdb"
+FILE_DB = "cs-faculty-20230604.duckdb"
 
 # generic object
 TABLE_ENTITY = "g_entity"
@@ -353,7 +353,7 @@ COLUMN_PROPS = {
             "widget_type": "text_input",
             "label_text": "Relation Type"
         },
-        
+
         "id": {
             "is_system_col": True,
             "is_user_key": False,
