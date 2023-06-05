@@ -615,3 +615,37 @@ create or replace view g_research_group as select * from g_entity where entity_t
 select * from g_award;
 
 select * from g_research_group;
+
+select * from g_relation where rel_type='person-team' and rel_key_sub = 'id';
+--rel_type='team-person';
+
+select name from g_person where id = (
+	select ref_val_sub from g_relation where id='92b72185-16bd-465c-bb18-a02009cc4e33'
+);
+
+select ref_key_sub,ref_val_sub from g_relation where id='92b72185-16bd-465c-bb18-a02009cc4e33';
+
+update g_relation 
+set 
+where rel_type='person-team' and rel_key_sub = 'url';
+
+update g_relation set rel_type = 'person-team' where rel_type='team-person';
+
+update g_relation set props =  (
+	select name from g_person where id=g_relation.ref_val_sub
+)
+where rel_type='person-team' and props is null;
+
+update g_relation set props =  (
+	select name from g_person where url=g_relation.ref_val_sub
+)
+where rel_type='person-team' and props is null;
+
+update g_relation set ref_key_sub = 'name', ref_val_sub =  props
+where rel_type='person-team';
+update g_relation set props=NULL
+where rel_type='person-team';
+
+select * from g_relation where rel_type='person-team';
+
+

@@ -141,6 +141,8 @@ STR_WORK            = "Work"
 STR_TASK            = "Task"
 STR_PERSON          = "Person"
 STR_AWARD           = "Award"
+STR_RELATION        = "Relation"
+STR_RELATION_ALL    = "Relation (All)"
 STR_NOTE_ALL        = "Note (All)"
 STR_WORK_ALL        = "Work (All)"
 STR_PERSON_ALL      = "Person (All)"
@@ -167,6 +169,7 @@ _STR_MENU_WORK              = STR_WORK_ALL
 _STR_MENU_PERSON            = STR_PERSON_ALL
 _STR_MENU_TASK              = STR_TASK_ALL
 _STR_MENU_AWARD             = STR_AWARD_ALL
+_STR_MENU_RELATION          = STR_RELATION_ALL
 _STR_MENU_IMP_EXP           = STR_IMPORT_EXPORT
 
 # Aggrid options
@@ -226,6 +229,8 @@ SELECTBOX_OPTIONS = {
     "ref_tab": BLANK_LIST + sorted([t for t in TABLE_LIST if t not in ["g_relation"]]),
     "ref_key": BLANK_LIST + ["id", "name", "url"],
     "ref_val": _query_ref_tab_key,
+    "ref_tab_sub": BLANK_LIST + sorted([t for t in TABLE_LIST if t not in ["g_relation"]]),
+    "ref_key_sub": BLANK_LIST + ["id", "name", "url"],
 }
 
 #####################################################
@@ -405,6 +410,85 @@ def _layout_grid(df,
         allow_unsafe_jscode=True, #Set it to True to allow jsfunction to be injected
     )
     return grid_response
+
+def _layout_form_relation(table_name, 
+                 selected_row):
+    form_name = st.session_state.get("form_name","")
+
+    COL_DEFS = COLUMN_DEFS[table_name]
+    visible_columns = COL_DEFS["is_visible"]
+    system_columns = COL_DEFS["is_system_col"]
+    form_columns = COL_DEFS["form_column"]
+    col_labels = COL_DEFS["label_text"]
+    widget_types = COL_DEFS["widget_type"]
+
+    old_row = {}
+    for col in visible_columns:
+        old_row[col] = selected_row.get(col) if selected_row is not None else ""
+
+    # display buttons
+    btn_save, btn_refresh, btn_delete = _crud_display_buttons(form_name)
+
+    data = {"table_name": table_name}
+        
+    # display form and populate data dict
+    col1_columns = []
+    col2_columns = []
+    col3_columns = []
+    for c in visible_columns:
+        if form_columns.get(c, "").startswith("COL_1-"):
+            col1_columns.append(c)
+        elif form_columns.get(c, "").startswith("COL_2-"):
+            col2_columns.append(c)
+        elif form_columns.get(c, "").startswith("COL_3-"):
+            col3_columns.append(c) 
+
+    displayed_cols = []
+    col1,col2,col3 = st.columns([6,5,4])
+    with col1:
+        for col in col1_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+    with col2:
+        for col in col2_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+    with col3:
+        for col in col3_columns:
+            data = _layout_form_fields(data,form_name,old_row,col,
+                        widget_types,col_labels,system_columns)
+            displayed_cols.append(col)
+
+    st.session_state[f"displayed_columns_{form_name}"] = displayed_cols
+
+    # copy id if present
+    id_val = old_row.get("id", "")
+    if id_val:
+        data.update({"id" : id_val})
+
+    try:
+        # handle buttons
+        if btn_save:
+            if data.get("id"):
+                data.update({"ts": str(datetime.now()),
+                            "uid": get_uid(), })
+                _db_update_by_id(data)
+            else:
+                data.update({"id": str(uuid4()), 
+                            "ts": str(datetime.now()),
+                            "uid": get_uid(), })
+                _db_upsert(data)
+
+        elif btn_delete and data.get("id"):
+            _db_delete_by_id(data)
+
+        elif btn_refresh:
+            _crud_clear_form()
+    except Exception as ex:
+        st.error(f"{str(ex)}")
+
 
 def _layout_form(table_name, 
                  selected_row, 
@@ -1343,6 +1427,55 @@ def _crud_display_grid_form_inter(table_name,
                 inter_table_name,
                 rel_type)
 
+# _STR_MENU_RELATION
+def _crud_display_grid_form_relation(
+                table_name="g_relation",
+                form_name_suffix="", 
+                orderby_clause="ref_tab,ref_tab_sub,ref_key,ref_key_sub",
+                page_size=10, grid_height=400):
+
+    if not table_name in COLUMN_PROPS or not table_name in COLUMN_DEFS:
+        st.error(f"Invalid table name: {table_name}")
+        return
+     
+    form_name = f"{table_name}#{form_name_suffix}"
+    st.session_state["form_name"] = form_name
+
+    COL_DEFS = COLUMN_DEFS[table_name]
+    visible_columns = COL_DEFS["is_visible"]
+    editable_columns = COL_DEFS["is_editable"]
+    clickable_columns = COL_DEFS["is_clickable"]
+    selected_rel_type = st.session_state.get("selected_rel_type")
+
+    # prepare dataframe
+    with DBConn() as _conn:
+        selected_cols = _push_selected_cols_to_front(visible_columns, selected_cols=["ref_val","ref_val_sub","props"])
+        where_clause = f" where rel_type = '{selected_rel_type}' "
+        sql_stmt = f"""
+            select 
+                {",".join(selected_cols)}
+            from {table_name} 
+                {where_clause}
+                order by {orderby_clause};
+        """
+        df = pd.read_sql(sql_stmt, _conn).fillna("")        
+
+    ## show data grid
+    grid_resp = _layout_grid(df, 
+            selection_mode="single", 
+            page_size=page_size, 
+            grid_height=grid_height,
+            editable_columns=editable_columns,
+            clickable_columns=clickable_columns)
+    selected_row = None
+    if grid_resp:
+        selected_rows = grid_resp['selected_rows']
+        if selected_rows and len(selected_rows):
+            selected_row = selected_rows[0]
+
+    ## layout form
+    _layout_form_relation(table_name, selected_row)
+
 # _STR_MENU_NOTE
 def _crud_display_grid_form_subject(table_name, 
                 ref_tab="", 
@@ -1573,6 +1706,16 @@ def _sidebar_display_org_filter(menu_iterm=_STR_MENU_PERSON):
         idx_default = org_list.index(STR_ALL_ORGS) if menu_iterm==_STR_MENU_PERSON else org_list.index(STR_CORNELL_UNIV)
         st.selectbox("Select Org:", org_list, index=idx_default, key="selected_org")
 
+def _sidebar_display_rel_type():
+    with DBConn() as _conn:
+        sql_stmt = """select distinct rel_type
+            from g_relation
+            order by rel_type;
+        """
+        df = pd.read_sql(sql_stmt, _conn)
+        rel_type_list = df["rel_type"].to_list()
+        st.selectbox("Select Rel Type:", rel_type_list, index=0, key="selected_rel_type")
+
 #####################################################
 # Menu Handlers
 #####################################################
@@ -1642,6 +1785,10 @@ def do_project():
 def do_task():
     st.subheader(f"{_STR_MENU_TASK}")
     _crud_display_grid_form_subject(TABLE_TASK)
+
+def do_relation():
+    st.subheader(f"{_STR_MENU_RELATION}")
+    _crud_display_grid_form_relation()
 
 def do_import_export():
     # Export
@@ -1754,6 +1901,7 @@ menu_dict = {
     _STR_MENU_PROJECT:              {"fn": do_project},
     _STR_MENU_TASK:                 {"fn": do_task},
     _STR_MENU_AWARD:                {"fn": do_award},
+    _STR_MENU_RELATION:             {"fn": do_relation},
     _STR_MENU_IMP_EXP:              {"fn": do_import_export},
 
 }
@@ -1790,6 +1938,9 @@ def do_sidebar():
 
         elif menu_item == _STR_MENU_AWARD:
             _sidebar_quick_add_form(form_name=f"quick_add-{TABLE_AWARD}")
+
+        elif menu_item == _STR_MENU_RELATION:
+            _sidebar_display_rel_type()
 
         else:
             pass

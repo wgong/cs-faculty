@@ -186,5 +186,6 @@ ALTER TABLE g_task add column alert_time TIMESTAMP;
 ALTER TABLE g_person add column award VARCHAR;
 ALTER TABLE g_work add column award VARCHAR;
 
-select * from g_task;
 
+create or replace view g_award as select * from g_entity where entity_type = 'award';
+create or replace view g_research_group as select * from g_entity where entity_type = 'research_group';

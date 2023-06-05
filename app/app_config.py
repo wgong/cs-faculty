@@ -255,7 +255,138 @@ COLUMN_PROPS = {
             "label_text": "UID",              
         },
 
+    },
 
+    "g_relation": {
+
+
+        "ref_tab": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_1-2",
+            "widget_type": "selectbox",
+            "label_text": "Object Table"
+        },
+        "ref_key": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_1-3",
+            "widget_type": "selectbox",
+            "label_text": "Object Column",              
+        },
+        "ref_val": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_1-4",
+            "widget_type": "text_input",  
+            "label_text": "Object Value",              
+        },
+
+
+        "ref_tab_sub": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_2-1",
+            "widget_type": "selectbox",
+            "label_text": "Subject Table"
+        },
+        "ref_key_sub": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_2-2",
+            "widget_type": "selectbox",
+            "label_text": "Subject Column",              
+        },
+        "ref_val_sub": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_2-3",
+            "widget_type": "text_input",  
+            "label_text": "Subject Value",              
+        },
+
+
+        "props": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_3-2",
+            "widget_type": "text_area",
+            "label_text": "Props"
+        },
+
+        "rel_type": {
+            "is_system_col": False,
+            "is_user_key": False,
+            "is_required": False,
+            "is_visible": True,
+            "is_editable": True,
+            "is_clickable": False,
+            "form_column": "COL_3-3",
+            "widget_type": "text_input",
+            "label_text": "Relation Type"
+        },
+        
+        "id": {
+            "is_system_col": True,
+            "is_user_key": False,
+            "is_required": True,
+            "is_visible": True,
+            "is_editable": False,
+            "is_clickable": False,
+            "form_column": "COL_3-97",
+            "widget_type": "text_input",
+            "label_text": "ID"
+        },
+        "ts": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-98",
+            "widget_type": "text_input",
+            "label_text": "Timestamp",              
+        },
+        "uid": {
+            'is_system_col': True,
+            'is_user_key': False,
+            'is_required': False,
+            'is_visible': True,
+            'is_editable': False,
+            'is_clickable': False,
+            "form_column": "COL_3-99",
+            "widget_type": "text_input",
+            "label_text": "UID",              
+        },
 
     },
 
@@ -1157,63 +1288,7 @@ COLUMN_PROPS = {
     },
 
 
-    "g_relation": {
-        "rel_type": {
-            "is_system_col": False,
-            "is_user_key": False,
-            "is_required": False,
-            "is_visible": True,
-            "is_editable": True,
-            "is_clickable": False,
-            "form_column": "COL_1-1",
-            "widget_type": "text_input",
-            },
-        "ref_key": {
-            "is_system_col": False,
-            "is_user_key": False,
-            "is_required": False,
-            "is_visible": False,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_1-2",
-            "widget_type": "selectbox",
-            "label_text": "Ref Column",              
-            },
-        "ref_val": {
-            "is_system_col": False,
-            "is_user_key": False,
-            "is_required": False,
-            "is_visible": False,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_1-3",
-            "widget_type": "selectbox",  
-            "label_text": "Ref Value",              
-            },
-
-
-        "ref_key_sub": {
-            "is_system_col": False,
-            "is_user_key": False,
-            "is_required": False,
-            "is_visible": False,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_2-2",
-            "widget_type": "text_input",
-            },
-        "ref_val_sub": {
-            "is_system_col": False,
-            "is_user_key": False,
-            "is_required": False,
-            "is_visible": False,
-            "is_editable": False,
-            "is_clickable": False,
-            "form_column": "COL_2-3",
-            "widget_type": "text_input",
-            },
-    },
 }
 
-TABLE_LIST = COLUMN_PROPS.keys()
+TABLE_LIST = list(COLUMN_PROPS.keys()) + ["g_award","g_research_group"]
 
