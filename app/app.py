@@ -11,7 +11,6 @@ TODO:
         - Collaborator
         - Internship
         - Google Scholar, Best Paper Award on work quality, CSRanking ?
-        - Award: Sloan, Best Paper, NSF career (e.g. https://www.cs.cornell.edu/information/awards-by-recipient)
 
     - Import data from another user, ensure no duplicates
 
@@ -21,6 +20,11 @@ TODO:
       so that special-purpose tables become unnecessary.
 
 DONE:
+
+- [2023-06-04]
+    - added Award: Sloan, Best Paper, NSF career (e.g. https://www.cs.cornell.edu/information/awards-by-recipient)
+    - select "Relation (All)" > "person-award" menu to view
+    
 - [2023-05-18]
     - Enhanced Ref Tab/Key/Val UI via selectbox
     - populate uid
